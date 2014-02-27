@@ -6,10 +6,10 @@ require 'sandthorn/version'
 Gem::Specification.new do |spec|
   spec.name          = "sandthorn"
   spec.version       = Sandthorn::VERSION
-  spec.authors       = ["Lars Krantz"]
-  spec.email         = ["lars.krantz@alaz.se"]
-  spec.description   = %q{TODO: Write a gem description}
-  spec.summary       = %q{TODO: Write a gem summary}
+  spec.authors       = ["Lars Krantz", "Morgan Hallgren"]
+  spec.email         = ["lars.krantz@alaz.se", "morgan.hallgren@gmail.com"]
+  spec.description   = %q{Event sourcing gem}
+  spec.summary       = %q{Event sourcing gem}
   spec.homepage      = ""
   spec.license       = "MIT"
 

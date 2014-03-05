@@ -4,6 +4,8 @@
 # loaded once.
 #
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
+require "ap"
+require "bundler"
 
 Bundler.require
 
@@ -23,4 +25,15 @@ RSpec.configure do |config|
   # the seed, which is printed after each run.
   #     --seed 1234
   config.order = 'random'
+end
+
+def spec_db
+    "sqlite://spec/db/sequel_driver.sqlite3"
+end
+def sqlite_store_setup
+  url = spec_db 
+  catch_all_config = [ {url: url } ]
+  Sandthorn.configuration = catch_all_config
+  migrator = UpptecEventSequelDriver::Migration.new url: url
+  migrator.send(:clear_for_test)
 end

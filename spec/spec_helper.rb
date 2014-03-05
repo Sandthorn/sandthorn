@@ -6,6 +6,7 @@
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 require "ap"
 require "bundler"
+require "sandthorn_driver_sequel"
 
 Bundler.require
 
@@ -32,8 +33,8 @@ def spec_db
 end
 def sqlite_store_setup
   url = spec_db 
-  catch_all_config = [ {url: url } ]
+  catch_all_config = [ { driver: SandthornDriverSequel.driver_from_url(url: url) } ]
   Sandthorn.configuration = catch_all_config
-  migrator = UpptecEventSequelDriver::Migration.new url: url
+  migrator = SandthornDriverSequel::Migration.new url: url
   migrator.send(:clear_for_test)
 end

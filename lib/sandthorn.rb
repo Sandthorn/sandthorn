@@ -2,6 +2,8 @@ require "sandthorn/version"
 require "sandthorn/errors"
 require "sandthorn/aggregate_root"
 require "sandthorn/dirty_checker"
+require 'uuidtools'
+require 'yaml'
 
 module Sandthorn
   class << self
@@ -10,6 +12,30 @@ module Sandthorn
     end
     def configuration
       @configuration ||= []
+    end
+
+    def serialize data
+      YAML::dump(data)
+    end
+
+    def deserialize data
+      YAML::load(data)
+    end
+
+    def generate_aggregate_id
+      UUIDTools::UUID.random_create.to_s
+    end
+
+    def save_events aggregate_events, originating_aggregate_version, aggregate_id, class_name
+      #begin
+      driver_for(class_name).save_events aggregate_events, originating_aggregate_version, aggregate_id, *class_name
+      #rescue UpptecEventSequelDriver::Errors::WrongAggregateVersionError => sequel_error
+      #  raise UpptecEventFramework::Errors::ConcurrencyError.new sequel_error.message
+      #end
+    end
+
+    def get_aggregate aggregate_id, class_name
+      driver_for(class_name).get_aggregate aggregate_id, class_name
     end
 
     private

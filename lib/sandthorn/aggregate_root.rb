@@ -30,7 +30,7 @@ module Sandthorn
       @aggregate_originating_version = 0
       @aggregate_events = []
       @aggregate_attribute_deltas ||= []
-      @aggregate_stored_instance_variables ||= {}
+      #@aggregate_stored_instance_variables ||= {}
       @hashy = DirtyHashy.new
     end
 
@@ -103,6 +103,7 @@ module Sandthorn
           aggregate.send :aggregate_clear_current_event_version!
         end
 
+        attributes = {}
         events.each do |event|
           event_args = event[:event_args]
           event_name = event[:event_name]
@@ -119,15 +120,17 @@ module Sandthorn
           end
 
           if !attribute_deltas.nil?
+            deltas = {}
             attribute_deltas.each do |delta|
-              aggregate.instance_variable_set "@#{delta[:attribute_name]}", delta[:new_value]
+              deltas[delta[:attribute_name]] = delta[:new_value]
             end
+            attributes.merge! deltas
           end
         end
         aggregate.send :clear_aggregate_events
         aggregate.send :set_orginating_aggregate_version!, current_aggregate_version
         aggregate.send :set_current_aggregate_version!, current_aggregate_version
-        aggregate.send :load_aggregate_stored_instance_variables
+        aggregate.send :set_instance_variables!, attributes
         aggregate
     end
       
@@ -154,11 +157,10 @@ module Sandthorn
       self
     end
 
-    def load_aggregate_stored_instance_variables
-      @aggregate_attribute_deltas = []
-      @aggregate_stored_instance_variables = {}
-      init_vars = extract_relevant_aggregate_instance_variables
-      init_vars.each {|attribute_name| @aggregate_stored_instance_variables[attribute_name] = instance_variable_get(attribute_name) }
+    def set_instance_variables! attributes
+      attributes.each_pair do |k,v|
+        self.instance_variable_set "@#{k}", v
+      end
     end
 
     def extract_relevant_aggregate_instance_variables

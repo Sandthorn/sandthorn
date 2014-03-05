@@ -10,7 +10,6 @@ module Sandthorn
     attr_reader :aggregate_events
     attr_reader :aggregate_current_event_version
     attr_reader :aggregate_originating_version
-    attr_reader :aggregate_attribute_deltas
     attr_reader :aggregate_stored_serialized_object
     attr_reader :hashy
 
@@ -29,8 +28,6 @@ module Sandthorn
       @aggregate_current_event_version = 0
       @aggregate_originating_version = 0
       @aggregate_events = []
-      @aggregate_attribute_deltas ||= []
-      #@aggregate_stored_instance_variables ||= {}
       @hashy = DirtyHashy.new
     end
 
@@ -59,7 +56,7 @@ module Sandthorn
       def find aggregate_id
         class_name = self.respond_to?(:name) ? self.name : self.class # to be able to extend a string for example.
         events = Sandthorn.get_aggregate(aggregate_id, class_name)
-        #raise UpptecEventFramework::Errors::AggregateNotFound unless events and !events.empty?
+        raise Sandthorn::Errors::AggregateNotFound unless events and !events.empty?
 
         transformed_events = events.map { |e| e.merge(event_args: Sandthorn.deserialize(e[:event_data])) }
         aggregate_build transformed_events
@@ -109,7 +106,8 @@ module Sandthorn
           event_name = event[:event_name]
 
           if event_name == "aggregate_set_from_snapshot"
-            aggregate.send event_name,*event_args
+            #aggregate.send event_name,*event_args
+            #set the attribute hash instead of instance varaibles directly
             next
           end
           next if event_name == "instance_extended_as_aggregate"
@@ -146,12 +144,12 @@ module Sandthorn
       end
       
       method_name = caller[0][/`.*'/][1..-2]
-      
+      aggregate_attribute_deltas = [] 
       @hashy.changes.each do |attribute|
-        @aggregate_attribute_deltas << { :attribute_name => attribute[0], :old_value => attribute[1][0], :new_value => attribute[1][1]}
+        aggregate_attribute_deltas << { :attribute_name => attribute[0], :old_value => attribute[1][0], :new_value => attribute[1][1]}
       end
-      unless @aggregate_attribute_deltas.empty?
-        data = {:method_name => method_name, :method_args => args, :attribute_deltas => @aggregate_attribute_deltas}
+      unless aggregate_attribute_deltas.empty?
+        data = {:method_name => method_name, :method_args => args, :attribute_deltas => aggregate_attribute_deltas}
         @aggregate_events << ({:aggregate_version => @aggregate_current_event_version, :event_name => method_name, :event_args => data})
       end
       self

@@ -11,7 +11,7 @@ module Sandthorn
     
     def initialize args = {}
       @name = args.fetch(:name, nil)
-      @sex = args.fetch(:age, nil)
+      @sex = args.fetch(:sex, nil)
       @writer = args.fetch(:writer, nil)
     end
 
@@ -43,7 +43,17 @@ module Sandthorn
       o = DirtyClass.new
       o
     }
-    sqlite_store_setup
+
+    context "new with args" do
+
+      let(:subject) { DirtyClass.new(name: "Mogge", sex: "hen", writer: true) }
+      it "should set the values" do
+        expect(subject.name).to eql "Mogge"
+        expect(subject.sex).to eql "hen"
+        expect{subject.writer}.to raise_error
+      end
+    end
+
     context "when changing name (attr_reader)" do
       
       it "should get new_name" do
@@ -89,7 +99,7 @@ module Sandthorn
     end
 
     context "find" do
-      before(:all) { dirty_obejct.save }
+      before(:each) { dirty_obejct.save }
       it "should find by id" do
         expect(DirtyClass.find(dirty_obejct.id).id).to eql dirty_obejct.id
       end

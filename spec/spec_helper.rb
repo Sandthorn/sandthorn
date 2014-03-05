@@ -26,6 +26,7 @@ RSpec.configure do |config|
   # the seed, which is printed after each run.
   #     --seed 1234
   config.order = 'random'
+  config.before(:each) { sqlite_store_setup }
 end
 
 def spec_db
@@ -36,5 +37,6 @@ def sqlite_store_setup
   catch_all_config = [ { driver: SandthornDriverSequel.driver_from_url(url: url) } ]
   Sandthorn.configuration = catch_all_config
   migrator = SandthornDriverSequel::Migration.new url: url
+  SandthornDriverSequel.migrate_db url: url
   migrator.send(:clear_for_test)
 end

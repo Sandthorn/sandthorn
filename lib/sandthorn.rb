@@ -1,6 +1,5 @@
 require "sandthorn/version"
 require "sandthorn/errors"
-require "sandthorn/aggregate_root"
 require 'uuidtools'
 require 'yaml'
 

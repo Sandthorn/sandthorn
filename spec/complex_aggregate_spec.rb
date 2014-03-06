@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'sandthorn/aggregate_root'
+require 'sandthorn/aggregate_root_dirty_hashy'
 require 'date'
 
 class Hello
@@ -16,7 +16,7 @@ class Hello
 end
 
 class IAmComplex
-  include Sandthorn::AggregateRoot
+  include Sandthorn::AggregateRoot::DirtyHashy
   attr_reader :a_date
   attr_reader :hello
 

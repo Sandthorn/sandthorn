@@ -1,10 +1,10 @@
 require 'spec_helper'
-require 'sandthorn/aggregate_root'
+require 'sandthorn/aggregate_root_dirty_hashy'
 
 module Sandthorn
   module AggregateRoot
     class DirtyClass
-      include Sandthorn::AggregateRoot
+      include Sandthorn::AggregateRoot::DirtyHashy
       attr_reader :name, :age
       attr :sex
       attr_writer :writer

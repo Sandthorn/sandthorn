@@ -29,7 +29,6 @@ module Sandthorn
       }
       n = 500
       it "should new, change_name, save and find 500 aggregates" do
-        
 
         Benchmark.bm do |x|
           x.report { for i in 1..n; s = TestClass.new().change_name("benchmark").save(); TestClass.find(s.id);  end }

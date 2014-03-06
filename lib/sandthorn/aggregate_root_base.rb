@@ -43,6 +43,8 @@ module Sandthorn
         end
         self
       end
+
+      alias :record_event :commit
       
 
       def all

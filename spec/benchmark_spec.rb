@@ -31,23 +31,23 @@ module Sandthorn
       it "should new, change_name, save and find 500 aggregates" do
 
         Benchmark.bm do |x|
-          x.report { for i in 1..n; s = TestClass.new().change_name("benchmark").save(); TestClass.find(s.id);  end }
+          x.report("new change save find") { for i in 1..n; s = TestClass.new().change_name("benchmark").save(); TestClass.find(s.id);  end }
         end
 
       end
       it "should find 500 aggregates" do
         Benchmark.bm do |x|
-          x.report { for i in 1..n; TestClass.find(test_object.id);  end }
+          x.report("find") { for i in 1..n; TestClass.find(test_object.id);  end }
         end
       end
       it "should commit 500 actions" do
         Benchmark.bm do |x|
-          x.report { for i in 1..n; test_object.change_name "#{i}";  end }
+          x.report("commit") { for i in 1..n; test_object.change_name "#{i}";  end }
         end
       end
       it "should commit and save 500 actions" do
         Benchmark.bm do |x|
-          x.report { for i in 1..n; test_object.change_name("#{i}").save;  end }
+          x.report("commit save") { for i in 1..n; test_object.change_name("#{i}").save;  end }
         end
       end
     end

@@ -31,5 +31,7 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency "dirty_hashy"
   spec.add_runtime_dependency "uuidtools"
+  spec.add_runtime_dependency "oj"
+  spec.add_runtime_dependency "msgpack"
 
 end

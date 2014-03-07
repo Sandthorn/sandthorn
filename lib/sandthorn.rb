@@ -2,6 +2,7 @@ require "sandthorn/version"
 require "sandthorn/errors"
 require 'uuidtools'
 require 'yaml'
+require 'oj'
 
 module Sandthorn
   class << self
@@ -13,11 +14,15 @@ module Sandthorn
     end
 
     def serialize data
-      YAML::dump(data)
+      #YAML::dump(data)
+      Oj.dump(data)
+      #MessagePack.pack(data, symbolize_keys: true)
     end
 
     def deserialize data
-      YAML::load(data)
+      #YAML::load(data)
+      Oj.load(data)
+      #MessagePack.unpack(data, symbolize_keys: true)
     end
 
     def generate_aggregate_id

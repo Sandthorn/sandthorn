@@ -30,6 +30,10 @@ module Sandthorn
       UUIDTools::UUID.random_create.to_s
     end
 
+    def get_aggregate_events aggregate_id, class_name
+      driver_for(class_name).get_aggregate_events aggregate_id, class_name
+    end
+
     def save_events aggregate_events, originating_aggregate_version, aggregate_id, class_name
       #begin
       driver_for(class_name).save_events aggregate_events, originating_aggregate_version, aggregate_id, *class_name

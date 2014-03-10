@@ -39,6 +39,7 @@ module Sandthorn
         
         unless aggregate_attribute_deltas.empty?
           data = {:method_name => method_name, :method_args => args, :attribute_deltas => aggregate_attribute_deltas}
+          data.merge!({trace: @aggregate_trace_information}) unless @aggregate_trace_information.nil? || @aggregate_trace_information.empty?
           @aggregate_events << ({:aggregate_version => @aggregate_current_event_version, :event_name => method_name, :event_args => data})
         end
         self
@@ -50,7 +51,22 @@ module Sandthorn
       def all
       end
 
+      def aggregate_trace args
+        @aggregate_trace_information = args
+        yield self
+        @aggregate_trace_information = nil
+      end
+
       module ClassMethods
+
+        @@aggregate_trace_information = nil
+        def aggregate_trace args
+          @@aggregate_trace_information = args
+          @aggregate_trace_information = args
+          yield self
+          @@aggregate_trace_information = nil
+          @aggregate_trace_information = nil
+        end
       
         def find aggregate_id
           class_name = self.respond_to?(:name) ? self.name : self.class # to be able to extend a string for example.
@@ -62,12 +78,14 @@ module Sandthorn
         end
 
         def new *args
-          agg = super
-          agg.aggregate_base_initialize
-          agg.aggregate_initialize
-          agg.send :set_aggregate_id, Sandthorn.generate_aggregate_id
-          agg.send :commit, *args
-          agg
+          aggregate = super
+          aggregate.aggregate_base_initialize
+          aggregate.aggregate_trace @@aggregate_trace_information do |aggr|
+            aggr.aggregate_initialize
+            aggr.send :set_aggregate_id, Sandthorn.generate_aggregate_id
+            aggr.send :commit, *args
+            return aggr
+          end
         end
 
 
@@ -78,10 +96,10 @@ module Sandthorn
             aggregate = first_event[:event_args][0]
             current_aggregate_version = aggregate.aggregate_originating_version
             events.shift
-          elsif first_event[:event_name] == "instance_extended_as_aggregate"
-            aggregate = first_event[:event_args][0]
-            aggregate.extend AggregateRoot
-            events.pop
+          # elsif first_event[:event_name] == "instance_extended_as_aggregate"
+          #   aggregate = first_event[:event_args][0]
+            #aggregate.extend AggregateRoot
+            # events.pop
           else
             new_args = events.first()[:event_args][:method_args]
 

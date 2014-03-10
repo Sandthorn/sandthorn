@@ -3,8 +3,6 @@ PATH
   specs:
     sandthorn (0.0.1)
       dirty_hashy
-      msgpack
-      oj
       uuidtools
 
 GEM
@@ -27,17 +25,15 @@ GEM
     i18n (0.6.9)
     method_source (0.8.2)
     minitest (4.7.5)
-    msgpack (0.5.8)
     multi_json (1.9.0)
-    oj (2.5.5)
     pg (0.17.1)
     pry (0.9.12.6)
       coderay (~> 1.0)
       method_source (~> 0.8)
       slop (~> 3.4)
-    pry-doc (0.5.1)
-      pry (>= 0.9)
-      yard (>= 0.8)
+    pry-doc (0.6.0)
+      pry (~> 0.9)
+      yard (~> 0.8)
     rake (10.1.1)
     rspec (2.14.1)
       rspec-core (~> 2.14.0)
@@ -47,7 +43,7 @@ GEM
     rspec-expectations (2.14.5)
       diff-lcs (>= 1.1.3, < 2.0)
     rspec-mocks (2.14.6)
-    sandthorn_driver_sequel (1.0.2)
+    sandthorn_driver_sequel (1.0.3)
       pg
       sequel
     sequel (4.8.0)
@@ -55,7 +51,7 @@ GEM
     sqlite3 (1.3.9)
     thread_safe (0.2.0)
       atomic (>= 1.1.7, < 2)
-    tzinfo (0.3.38)
+    tzinfo (0.3.39)
     uuidtools (2.1.4)
     yard (0.8.7.3)
 

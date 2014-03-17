@@ -13,17 +13,16 @@ _Example:_
 
 ```ruby
 
-require 'sandthorn/aggregate_root_dirty_hashy'
+#Setup the Aggregate
+
+require 'sandthorn/aggregate_root_dirty_hashy' #the one available right now
 
 class Ship
-  include Sandthorn::AggregateRoot::DirtyHashy #the one available
-right now
-	attr_reader :shipping_company
+  include Sandthorn::AggregateRoot::DirtyHashy 
 	attr_reader :name
 
 	def initialize name: nil, shipping_company: nil
 		@name = name
-		@shipping_company = shipping_company
 	end
 
 	# state-changing command
@@ -40,23 +39,28 @@ right now
 	end
 end
 
-class Port
-  include Sandthorn::AggregateRoot::DirtyHashy
-	attr_reader :name
+#Setup the framework with the sequel driver for persistance
+url = "path to sql" #Example sqlite://path/sequel_driver.sqlite3 
+catch_all_config = [ { driver: SandthornDriverSequel.driver_from_url(url: url) } ]
+Sandthorn.configuration = catch_all_config
 
-	def initialize name: nil, owner: nil
-		@name = name
-		@owner = owner
-	end
+#migrate db schema for the sequel driver
+migrator = SandthornDriverSequel::Migration.new url: url
+SandthornDriverSequel.migrate_db url: url
 
-	# non_state_changing events
-	def ship_arrived_to_port ship: nil
-		commit { ship_id: ship.id }
-	end
-	def ship_departed_port ship: nil
-		commit { ship_id: ship.id }
-	end
-end
+#Usage
+ship = Ship.new "Titanic"
+ship.rename! "Vasa"
+puts ship.aggregate_events
+ship.save
+
+new_ship = Ship.find ship.id
+puts ship.name
+.
+.
+
+For more info look at the specs.
+
 ```
 
 ## Installation

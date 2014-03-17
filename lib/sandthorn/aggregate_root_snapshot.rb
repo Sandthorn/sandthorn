@@ -19,9 +19,7 @@ module Sandthorn
       raise "No snapshot has been created!" unless @aggregate_snapshot
       @aggregate_snapshot[:event_data] = Sandthorn.serialize @aggregate_snapshot[:event_args]
       @aggregate_snapshot[:event_args] = nil
-      puts "pre save_snapshot"
       Sandthorn.save_snapshot @aggregate_snapshot, @aggregate_id, self.class.name
-      puts "post save_snapshot"
       @aggregate_snapshot = nil
     end
     private

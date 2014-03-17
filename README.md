@@ -12,7 +12,12 @@ Think of it as an object database where you not only what the new value of the a
 _Example:_
 
 ```ruby
-class Ship < Sandthorn::EventAggregate
+
+require 'sandthorn/aggregate_root_dirty_hashy'
+
+class Ship
+  include Sandthorn::AggregateRoot::DirtyHashy #the one available
+right now
 	attr_reader :shipping_company
 	attr_reader :name
 
@@ -29,13 +34,14 @@ class Ship < Sandthorn::EventAggregate
 		end
 	end
 	private
-	# record the event and state-change is automatically recorded.
+	# commit the event and state-change is automatically recorded.
 	def ship_was_renamed
-		record_event
+		commit
 	end
 end
 
-class Port < Sandthorn::EventAggregate
+class Port
+  include Sandthorn::AggregateRoot::DirtyHashy
 	attr_reader :name
 
 	def initialize name: nil, owner: nil
@@ -45,10 +51,10 @@ class Port < Sandthorn::EventAggregate
 
 	# non_state_changing events
 	def ship_arrived_to_port ship: nil
-		record_event { ship_id: ship.id }
+		commit { ship_id: ship.id }
 	end
 	def ship_departed_port ship: nil
-		record_event { ship_id: ship.id }
+		commit { ship_id: ship.id }
 	end
 end
 ```

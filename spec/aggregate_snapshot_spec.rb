@@ -1,0 +1,260 @@
+require 'spec_helper'
+require 'uuidtools'
+require 'sandthorn/aggregate_root_dirty_hashy'
+require 'sandthorn/aggregate_root_snapshot'
+require 'date'
+
+
+module BankAccountInterestCommands
+  def calculate_interest! until_date = DateTime.now
+    # skipping all safety-checks..
+    # and this is of course horribly wrong financially speaking.. whatever
+    pay_out_unpaid_interest!
+    interest_calculation_time = until_date - @last_interest_calculation
+    days_with_interest = interest_calculation_time.to_i
+    unpaid_interest = @balance * @current_interest_info[:interest_rate] * days_with_interest / 365.2425
+    added_unpaid_interest_event unpaid_interest,until_date
+  end
+
+  def pay_out_unpaid_interest!
+    paid_out_unpaid_interest_balance_event @unpaid_interest_balance
+  end
+
+  def change_interest! new_interest_rate, interest_valid_from
+    calculate_interest!
+    changed_interest_rate_event new_interest_rate,interest_valid_from
+  end
+end
+module BankAccountWithdrawalCommands
+  def withdraw_from_atm! amount, atm_id
+    withdrew_amount_from_atm_event amount, atm_id
+  end
+
+  def withdraw_from_cashier! amount, cashier_id
+    withdrew_amount_from_cashier_event amount, cashier_id
+    charged_cashier_withdrawal_fee_event 50
+  end
+end
+
+module BankAccountVisaCardPurchasesCommands
+  def charge_card! amount, merchant_id
+    visa = VisaCardTransactionGateway.new
+    transaction_id = visa.charge_card "3030-3333-4252-2535", merchant_id, amount
+    paid_with_visa_card_event amount, transaction_id
+  end
+
+end
+
+class VisaCardTransactionGateway
+  def initialize
+    @visa_connector = "foo_bar"
+  end
+  def charge_card visa_card_number, merchant_id, amount
+    transaction_id = UUIDTools::UUID.random_create.to_s
+  end
+end
+
+module BankAccountDepositCommmands
+  def deposit_at_bank_office! amount, cashier_id
+    deposited_to_cashier_event amount, cashier_id
+  end
+
+  def transfer_money_from_another_account! amount, from_account_number
+    incoming_transfer_event amount,from_account_number
+  end
+end
+
+class BankAccount
+  include Sandthorn::AggregateRoot::DirtyHashy
+
+  attr_reader :balance
+  attr_reader :account_number
+  attr_reader :current_interest_info
+  attr_reader :account_creation_date
+  attr_reader :unpaid_interest_balance
+  attr_reader :last_interest_calculation
+
+  def initialize *args
+    account_number = args[0]
+    interest_rate = args[1]
+    creation_date = args[2]
+
+    @current_interest_info = {}
+    @current_interest_info[:interest_rate] = interest_rate
+    @current_interest_info[:interest_valid_from] = creation_date
+    @balance = 0
+    @unpaid_interest_balance = 0
+    @account_creation_date = creation_date
+    @last_interest_calculation = creation_date
+  end
+
+  def changed_interest_rate_event new_interest_rate, interest_valid_from
+    @current_interest_info[:interest_rate] = new_interest_rate
+    @current_interest_info[:interest_valid_from] = interest_valid_from
+    record_event new_interest_rate,interest_valid_from
+  end
+
+  def added_unpaid_interest_event interest_amount, calculated_until
+    @unpaid_interest_balance += interest_amount
+    @last_interest_calculation = calculated_until
+    record_event interest_amount, calculated_until
+  end
+
+  def paid_out_unpaid_interest_balance_event interest_amount
+    @unpaid_interest_balance -= interest_amount
+    @balance += interest_amount
+    record_event interest_amount
+  end
+
+  def withdrew_amount_from_atm_event amount, atm_id
+    @balance -= amount
+    record_event amount,atm_id
+  end
+
+  def withdrew_amount_from_cashier_event amount, cashier_id
+    @balance -= amount
+    record_event amount, cashier_id
+  end
+
+  def paid_with_visa_card_event amount, visa_card_transaction_id
+    @balance -= amount
+    record_event amount,visa_card_transaction_id
+  end
+
+  def charged_cashier_withdrawal_fee_event amount
+    @balance -= amount
+    record_event amount
+  end
+
+  def deposited_to_cashier_event amount, cashier_id
+    @balance = self.balance + amount
+    record_event amount,cashier_id
+  end
+
+  def incoming_transfer_event amount, from_account_number
+    current_balance = self.balance
+    @balance = amount + current_balance
+    record_event amount, from_account_number
+  end
+
+end
+
+def a_test_account
+  a = BankAccount.new "91503010111",0.031415, Date.new(2011,10,12)
+  a.extend BankAccountDepositCommmands
+  a.transfer_money_from_another_account! 90000, "FOOBAR"
+  a.deposit_at_bank_office! 10000, "Lars Idorn"
+
+  a.extend BankAccountVisaCardPurchasesCommands
+  a.charge_card! 1000, "Starbucks Coffee"
+
+  a.extend BankAccountInterestCommands
+  a.calculate_interest!
+  return a
+end
+
+#Tests part
+describe "when doing aggregate_find on an aggregate with a snapshot" do
+  let(:aggregate) do
+    a = a_test_account
+    a.save
+    a.extend Sandthorn::AggregateRootSnapshot
+    a.aggregate_snapshot!
+    a.save_snapshot
+    a.charge_card! 9000, "Apple"
+    a.save
+    a
+  end
+  it "should be loaded with correct version" do
+    org = aggregate
+    loaded = BankAccount.find org.aggregate_id
+    expect(loaded.balance).to eql org.balance
+  end
+end
+
+describe 'when generating state on an aggregate root' do
+
+  before(:each) do
+    @original_account = a_test_account
+    events = @original_account.aggregate_events
+    @account = BankAccount.aggregate_build events
+    @account.extend Sandthorn::AggregateRootSnapshot
+    @account.aggregate_snapshot!
+  end
+
+  it 'account should have properties set' do
+    @account.balance.should eql 99000
+    @account.unpaid_interest_balance.should be > 1000
+  end
+
+  it 'should store snapshot data in aggregate_snapshot' do
+    @account.aggregate_snapshot.should be_a(Hash)
+  end
+
+  it 'should store aggregate_version in aggregate_snapshot' do
+    @account.aggregate_snapshot[:aggregate_version].should eql(@original_account.aggregate_current_event_version)
+  end
+
+  it 'should be able to load up from snapshot' do
+
+    events = [@account.aggregate_snapshot]
+    loaded = BankAccount.aggregate_build events
+
+    loaded.balance.should eql(@original_account.balance)
+    loaded.account_number.should eql(@original_account.account_number)
+    loaded.current_interest_info.should eql(@original_account.current_interest_info)
+    loaded.account_creation_date.should eql(@original_account.account_creation_date)
+    loaded.unpaid_interest_balance.should eql(@original_account.unpaid_interest_balance)
+    loaded.last_interest_calculation.should eql(@original_account.last_interest_calculation)
+    loaded.aggregate_id.should eql(@original_account.aggregate_id)
+    loaded.aggregate_originating_version.should eql(@account.aggregate_originating_version)
+
+  end
+
+end
+
+describe 'when saving to repository' do
+  let(:account) {a_test_account.extend Sandthorn::AggregateRootSnapshot}
+  it 'should raise an error if trying to save before creating a snapshot' do
+    lambda {account.save_snapshot}.should raise_error (RuntimeError)
+  end
+  it 'should not raise an error if snapshot was created' do
+    account.save
+    account.aggregate_snapshot!
+    lambda {account.save_snapshot}.should_not raise_error
+  end
+  it 'should set aggregate_snapshot to nil' do
+    account.save
+    account.aggregate_snapshot!
+    account.save_snapshot
+    account.aggregate_snapshot.should eql(nil)
+  end
+
+  it 'should raise error if trying to create snapshot before events are saved on object' do
+    lambda {account.aggregate_snapshot!}.should raise_error
+  end
+
+  it 'should not raise an error if trying to create snapshot on object when events are saved' do
+    account.save
+    lambda {account.aggregate_snapshot!}.should_not raise_error
+  end
+
+  it 'should get snapshot on account find when a snapshot is saved' do
+
+    account.save
+    account.aggregate_snapshot!
+    account.save_snapshot
+
+    loaded = BankAccount.find account.aggregate_id
+
+    loaded.balance.should eql(account.balance)
+    loaded.account_number.should eql(account.account_number)
+    loaded.current_interest_info.should eql(account.current_interest_info)
+    loaded.account_creation_date.should eql(account.account_creation_date)
+    loaded.unpaid_interest_balance.should eql(account.unpaid_interest_balance)
+    loaded.last_interest_calculation.should eql(account.last_interest_calculation)
+    loaded.aggregate_id.should eql(account.aggregate_id)
+    loaded.aggregate_originating_version.should eql(account.aggregate_originating_version)
+
+  end
+end

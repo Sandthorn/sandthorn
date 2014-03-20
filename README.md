@@ -1,5 +1,5 @@
 # Sandthorn Event Sourcing
-A ruby framwork for saving an object's state as a series of events, and tracking non state changing events.
+A ruby framework for saving an object's state as a series of events, and tracking non state changing events.
 
 ## What is Event Sourcing
 
@@ -13,53 +13,57 @@ _Example:_
 
 ```ruby
 
-#Setup the Aggregate
+# Setup the Aggregate
 
-require 'sandthorn/aggregate_root_dirty_hashy' #the one available right now
+# The one available right now
+require 'sandthorn'
+require 'sandthorn_driver_sequel'
+require 'sandthorn/aggregate_root_dirty_hashy'
 
 class Ship
-  include Sandthorn::AggregateRoot::DirtyHashy 
-	attr_reader :name
+  include Sandthorn::AggregateRoot::DirtyHashy
+  attr_reader :name
 
-	def initialize name: nil, shipping_company: nil
-		@name = name
-	end
+  def initialize name: nil, shipping_company: nil
+    @name = name
+  end
 
-	# state-changing command
-	def rename! new_name: ""
-		unless new_name.empty? or new_name == name
-			@name = new_name
-			ship_was_renamed
-		end
-	end
-	private
-	# commit the event and state-change is automatically recorded.
-	def ship_was_renamed
-		commit
-	end
+  # State-changing command
+  def rename! new_name: ""
+    unless new_name.empty? or new_name == name
+      @name = new_name
+      ship_was_renamed
+    end
+  end
+
+  private
+
+  # Commit the event and state-change is automatically recorded.
+  def ship_was_renamed
+    commit
+  end
 end
 
-#Setup the framework with the sequel driver for persistance
-url = "path to sql" #Example sqlite://path/sequel_driver.sqlite3 
+# Setup the framework with the sequel driver for persistance
+url = "path to sql" #Example sqlite://path/sequel_driver.sqlite3
+url = "sqlite://spec/db/sequel_driver.sqlite3"
 catch_all_config = [ { driver: SandthornDriverSequel.driver_from_url(url: url) } ]
 Sandthorn.configuration = catch_all_config
 
-#migrate db schema for the sequel driver
+# Migrate db schema for the sequel driver
 migrator = SandthornDriverSequel::Migration.new url: url
 SandthornDriverSequel.migrate_db url: url
 
-#Usage
-ship = Ship.new "Titanic"
-ship.rename! "Vasa"
-puts ship.aggregate_events
+# Usage
+ship = Ship.new name: "Titanic"
+ship.rename! new_name: "Vasa"
+
 ship.save
 
 new_ship = Ship.find ship.id
 puts ship.name
-.
-.
 
-For more info look at the specs.
+# For more info look at the specs.
 
 ```
 

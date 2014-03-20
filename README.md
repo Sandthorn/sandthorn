@@ -81,6 +81,11 @@ Or install it yourself as:
 
 TODO: Write usage instructions here
 
+## Development
+
+run:
+   `rake console`
+
 ## Contributing
 
 1. Fork it

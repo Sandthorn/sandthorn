@@ -30,6 +30,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "sandthorn_driver_sequel"
 
   spec.add_runtime_dependency "dirty_hashy"
-  spec.add_runtime_dependency "uuidtools"
 
 end

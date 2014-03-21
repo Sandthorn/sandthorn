@@ -3,7 +3,6 @@ PATH
   specs:
     sandthorn (0.0.1)
       dirty_hashy
-      uuidtools
 
 GEM
   remote: https://rubygems.org/
@@ -52,7 +51,6 @@ GEM
     thread_safe (0.2.0)
       atomic (>= 1.1.7, < 2)
     tzinfo (0.3.39)
-    uuidtools (2.1.4)
     yard (0.8.7.3)
 
 PLATFORMS

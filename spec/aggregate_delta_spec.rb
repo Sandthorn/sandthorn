@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'uuidtools'
 require 'sandthorn/aggregate_root_dirty_hashy'
 
 

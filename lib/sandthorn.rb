@@ -1,6 +1,5 @@
 require "sandthorn/version"
 require "sandthorn/errors"
-require 'uuidtools'
 require 'yaml'
 
 module Sandthorn
@@ -27,7 +26,7 @@ module Sandthorn
     end
 
     def generate_aggregate_id
-      UUIDTools::UUID.random_create.to_s
+      SecureRandom.uuid
     end
 
     def get_aggregate_events aggregate_id, class_name

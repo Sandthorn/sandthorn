@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'uuidtools'
 require 'sandthorn/aggregate_root_dirty_hashy'
 require 'sandthorn/aggregate_root_snapshot'
 require 'date'
@@ -50,7 +49,7 @@ class VisaCardTransactionGateway
     @visa_connector = "foo_bar"
   end
   def charge_card visa_card_number, merchant_id, amount
-    transaction_id = UUIDTools::UUID.random_create.to_s
+    transaction_id = SecureRandom.uuid
   end
 end
 

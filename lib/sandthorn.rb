@@ -1,6 +1,7 @@
 require "sandthorn/version"
 require "sandthorn/errors"
 require 'yaml'
+require 'securerandom'
 
 module Sandthorn
   class << self

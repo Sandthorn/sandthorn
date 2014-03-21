@@ -1,3 +1,5 @@
+[![Code Climate](https://codeclimate.com/github/Sandthorn/sandthorn.png)](https://codeclimate.com/github/Sandthorn/sandthorn)
+
 # Sandthorn Event Sourcing
 A ruby framework for saving an object's state as a series of events, and tracking non state changing events.
 

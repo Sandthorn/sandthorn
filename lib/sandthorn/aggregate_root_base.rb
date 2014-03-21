@@ -34,7 +34,7 @@ module Sandthorn
 
       def commit *args
         increase_current_aggregate_version!
-        method_name = caller[0][/`.*'/][1..-2]
+        method_name = caller[0][/\`.*\'/][1..-2]
         aggregate_attribute_deltas = get_delta
         
         unless aggregate_attribute_deltas.empty?
@@ -67,7 +67,7 @@ module Sandthorn
           @@aggregate_trace_information = nil
           @aggregate_trace_information = nil
         end
-      
+
         def find aggregate_id
           class_name = self.respond_to?(:name) ? self.name : self.class # to be able to extend a string for example.
           events = Sandthorn.get_aggregate(aggregate_id, class_name)

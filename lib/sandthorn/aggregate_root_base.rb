@@ -17,8 +17,6 @@ module Sandthorn
         @aggregate_events = []
       end
 
-
-
       def save
         aggregate_events.each do |event|
           event[:event_data] = Sandthorn.serialize event[:event_args]
@@ -80,6 +78,7 @@ module Sandthorn
         def new *args
           aggregate = super
           aggregate.aggregate_base_initialize
+
           aggregate.aggregate_trace @@aggregate_trace_information do |aggr|
             aggr.aggregate_initialize
             aggr.send :set_aggregate_id, Sandthorn.generate_aggregate_id
@@ -88,7 +87,6 @@ module Sandthorn
           end
         end
 
-
         def aggregate_build events
           first_event = events.first()
           current_aggregate_version = 0
@@ -96,10 +94,6 @@ module Sandthorn
             aggregate = first_event[:event_args][0]
             current_aggregate_version = aggregate.aggregate_originating_version
             events.shift
-          # elsif first_event[:event_name] == "instance_extended_as_aggregate"
-          #   aggregate = first_event[:event_args][0]
-            #aggregate.extend AggregateRoot
-            # events.pop
           else
             new_args = events.first()[:event_args][:method_args]
 
@@ -116,23 +110,20 @@ module Sandthorn
             event_args = event[:event_args]
             event_name = event[:event_name]
 
-            if event_name == "aggregate_set_from_snapshot"
-              #aggregate.send event_name,*event_args
-              #set the attribute hash instead of instance varaibles directly
-              next
-            end
+            next if event_name == "aggregate_set_from_snapshot"
             next if event_name == "instance_extended_as_aggregate"
 
             attribute_deltas = event_args[:attribute_deltas]
-            if (event[:aggregate_version].nil? == false)
+
+            unless event[:aggregate_version].nil?
               current_aggregate_version = event[:aggregate_version]
             end
 
-            if !attribute_deltas.nil?
-              deltas = {}
-              attribute_deltas.each do |delta|
-                deltas[delta[:attribute_name]] = delta[:new_value]
+            unless attribute_deltas.nil?
+              deltas = attribute_deltas.each_with_object({}) do |delta, acc|
+                acc[delta[:attribute_name]] = delta[:new_value]
               end
+
               attributes.merge! deltas
             end
           end
@@ -143,7 +134,7 @@ module Sandthorn
           aggregate
         end
       end
-      
+
       private
 
       def set_instance_variables! attributes
@@ -153,7 +144,9 @@ module Sandthorn
       end
 
       def extract_relevant_aggregate_instance_variables
-        instance_variables.select { |i| i.to_s != "@hashy" && (!i.to_s.start_with?("@aggregate_") || i.to_s == "@aggregate_id") }
+        instance_variables.select do |i|
+          i.to_s != "@hashy" && (!i.to_s.start_with?("@aggregate_") || i.to_s == "@aggregate_id")
+        end
       end
 
       def set_orginating_aggregate_version! aggregate_version

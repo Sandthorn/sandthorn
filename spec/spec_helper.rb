@@ -4,11 +4,13 @@
 # loaded once.
 #
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
+require 'coveralls'
 require "ap"
 require "bundler"
 require "sandthorn_driver_sequel"
 
 Bundler.require
+Coveralls.wear!
 
 module Helpers
   def class_including(mod)

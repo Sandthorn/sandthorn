@@ -50,7 +50,6 @@ class Ship
 end
 
 # Setup the framework with the sequel driver for persistance
-url = "path to sql" #Example sqlite://path/sequel_driver.sqlite3
 url = "sqlite://spec/db/sequel_driver.sqlite3"
 catch_all_config = [ { driver: SandthornDriverSequel.driver_from_url(url: url) } ]
 Sandthorn.configuration = catch_all_config

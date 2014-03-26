@@ -52,6 +52,10 @@ module Sandthorn
       context "with no tracing information" do
         let(:subject) { aggregate.this_is_an_event;aggregate }
         
+        it "should have the new event" do
+          subject.has_event?(:new).should be_true
+        end
+
         it "should report true on has_unsaved_event? :this_is_an_event" do
           subject.has_unsaved_event?(:this_is_an_event).should be_true
         end

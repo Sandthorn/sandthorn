@@ -30,9 +30,9 @@ module Sandthorn
         self
       end
 
-      def commit *args
+      def commit *args, method_name: nil
         increase_current_aggregate_version!
-        method_name = caller[0][/\`.*\'/][1..-2]
+        method_name = caller_locations(1,1)[0].label unless method_name
         aggregate_attribute_deltas = get_delta
         
         unless aggregate_attribute_deltas.empty?
@@ -82,7 +82,7 @@ module Sandthorn
           aggregate.aggregate_trace @@aggregate_trace_information do |aggr|
             aggr.aggregate_initialize
             aggr.send :set_aggregate_id, Sandthorn.generate_aggregate_id
-            aggr.send :commit, *args
+            aggr.send :commit, *args, method_name: "new"
             return aggr
           end
         end

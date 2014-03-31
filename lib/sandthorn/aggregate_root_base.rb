@@ -45,10 +45,6 @@ module Sandthorn
 
       alias :record_event :commit
       
-
-      def all
-      end
-
       def aggregate_trace args
         @aggregate_trace_information = args
         yield self
@@ -66,7 +62,17 @@ module Sandthorn
           @aggregate_trace_information = nil
         end
 
-        def find aggregate_id
+        def all
+          aggregate_id_list = Sandthorn.get_aggregate_list_by_typename(self.name)
+          find aggregate_id_list
+        end
+
+        def find id
+          return aggregate_find id unless id.respond_to?(:each)
+          return id.map { |e| aggregate_find e }
+        end
+
+        def aggregate_find aggregate_id
           class_name = self.respond_to?(:name) ? self.name : self.class # to be able to extend a string for example.
           events = Sandthorn.get_aggregate(aggregate_id, class_name)
           raise Sandthorn::Errors::AggregateNotFound unless events and !events.empty?

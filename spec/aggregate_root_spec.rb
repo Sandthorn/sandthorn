@@ -37,6 +37,29 @@ module Sandthorn
       
     end
 
+    describe "when get all aggregates from DirtyClass" do
+      
+      before(:each) do
+        @first = DirtyClass.new.save
+        @middle = DirtyClass.new.save
+        @last = DirtyClass.new.save
+      end
+
+      let(:subject) { DirtyClass.all.map{ |s| s.id} }
+      let(:ids) { [@first.id, @middle.id, @last.id] }
+
+      context "all" do
+        it "should all the aggregates" do
+          expect(subject.length).to eql 3
+        end
+
+        it "should include correct aggregates" do
+          expect(subject).to match_array(ids)
+        end
+      end
+
+    end
+
 
     describe "when making a change on a aggregate" do
       let(:dirty_obejct) { 

@@ -50,6 +50,10 @@ module Sandthorn
       driver_for(class_name).save_snapshot aggregate_snapshot, aggregate_id, class_name
     end
 
+    def get_aggregate_list_by_typename class_name
+      driver_for(class_name).get_aggregate_list_by_typename class_name
+    end
+
     private
     def driver_for class_name, &block
       driver = identify_driver_from_class class_name

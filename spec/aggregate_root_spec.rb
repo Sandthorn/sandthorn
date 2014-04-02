@@ -136,6 +136,36 @@ module Sandthorn
           expect{DirtyClass.find("666")}.to raise_error
         end
       end
+
+
+    end
+
+    describe "event data" do
+
+      let(:dirty_obejct) { 
+        o = DirtyClass.new :name => "old_value"
+        o
+      }
+
+      context "old_value should be set" do
+      
+        it "should set the old_value on the event" do
+          dirty_obejct.change_name "new_name"
+          expect(dirty_obejct.aggregate_events.last[:event_args][:attribute_deltas].first[:old_value]).to eql "old_value"
+        end
+
+        it "should not change aggregate_id" do
+          dirty_obejct.change_name "new_name"
+          expect(dirty_obejct.aggregate_events.last[:event_args][:attribute_deltas].last[:attribute_name]).not_to eql "aggregate_id"
+        end
+
+        it "should not change sex attribute" do
+          dirty_obejct.change_name "new_name"
+          dirty_obejct.aggregate_events.each do |event|
+            expect(event[:event_name]).not_to eql "change_sex"
+          end
+        end
+      end
     end
   end
 end

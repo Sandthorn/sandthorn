@@ -31,11 +31,11 @@ module Sandthorn
       end
 
       def commit *args
-        increase_current_aggregate_version!
-        method_name = caller_locations(1,1)[0].label.gsub("block in ", "")
         aggregate_attribute_deltas = get_delta
         
         unless aggregate_attribute_deltas.empty?
+          method_name = caller_locations(1,1)[0].label.gsub("block in ", "")
+          increase_current_aggregate_version!
           data = {:method_name => method_name, :method_args => args, :attribute_deltas => aggregate_attribute_deltas}
           data.merge!({trace: @aggregate_trace_information}) unless @aggregate_trace_information.nil? || @aggregate_trace_information.empty?
           @aggregate_events << ({:aggregate_version => @aggregate_current_event_version, :event_name => method_name, :event_args => data})
@@ -45,22 +45,22 @@ module Sandthorn
 
       alias :record_event :commit
       
-      def aggregate_trace args
-        @aggregate_trace_information = args
-        yield self
-        @aggregate_trace_information = nil
-      end
+      # def aggregate_trace args
+      #   @aggregate_trace_information = args
+      #   yield self
+      #   @aggregate_trace_information = nil
+      # end
 
       module ClassMethods
 
-        @@aggregate_trace_information = nil
-        def aggregate_trace args
-          @@aggregate_trace_information = args
-          @aggregate_trace_information = args
-          yield self
-          @@aggregate_trace_information = nil
-          @aggregate_trace_information = nil
-        end
+        # @@aggregate_trace_information = nil
+        # def aggregate_trace args
+        #   @@aggregate_trace_information = args
+        #   @aggregate_trace_information = args
+        #   yield self
+        #   @@aggregate_trace_information = nil
+        #   @aggregate_trace_information = nil
+        # end
 
         def all
           aggregate_id_list = Sandthorn.get_aggregate_list_by_typename(self.name)
@@ -84,13 +84,14 @@ module Sandthorn
         def new *args
           aggregate = super
           aggregate.aggregate_base_initialize
+          aggr = aggregate
 
-          aggregate.aggregate_trace @@aggregate_trace_information do |aggr|
-            aggr.aggregate_initialize
-            aggr.send :set_aggregate_id, Sandthorn.generate_aggregate_id
-            aggr.send :commit, *args
-            return aggr
-          end
+          #aggregate.aggregate_trace @@aggregate_trace_information do |aggr|
+          aggregate.aggregate_initialize
+          aggregate.send :set_aggregate_id, Sandthorn.generate_aggregate_id
+          aggregate.send :commit, *args
+          aggregate
+          #end
         end
 
         def aggregate_build events
@@ -137,6 +138,7 @@ module Sandthorn
           aggregate.send :set_orginating_aggregate_version!, current_aggregate_version
           aggregate.send :set_current_aggregate_version!, current_aggregate_version
           aggregate.send :set_instance_variables!, attributes
+          aggregate.send :aggregate_initialize
           aggregate
         end
       end
@@ -150,9 +152,7 @@ module Sandthorn
       end
 
       def extract_relevant_aggregate_instance_variables
-        instance_variables.select do |i|
-          i.to_s != "@hashy" && (!i.to_s.start_with?("@aggregate_") || i.to_s == "@aggregate_id")
-        end
+        instance_variables.select { |i| i.to_s=="@aggregate_id" || !i.to_s.start_with?("@aggregate_") }
       end
 
       def set_orginating_aggregate_version! aggregate_version
@@ -169,7 +169,6 @@ module Sandthorn
 
       def clear_aggregate_events
         @aggregate_events = []
-        @aggregate_attribute_deltas = []
       end
 
       def aggregate_clear_current_event_version!

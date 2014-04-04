@@ -5,7 +5,7 @@ require 'benchmark'
 module Sandthorn
   module AggregateRoot
     class TestClass
-      include Sandthorn::AggregateRoot::DirtyHashy
+      include Sandthorn::AggregateRoot
       attr_reader :name
       
       

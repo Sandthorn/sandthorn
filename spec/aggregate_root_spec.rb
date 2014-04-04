@@ -1,10 +1,9 @@
 require 'spec_helper'
-require 'sandthorn/aggregate_root_dirty_hashy'
 
 module Sandthorn
   module AggregateRoot
     class DirtyClass
-      include Sandthorn::AggregateRoot::DirtyHashy
+      include Sandthorn::AggregateRoot
       attr_reader :name, :age
       attr :sex
       attr_writer :writer
@@ -25,12 +24,14 @@ module Sandthorn
       def change_sex value
         unless sex == value
           @sex = value
+          commit
         end
       end
 
       def change_writer value
         unless writer == value
           @writer = value
+          commit
         end
       end
 
@@ -143,9 +144,20 @@ module Sandthorn
     describe "event data" do
 
       let(:dirty_obejct) { 
-        o = DirtyClass.new :name => "old_value"
-        o
+        o = DirtyClass.new :name => "old_value", :sex => "hen"
+        o.save
       }
+
+      let(:dirty_obejct_after_find) { DirtyClass.find dirty_obejct.id }
+
+      context "after find" do
+
+        it "should set the old_value on the event" do
+          dirty_obejct_after_find.change_name "new_name"
+          expect(dirty_obejct_after_find.aggregate_events.last[:event_args][:attribute_deltas].first[:old_value]).to eql "old_value"
+        end
+
+      end
 
       context "old_value should be set" do
       
@@ -159,11 +171,28 @@ module Sandthorn
           expect(dirty_obejct.aggregate_events.last[:event_args][:attribute_deltas].last[:attribute_name]).not_to eql "aggregate_id"
         end
 
-        it "should not change sex attribute" do
+        it "should not change sex attribute if sex method is not runned" do
           dirty_obejct.change_name "new_name"
           dirty_obejct.aggregate_events.each do |event|
-            expect(event[:event_name]).not_to eql "change_sex"
+            event[:event_args][:attribute_deltas].each do |attribute_delta|
+              expect(attribute_delta[:attribute_name]).not_to eql "sex"
+            end
           end
+        end
+
+        it "should not change sex attribute if sex attribute is the same" do
+          dirty_obejct.change_sex "hen"
+          dirty_obejct.aggregate_events.each do |event|
+            event[:event_args][:attribute_deltas].each do |attribute_delta|
+              expect(attribute_delta[:attribute_name]).not_to eql "sex"
+            end
+          end
+        end
+
+        it "should set old_value and new_value on sex change" do
+          dirty_obejct.change_sex "shemale"
+          expect(dirty_obejct.aggregate_events.last[:event_args][:attribute_deltas].first[:old_value]).to eql "hen"
+          expect(dirty_obejct.aggregate_events.last[:event_args][:attribute_deltas].first[:new_value]).to eql "shemale"
         end
       end
     end

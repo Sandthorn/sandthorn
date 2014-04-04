@@ -6,10 +6,6 @@ module Sandthorn
     module DirtyHashy
       include Sandthorn::AggregateRoot::Base
 
-      def self.included(base)
-        base.extend(Sandthorn::AggregateRoot::Base::ClassMethods)
-      end
-
       def aggregate_initialize *args
         @hashy = ::DirtyHashy.new
       end

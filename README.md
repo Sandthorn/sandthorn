@@ -23,10 +23,9 @@ _Example:_
 # The one available right now
 require 'sandthorn'
 require 'sandthorn_driver_sequel'
-require 'sandthorn/aggregate_root_dirty_hashy'
 
 class Ship
-  include Sandthorn::AggregateRoot::DirtyHashy
+  include Sandthorn::AggregateRoot
   attr_reader :name
 
   def initialize name: nil, shipping_company: nil
@@ -65,7 +64,7 @@ ship.rename! new_name: "Vasa"
 ship.save
 
 new_ship = Ship.find ship.id
-puts ship.name
+puts new_ship.name
 
 # For more info look at the specs.
 

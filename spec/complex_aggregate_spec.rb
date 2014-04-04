@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'sandthorn/aggregate_root_dirty_hashy'
 require 'date'
 
 class Hello
@@ -16,7 +15,7 @@ class Hello
 end
 
 class IAmComplex
-  include Sandthorn::AggregateRoot::DirtyHashy
+  include Sandthorn::AggregateRoot
   attr_reader :a_date
   attr_reader :hello
 
@@ -70,7 +69,6 @@ describe 'when using complex types in events' do
   it 'should detect foo_bar chaning in hello' do
     aggr = IAmComplex.aggregate_build @events
     aggr.set_foo_bar_on_hello "morgan"
-
     builded = IAmComplex.aggregate_build aggr.aggregate_events
     builded.hello.foo_bar.should eql "morgan"
   end

@@ -1,10 +1,9 @@
 require 'spec_helper'
-require 'sandthorn/aggregate_root_dirty_hashy'
 
 
 
 class PersonTest
-    include Sandthorn::AggregateRoot::DirtyHashy
+    include Sandthorn::AggregateRoot
     attr_reader :name
     attr_reader :age
     attr_reader :relationship_status

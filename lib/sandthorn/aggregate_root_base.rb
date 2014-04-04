@@ -137,8 +137,8 @@ module Sandthorn
           aggregate.send :clear_aggregate_events
           aggregate.send :set_orginating_aggregate_version!, current_aggregate_version
           aggregate.send :set_current_aggregate_version!, current_aggregate_version
-          aggregate.send :set_instance_variables!, attributes
           aggregate.send :aggregate_initialize
+          aggregate.send :set_instance_variables!, attributes
           aggregate
         end
       end

@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'sandthorn/aggregate_root_dirty_hashy'
 require 'sandthorn/aggregate_root_snapshot'
 require 'date'
 
@@ -64,7 +63,7 @@ module BankAccountDepositCommmands
 end
 
 class BankAccount
-  include Sandthorn::AggregateRoot::DirtyHashy
+  include Sandthorn::AggregateRoot
 
   attr_reader :balance
   attr_reader :account_number

@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    sandthorn (0.1.1)
+    sandthorn (0.2.0)
       dirty_hashy
 
 GEM

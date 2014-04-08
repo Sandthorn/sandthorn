@@ -1,3 +1,3 @@
 Autotest.add_hook :initialize do |at|
-    %w{.git spec/db}.each {|exception| at.add_exception(exception)}
+    %w{.git spec/db coverage}.each {|exception| at.add_exception(exception)}
 end

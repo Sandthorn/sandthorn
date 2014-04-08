@@ -6,6 +6,10 @@ RSpec::Core::RakeTask.new(:spec)
 
 task :default => :spec
 
+task :benchmark do
+	sh "rspec --tag benchmark"
+end
+
 task :console do
   require 'ap'
   require 'pry'

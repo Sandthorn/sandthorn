@@ -21,7 +21,7 @@ module Sandthorn
 
     end
 
-    describe "benchmark" do
+    describe "benchmark", benchmark: true do
 
       let(:test_object) { 
         o = TestClass.new().save

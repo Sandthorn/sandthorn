@@ -55,6 +55,17 @@ module Sandthorn
       driver_for(class_name).get_aggregate_list_by_typename class_name
     end
 
+    def get_events aggregate_types: [], take: 0, after_sequence_number: 0
+      drivers = drivers_for_aggregate_types type_names: aggregate_types
+      raise Sandthorn::Errors::Error.new "Cannot get events from multiple contexts simultaneously, only one single context can be handled at a time." unless drivers.length == 1
+      driver = drivers.first 
+      events = driver.get_events aggregate_types: aggregate_types, take: take, after_sequence_number: after_sequence_number
+      events.each do |event|
+        event[:event_args] = deserialize event[:event_data]
+        event.delete(:event_data)
+      end 
+      events
+    end
     private
     def driver_for class_name, &block
       driver = identify_driver_from_class class_name
@@ -70,14 +81,13 @@ module Sandthorn
       raise Sandthorn::Errors::ConfigurationError.new "Aggregate class #{class_name} is not configured for Sandthorn" if matches.empty?
       first_match = matches.first
       first_match[:driver]
-      #UpptecEventSequelDriver.driver_from_url url: first_match[:url], context: first_match[:context]
     end
-    # def drivers_for_class_names class_names: []
-    #   return all_drivers if class_names.empty?
-    #   class_names.map { |e| driver_for e }.uniq { |d| { url: d.url, context: d.context } }
-    # end
-    # def all_drivers
-    #   configuration.map { |e| UpptecEventSequelDriver.driver_from_url url: e[:url], context: e[:context]  }
-    # end
+    def drivers_for_aggregate_types type_names: []
+      return all_drivers if type_names.empty?
+      type_names.map { |e| driver_for e }
+    end
+    def all_drivers
+      configuration.map { |e| e[:driver]  }
+    end
   end
 end

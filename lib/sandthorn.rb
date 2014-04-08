@@ -67,7 +67,7 @@ module Sandthorn
         pattern = class_name.to_s
         conf[:aggregate_pattern].nil? || r.match(pattern)
       end
-      raise Sandthorn::Errors::ConfigurationError.new "Aggregate class #{class_name} is not configured for EventStore" if matches.empty?
+      raise Sandthorn::Errors::ConfigurationError.new "Aggregate class #{class_name} is not configured for Sandthorn" if matches.empty?
       first_match = matches.first
       first_match[:driver]
       #UpptecEventSequelDriver.driver_from_url url: first_match[:url], context: first_match[:context]

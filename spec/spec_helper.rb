@@ -32,7 +32,7 @@ RSpec.configure do |config|
 end
 
 def spec_db
-    "sqlite://spec/db/sequel_driver.sqlite3"
+  "sqlite://spec/db/sequel_driver.sqlite3"
 end
 def sqlite_store_setup
   url = spec_db 

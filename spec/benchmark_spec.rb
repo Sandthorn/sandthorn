@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'sandthorn/aggregate_root_dirty_hashy'
 require 'benchmark'
 
 module Sandthorn

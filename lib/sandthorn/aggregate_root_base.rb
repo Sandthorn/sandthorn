@@ -95,50 +95,52 @@ module Sandthorn
         end
 
         def aggregate_build events
-          first_event = events.first()
           current_aggregate_version = 0
-          if first_event[:event_name] == "aggregate_set_from_snapshot"
-            aggregate = first_event[:event_args][0]
+          if first_event_snapshot?(events)
+            aggregate = start_build_from_snapshot events 
             current_aggregate_version = aggregate.aggregate_originating_version
             events.shift
           else
-            new_args = events.first()[:event_args][:method_args]
-
-            if new_args.nil?
-              aggregate = new
-            else
-              aggregate = new *new_args
-            end
-            aggregate.send :aggregate_clear_current_event_version!
+            aggregate = start_build_from_new events
           end
-
-          attributes = {}
-          events.each do |event|
-            event_args = event[:event_args]
-            event_name = event[:event_name]
-
-            next if event_name == "aggregate_set_from_snapshot"
-            next if event_name == "instance_extended_as_aggregate"
-
-            attribute_deltas = event_args[:attribute_deltas]
-
-            unless event[:aggregate_version].nil?
-              current_aggregate_version = event[:aggregate_version]
-            end
-
-            unless attribute_deltas.nil?
-              deltas = attribute_deltas.each_with_object({}) do |delta, acc|
-                acc[delta[:attribute_name]] = delta[:new_value]
-              end
-
-              attributes.merge! deltas
-            end
-          end
+          attributes = build_instance_vars_from_events events
+          current_aggregate_version = events.last[:aggregate_version] unless events.empty?
           aggregate.send :clear_aggregate_events
           aggregate.send :set_orginating_aggregate_version!, current_aggregate_version
           aggregate.send :set_current_aggregate_version!, current_aggregate_version
           aggregate.send :aggregate_initialize
           aggregate.send :set_instance_variables!, attributes
+          aggregate
+        end
+        private
+        def build_instance_vars_from_events events
+          events.inject({}) do |instance_vars, event |
+            event_args = event[:event_args]
+            event_name = event[:event_name]
+            attribute_deltas = event_args[:attribute_deltas]
+            unless attribute_deltas.nil?
+              deltas = attribute_deltas.each_with_object({}) do |delta, acc|
+                acc[delta[:attribute_name]] = delta[:new_value]
+              end
+              instance_vars.merge! deltas
+            end
+            instance_vars
+          end
+        end
+        def first_event_snapshot? events
+          events.first[:event_name].to_sym == :aggregate_set_from_snapshot
+        end
+        def start_build_from_snapshot events
+          snapshot = events.first[:event_args][0]
+        end
+        def start_build_from_new events
+          new_args = events.first[:event_args][:method_args]
+          if new_args.nil?
+            aggregate = new
+          else
+            aggregate = new *new_args
+          end
+          aggregate.send :aggregate_clear_current_event_version!
           aggregate
         end
       end

@@ -2,10 +2,16 @@ module Sandthorn
   module AggregateRootSnapshot
     attr_reader :aggregate_snapshot
 
+    def snapshot
+      aggregate_snapshot!
+      save_snapshot
+      self
+    end
+
     def aggregate_snapshot!
 
       if @aggregate_events.count > 0
-        raise "Can't take snapshot on object with unsaved events"
+        raise Errors::SnapshotError.new "Can't take snapshot on object with unsaved events"
       end
 
       @aggregate_snapshot = {
@@ -16,10 +22,10 @@ module Sandthorn
     end
 
     def save_snapshot
-      raise "No snapshot has been created!" unless @aggregate_snapshot
-      @aggregate_snapshot[:event_data] = Sandthorn.serialize @aggregate_snapshot[:event_args]
+      raise Errors::SnapshotError.new "No snapshot has been created!" unless aggregate_snapshot
+      @aggregate_snapshot[:event_data] = Sandthorn.serialize aggregate_snapshot[:event_args]
       @aggregate_snapshot[:event_args] = nil
-      Sandthorn.save_snapshot @aggregate_snapshot, @aggregate_id, self.class.name
+      Sandthorn.save_snapshot aggregate_snapshot, aggregate_id, self.class.name
       @aggregate_snapshot = nil
     end
     private

@@ -211,10 +211,24 @@ describe 'when generating state on an aggregate root' do
 
 end
 
+describe Sandthorn::AggregateRootSnapshot do
+  let(:subject) { a_test_account.save.extend Sandthorn::AggregateRootSnapshot  }
+  context "when using :snapshot - method" do
+    it "should return self" do
+      expect(subject.snapshot).to eql subject
+    end
+    it "should raise SnapshotError if aggregate has unsaved events" do
+      subject.paid_with_visa_card_event 2000, ""
+      expect{subject.snapshot}.to raise_error Sandthorn::Errors::SnapshotError
+    end
+  end
+end
+
+
 describe 'when saving to repository' do
   let(:account) {a_test_account.extend Sandthorn::AggregateRootSnapshot}
   it 'should raise an error if trying to save before creating a snapshot' do
-    lambda {account.save_snapshot}.should raise_error (RuntimeError)
+    lambda {account.save_snapshot}.should raise_error (Sandthorn::Errors::SnapshotError)
   end
   it 'should not raise an error if snapshot was created' do
     account.save

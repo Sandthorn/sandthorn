@@ -10,7 +10,7 @@ module Sandthorn
 
     def aggregate_snapshot!
       if @aggregate_events.count > 0
-        raise Errors::SnapshotError.new, 
+        raise Errors::SnapshotError,
           "Can't take snapshot on object with unsaved events"
       end
 
@@ -23,7 +23,7 @@ module Sandthorn
 
     def save_snapshot
       unless aggregate_snapshot
-        raise Errors::SnapshotError.new "No snapshot has been created!"
+        raise Errors::SnapshotError, "No snapshot has been created!"
       end
 
       @aggregate_snapshot[:event_data] = Sandthorn

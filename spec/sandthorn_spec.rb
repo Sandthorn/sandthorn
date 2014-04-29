@@ -19,13 +19,13 @@ describe Sandthorn do
 
   context "when doing snapshots" do
     it "retrieves a list of obsolete snapshots" do
-      obsolete_aggregates = Sandthorn.aggregates_with_obsolete_snapshots type_names: [AnAggregate], min_event_distance: 0
+      obsolete_aggregates = Sandthorn.obsolete_snapshots type_names: [AnAggregate], min_event_distance: 0
       expect(obsolete_aggregates).to_not be_empty
     end
 
     it "accepts a block that is applied to each aggregate" do
       obsolete_aggregates = []
-      Sandthorn.aggregates_with_obsolete_snapshots type_names: [AnAggregate], min_event_distance: 0 do |aggr|
+      Sandthorn.obsolete_snapshots type_names: [AnAggregate], min_event_distance: 0 do |aggr|
         aggr.test_block_count = true
         obsolete_aggregates << aggr
       end
@@ -33,7 +33,7 @@ describe Sandthorn do
     end
 
     it "only retrieves aggregates older than min_event_distance" do
-      obsolete_aggregates = Sandthorn.aggregates_with_obsolete_snapshots type_names: [AnAggregate], min_event_distance: 10
+      obsolete_aggregates = Sandthorn.obsolete_snapshots type_names: [AnAggregate], min_event_distance: 10
       expect(obsolete_aggregates).to be_empty
     end
   end

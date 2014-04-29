@@ -67,7 +67,7 @@ module Sandthorn
       events
     end
 
-    def aggregates_with_obsolete_snapshots type_names: [], min_event_distance: 0
+    def obsolete_snapshots type_names: [], min_event_distance: 0
       drivers = drivers_for_aggregate_types type_names: type_names
       obsolete = drivers.flat_map { |driver| driver.obsolete_snapshots(class_names: type_names, max_event_distance: min_event_distance) }
       yielder = []

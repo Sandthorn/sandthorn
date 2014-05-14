@@ -4,14 +4,30 @@
 [![Gem Version](https://badge.fury.io/rb/sandthorn.png)](http://badge.fury.io/rb/sandthorn)
 
 # Sandthorn Event Sourcing
-A ruby framework for saving an object's state as a series of events, and tracking non state changing events.
+A ruby library for saving an object's state as a series of events.
 
-## What is Event Sourcing
+## What is Event Sourcing?
 
 "Capture all changes to an application state as a sequence of events."
 [Event Sourcing](http://martinfowler.com/eaaDev/EventSourcing.html)
 
-## The short story
+## When do I need event sourcing?
+
+If the history of how an object came to be is important a well known technique is to generate a separate history log. The log is generated in parallel with the object and all actions to the object needs to be stored to the log by a separate method call. With event sourcing the history log is now integrated with the object and generated based on the actions that are made on the object, the log is now the fact that the object is built upon.
+
+
+## Why Sandthorn?
+
+If you have been following [Uncle Bob](http://blog.8thlight.com/uncle-bob/2014/05/11/FrameworkBound.html) you know what he thinks of the "Rails way" and how we get bound to the Rails framework. We have created Sandthorn to decouple our models from Active Record and restore them to what they should be, i.e., Plain Old Ruby Objects (PORO) with a twist of Sandthorn magic.
+
+Check out examples of Sandthorn:
+
+* [Examples](https://github.com/Sandthorn/sandthorn_examples) including a product shop and TicTacToe game.
+* Live [demo](http://demo.sandthorn.org) comparing Active Record and Sandthorn.
+
+## How do I use Sandthorn?
+
+
 
 Think of it as an object database where you store not only what the new value of an attribute is, but also when and why it changed.
 _Example:_
@@ -67,7 +83,7 @@ new_ship = Ship.find ship.id
 puts new_ship.name
 ```
 
-## Installation
+# Installation
 
 Add this line to your application's Gemfile:
 
@@ -81,9 +97,42 @@ Or install it yourself as:
 
     $ gem install sandthorn
 
-## Usage
+# Configuring Sandthorn
 
-Any object that should have event-sourcing capability must include the methods provided by `Sandthorn::AggregateRoot`. These makes it possible to `commit` events and `save` changes to an aggregate. Use the `include` directive as follows:
+Sandthorn relies on a driver is specific to the data storage that you are using. This means Sandthorn can be used with any data storage given that a driver exists.
+
+To setup a driver you need to add it to your project's Gemfile and configure it in your application code.
+
+    gem 'sandthorn_driver_sequel'
+
+The driver is configured when your application launches. Here's an example of how to do it using the Sequel driver and a sqlite3 database.
+
+```ruby
+url = "sqlite://spec/db/sequel_driver.sqlite3"
+driver = SandthornDriverSequel.driver_from_url(url: url)
+catch_all_config = [ { driver: driver } ]
+Sandthorn.configuration = catch_all_config
+```
+
+First we specify the path to the sqlite3 database in the `url` variable. Secondly, the specific driver is instantiated with the `url`. Hence, the driver could be instantiated using a different configuration, for example, an address to a Postgres database. Finally, `Sandthorn.configure` accepts a keyword list with options. The only option which is required is `driver`.
+
+The first time you use the Sequel driver it is necessary to install the database schema.
+
+```ruby
+url = "sqlite://spec/db/sequel_driver.sqlite3"
+SandthornDriverSequel::Migration.new url: url
+SandthornDriverSequel.migrate_db url: url
+```
+
+Optionally, when using Sandthorn in your tests you can configure it in a `spec_helper.rb` which is then required by your test suites [example](https://github.com/Sandthorn/sandthorn_examples/blob/master/sandthorn_tictactoe/spec/spec_helper.rb#L20-L30). Note that the Sequel driver accepts a special parameter to empty the database between each test.
+
+The Sequel driver is the only production-ready driver to date.
+
+# Usage
+
+The workflow when using Sandthorn is to load, or create, an aggregate (essentially
+
+Any object that should have event sourcing capability must include the methods provided by `Sandthorn::AggregateRoot`. These make it possible to `commit` events and `save` changes to an aggregate. Use the `include` directive as follows:
 
 ```ruby
 require 'sandthorn'
@@ -93,7 +142,7 @@ class Board
 end
 ```
 
-All objects that include `Sandthorn::AggregateRoot` will get an `aggregate_id` which is a [UUID](http://en.wikipedia.org/wiki/Universally_unique_identifier).
+All objects that include `Sandthorn::AggregateRoot` is provided with an `aggregate_id` which is a [UUID](http://en.wikipedia.org/wiki/Universally_unique_identifier).
 
 ### `Sandthorn::AggregateRoot.commit`
 
@@ -148,7 +197,7 @@ board.aggregate_id == uuid
 
 If no aggregate with the specifid id is found, a `Sandthorn::Errors::AggregateNotFound` exception is raised.
 
-## Development
+# Development
 
 Run tests: `rake`
 
@@ -156,15 +205,14 @@ Run benchmark tests: `rake benchmark`
 
 Load a console: `rake console`
 
-## Contributing
+# Contributing
 
-We're happily accepting pull requests that makes the code cleaner or more idiomatic, the documentation more understandable, or improves the testsuite. If you don't have time right now, considering opening an issue, that's worth a lot too!
+We're happy to accept pull requests that makes the code cleaner or more idiomatic, the documentation more understandable, or improves the testsuite. Even considering opening an issue for what's troubling you or writing a blog post about how you used Sandthorn is  worth a lot too!
 
-In general, the contribution process works like this.
+In general, the contribution process for code works like this.
 
 1. Fork this repo
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
-

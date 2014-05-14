@@ -130,8 +130,6 @@ The Sequel driver is the only production-ready driver to date.
 
 # Usage
 
-The workflow when using Sandthorn is to load, or create, an aggregate (essentially
-
 Any object that should have event sourcing capability must include the methods provided by `Sandthorn::AggregateRoot`. These make it possible to `commit` events and `save` changes to an aggregate. Use the `include` directive as follows:
 
 ```ruby

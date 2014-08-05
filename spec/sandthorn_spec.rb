@@ -29,7 +29,8 @@ describe Sandthorn do
         aggr.test_block_count = true
         obsolete_aggregates << aggr
       end
-      expect(obsolete_aggregates.all? { |aggregate| aggregate.test_block_count == true }).to be_true
+      ap obsolete_aggregates.all? { |aggregate| aggregate.test_block_count == true }
+      expect(obsolete_aggregates.all? { |aggregate| aggregate.test_block_count == true }).to be_truthy
     end
 
     it "only retrieves aggregates older than min_event_distance" do

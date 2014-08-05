@@ -29,7 +29,6 @@ describe Sandthorn do
         aggr.test_block_count = true
         obsolete_aggregates << aggr
       end
-      ap obsolete_aggregates.all? { |aggregate| aggregate.test_block_count == true }
       expect(obsolete_aggregates.all? { |aggregate| aggregate.test_block_count == true }).to be_truthy
     end
 

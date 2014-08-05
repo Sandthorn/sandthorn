@@ -7,6 +7,7 @@ module Sandthorn
       attr_reader :aggregate_current_event_version
       attr_reader :aggregate_originating_version
       attr_reader :aggregate_stored_serialized_object
+      attr_reader :aggregate_trace_information
 
       alias :id :aggregate_id
 
@@ -36,6 +37,12 @@ module Sandthorn
         end
 
         self
+      end
+
+      def aggregate_trace args
+        @aggregate_trace_information = args
+        yield self if block_given?
+        @aggregate_trace_information = nil
       end
 
       def commit *args

@@ -208,7 +208,7 @@ end
 ```
 
 It is also possible to do a `aggregate_trace` on a class, all event in
-the block will have the trace attached to when.
+the block will have the trace attached.
 
 ````ruby
 Board.aggregate_trace {ip: :127.0.0.1} do

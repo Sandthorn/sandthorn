@@ -40,7 +40,6 @@ describe "using a traced change" do
       
       simple.extend Go
       simple.aggregate_trace "123" do |traced|
-        ap traced
         traced.go
       end
       simple.events_with_trace_info.last[:trace].should eql("123")

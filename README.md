@@ -193,6 +193,29 @@ board = Board.find(uuid)
 board.aggregate_id == uuid
 ```
 
+### `Sandthorn::AggregateRoot.aggregate_trace`
+ 
+Using `aggragete_trace` it is possible to add extra data to an event that is not aggregate specific.
+ 
+```ruby
+uuid = '550e8400-e29b-41d4-a716-446655440000'
+board = Board.find(uuid)
+board.aggregate_trace "trace data" do |aggregate|
+   aggreagte.mark :o, 0, 1
+   aggregate.save
+end
+```
+
+It is also possible to do a `aggregate_trace` on a class, all event in
+the block will have the trace attached to when.
+
+````ruby
+Board.aggregate_trace "trace data" do
+  board = Board.new
+  board.mark :o , 0, 1
+  board.save
+end
+
 If no aggregate with the specifid id is found, a `Sandthorn::Errors::AggregateNotFound` exception is raised.
 
 # Development

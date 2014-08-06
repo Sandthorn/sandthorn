@@ -215,6 +215,7 @@ Board.aggregate_trace "trace data" do
   board.mark :o , 0, 1
   board.save
 end
+```
 
 If no aggregate with the specifid id is found, a `Sandthorn::Errors::AggregateNotFound` exception is raised.
 

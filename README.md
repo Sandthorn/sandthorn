@@ -193,6 +193,9 @@ board = Board.find(uuid)
 board.aggregate_id == uuid
 ```
 
+If no aggregate with the specifid id is found, a `Sandthorn::Errors::AggregateNotFound` exception is raised.
+
+
 ### `Sandthorn::AggregateRoot.aggregate_trace`
  
 Using `aggragete_trace` it is possible to add extra data to an event that is not aggregate specific.
@@ -217,7 +220,6 @@ Board.aggregate_trace {ip: :127.0.0.1} do
 end
 ```
 
-If no aggregate with the specifid id is found, a `Sandthorn::Errors::AggregateNotFound` exception is raised.
 
 # Development
 

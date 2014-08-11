@@ -198,17 +198,16 @@ If no aggregate with the specifid id is found, a `Sandthorn::Errors::AggregateNo
 
 ### `Sandthorn::AggregateRoot.aggregate_trace`
  
-Using `aggragete_trace` it is possible to add extra data to an event that is not aggregate specific.
+Using `aggragete_trace` it is possible to add extra data to an event that is not aggregate specific, for exampel who created a specific event on the aggregate.
  
 ```ruby
-board.aggregate_trace "trace data" do |aggregate|
+board.aggregate_trace "Freddy" do |aggregate|
    aggreagte.mark :o, 0, 1
    aggregate.save
 end
 ```
 
-It is also possible to do a `aggregate_trace` on a class, all event in
-the block will have the trace attached.
+It is also possible to do a `aggregate_trace` on a class.
 
 ````ruby
 Board.aggregate_trace {ip: :127.0.0.1} do
@@ -217,6 +216,8 @@ Board.aggregate_trace {ip: :127.0.0.1} do
   board.save
 end
 ```
+
+The resulting events from the commands new and mark will have the trace {ip: :127.0.0.1} attached.
 
 
 # Development

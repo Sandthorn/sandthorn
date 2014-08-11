@@ -79,10 +79,8 @@ module Sandthorn
         @@aggregate_trace_information = nil
         def aggregate_trace args
           @@aggregate_trace_information = args
-          @aggregate_trace_information = args
           yield self
           @@aggregate_trace_information = nil
-          @aggregate_trace_information = nil
         end
 
         def all

@@ -60,11 +60,11 @@ describe "using a traced change" do
   context "when changing aggregate in a traced context" do
     let(:suspect) {UsualSuspect.new("Conny").extend Sandthorn::EventInspector}
     it "should record modififier in the event" do
-      suspect.aggregate_trace "Lars Krantz" do |s|
+      suspect.aggregate_trace "Ture Sventon" do |s|
         s.charge_suspect_of_crime! "Theft"
       end
       event = suspect.events_with_trace_info.last
-      event[:trace].should eql "Lars Krantz"
+      event[:trace].should eql "Ture Sventon"
     end
 
     it "should record optional other tracing information" do
@@ -78,10 +78,10 @@ describe "using a traced change" do
   end
   context "when initializing a new aggregate in a traced context" do
     it "should record modifier in the new event" do
-      UsualSuspect.aggregate_trace "Lars Krantz" do
+      UsualSuspect.aggregate_trace "Ture Sventon" do
         suspect = UsualSuspect.new("Sonny").extend Sandthorn::EventInspector
         event = suspect.events_with_trace_info.first
-        event[:trace].should eql "Lars Krantz"
+        event[:trace].should eql "Ture Sventon"
       end
     end
     it "should record tracing for all events in the trace block" do
@@ -104,10 +104,10 @@ describe "using a traced change" do
     end
     it "should only record info within block" do
       fork do
-        UsualSuspect.aggregate_trace "Lars Krantz" do
+        UsualSuspect.aggregate_trace "Ture Sventon" do
           suspect = UsualSuspect.new("Sonny").extend Sandthorn::EventInspector
           event = suspect.events_with_trace_info.first
-          event[:trace].should eql "Lars Krantz"
+          event[:trace].should eql "Ture Sventon"
           sleep 1
         end
       end

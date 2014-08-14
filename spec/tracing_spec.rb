@@ -102,20 +102,6 @@ describe "using a traced change" do
         event[:trace].should eql trace_info
       end
     end
-    it "should only record info within block" do
-      fork do
-        UsualSuspect.aggregate_trace "Ture Sventon" do
-          suspect = UsualSuspect.new("Sonny").extend Sandthorn::EventInspector
-          event = suspect.events_with_trace_info.first
-          event[:trace].should eql "Ture Sventon"
-          sleep 1
-        end
-      end
-      sleep 0.5
-      s2 = UsualSuspect.new("Ronny").extend Sandthorn::EventInspector
-      event = s2.events_with_trace_info.first
-      event[:trace].should be_nil
-    end
   end 
 
 end

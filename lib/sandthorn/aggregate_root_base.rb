@@ -7,6 +7,7 @@ module Sandthorn
       attr_reader :aggregate_current_event_version
       attr_reader :aggregate_originating_version
       attr_reader :aggregate_stored_serialized_object
+      attr_reader :aggregate_trace_information
 
       alias :id :aggregate_id
 
@@ -36,6 +37,12 @@ module Sandthorn
         end
 
         self
+      end
+
+      def aggregate_trace args
+        @aggregate_trace_information = args
+        yield self if block_given?
+        @aggregate_trace_information = nil
       end
 
       def commit *args
@@ -68,6 +75,14 @@ module Sandthorn
       alias :record_event :commit
 
       module ClassMethods
+
+        @@aggregate_trace_information = nil
+        def aggregate_trace args
+          @@aggregate_trace_information = args
+          yield self
+          @@aggregate_trace_information = nil
+        end
+
         def all
           aggregate_id_list = Sandthorn.get_aggregate_list_by_typename(self.name)
           find aggregate_id_list
@@ -95,10 +110,13 @@ module Sandthorn
 
         def new *args
           super.tap do |aggregate|
-            aggregate.aggregate_base_initialize
-            aggregate.aggregate_initialize
-            aggregate.send :set_aggregate_id, Sandthorn.generate_aggregate_id
-            aggregate.send :commit, *args
+            aggregate.aggregate_trace @@aggregate_trace_information do |aggr|
+              aggr.aggregate_base_initialize
+              aggr.aggregate_initialize
+              aggr.send :set_aggregate_id, Sandthorn.generate_aggregate_id
+              aggr.send :commit, *args
+              return aggr
+            end
           end
         end
 

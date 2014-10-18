@@ -181,16 +181,16 @@ describe 'when generating state on an aggregate root' do
   end
 
   it 'account should have properties set' do
-    @account.balance.should eql 99000
-    @account.unpaid_interest_balance.should be > 1000
+    expect(@account.balance).to eql 99000
+    expect(@account.unpaid_interest_balance).to be > 1000
   end
 
   it 'should store snapshot data in aggregate_snapshot' do
-    @account.aggregate_snapshot.should be_a(Hash)
+    expect(@account.aggregate_snapshot).to be_a(Hash)
   end
 
   it 'should store aggregate_version in aggregate_snapshot' do
-    @account.aggregate_snapshot[:aggregate_version].should eql(@original_account.aggregate_current_event_version)
+    expect(@account.aggregate_snapshot[:aggregate_version]).to eql(@original_account.aggregate_current_event_version)
   end
 
   it 'should be able to load up from snapshot' do
@@ -198,14 +198,14 @@ describe 'when generating state on an aggregate root' do
     events = [@account.aggregate_snapshot]
     loaded = BankAccount.aggregate_build events
 
-    loaded.balance.should eql(@original_account.balance)
-    loaded.account_number.should eql(@original_account.account_number)
-    loaded.current_interest_info.should eql(@original_account.current_interest_info)
-    loaded.account_creation_date.should eql(@original_account.account_creation_date)
-    loaded.unpaid_interest_balance.should eql(@original_account.unpaid_interest_balance)
-    loaded.last_interest_calculation.should eql(@original_account.last_interest_calculation)
-    loaded.aggregate_id.should eql(@original_account.aggregate_id)
-    loaded.aggregate_originating_version.should eql(@account.aggregate_originating_version)
+    expect(loaded.balance).to eql(@original_account.balance)
+    expect(loaded.account_number).to eql(@original_account.account_number)
+    expect(loaded.current_interest_info).to eql(@original_account.current_interest_info)
+    expect(loaded.account_creation_date).to eql(@original_account.account_creation_date)
+    expect(loaded.unpaid_interest_balance).to eql(@original_account.unpaid_interest_balance)
+    expect(loaded.last_interest_calculation).to eql(@original_account.last_interest_calculation)
+    expect(loaded.aggregate_id).to eql(@original_account.aggregate_id)
+    expect(loaded.aggregate_originating_version).to eql(@account.aggregate_originating_version)
 
   end
 
@@ -228,27 +228,27 @@ end
 describe 'when saving to repository' do
   let(:account) {a_test_account.extend Sandthorn::AggregateRootSnapshot}
   it 'should raise an error if trying to save before creating a snapshot' do
-    lambda {account.save_snapshot}.should raise_error (Sandthorn::Errors::SnapshotError)
+    expect(lambda {account.save_snapshot}).to raise_error (Sandthorn::Errors::SnapshotError)
   end
   it 'should not raise an error if snapshot was created' do
     account.save
     account.aggregate_snapshot!
-    lambda {account.save_snapshot}.should_not raise_error
+    expect(lambda {account.save_snapshot}).not_to raise_error
   end
   it 'should set aggregate_snapshot to nil' do
     account.save
     account.aggregate_snapshot!
     account.save_snapshot
-    account.aggregate_snapshot.should eql(nil)
+    expect(account.aggregate_snapshot).to eql(nil)
   end
 
   it 'should raise error if trying to create snapshot before events are saved on object' do
-    lambda {account.aggregate_snapshot!}.should raise_error
+    expect(lambda {account.aggregate_snapshot!}).to raise_error
   end
 
   it 'should not raise an error if trying to create snapshot on object when events are saved' do
     account.save
-    lambda {account.aggregate_snapshot!}.should_not raise_error
+    expect( lambda {account.aggregate_snapshot!}).not_to raise_error
   end
 
   it 'should get snapshot on account find when a snapshot is saved' do
@@ -259,14 +259,14 @@ describe 'when saving to repository' do
 
     loaded = BankAccount.find account.aggregate_id
 
-    loaded.balance.should eql(account.balance)
-    loaded.account_number.should eql(account.account_number)
-    loaded.current_interest_info.should eql(account.current_interest_info)
-    loaded.account_creation_date.should eql(account.account_creation_date)
-    loaded.unpaid_interest_balance.should eql(account.unpaid_interest_balance)
-    loaded.last_interest_calculation.should eql(account.last_interest_calculation)
-    loaded.aggregate_id.should eql(account.aggregate_id)
-    loaded.aggregate_originating_version.should eql(account.aggregate_originating_version)
+    expect(loaded.balance).to eql(account.balance)
+    expect(loaded.account_number).to eql(account.account_number)
+    expect(loaded.current_interest_info).to eql(account.current_interest_info)
+    expect(loaded.account_creation_date).to eql(account.account_creation_date)
+    expect(loaded.unpaid_interest_balance).to eql(account.unpaid_interest_balance)
+    expect(loaded.last_interest_calculation).to eql(account.last_interest_calculation)
+    expect(loaded.aggregate_id).to eql(account.aggregate_id)
+    expect(loaded.aggregate_originating_version).to eql(account.aggregate_originating_version)
 
   end
 end

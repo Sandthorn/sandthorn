@@ -82,7 +82,7 @@ module Sandthorn
         
         it "should get new_name" do
           dirty_obejct.change_name "new_name"
-          dirty_obejct.name.should eql "new_name"
+          expect(dirty_obejct.name).to eql "new_name"
         end
 
         it "should generate one event on new" do
@@ -98,7 +98,7 @@ module Sandthorn
       context "when changing sex (attr)" do
         it "should get new_sex" do
           dirty_obejct.change_sex "new_sex"
-          dirty_obejct.sex.should eql "new_sex"
+          expect(dirty_obejct.sex).to eql "new_sex"
         end
       end
 

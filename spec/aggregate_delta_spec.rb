@@ -44,21 +44,21 @@ describe 'Property Delta Event Sourcing' do
 
   it 'should be able to set name' do
     person.change_name  "Klabbarparen"
-    person.name.should eql("Klabbarparen")
+    expect(person.name).to eql("Klabbarparen")
     #puts person.aggregate_events
   end
 
   it 'should be able to build from events' do
     person.change_name  "Klabbarparen"
     builded = PersonTest.aggregate_build person.aggregate_events
-    builded.name.should eql(person.name)
-    builded.aggregate_id.should eql(person.aggregate_id)
+    expect(builded.name).to eql(person.name)
+    expect(builded.aggregate_id).to eql(person.aggregate_id)
   end
 
   it 'should not have any events when built up' do
     person.change_name "Mattias"
     builded = PersonTest.aggregate_build person.aggregate_events
-    builded.aggregate_events.should be_empty
+    expect(builded.aggregate_events).to be_empty
   end
 
   it 'should detect change on array' do
@@ -66,8 +66,8 @@ describe 'Property Delta Event Sourcing' do
     person.add_to_array "bar"
 
     builded = PersonTest.aggregate_build person.aggregate_events
-    builded.my_array.should include "Foo"
-    builded.my_array.should include "bar"
+    expect(builded.my_array).to include "Foo"
+    expect(builded.my_array).to include "bar"
   end
 
   it 'should detect change on hash' do
@@ -75,8 +75,8 @@ describe 'Property Delta Event Sourcing' do
     person.add_to_hash :bar, "foo"
 
     builded = PersonTest.aggregate_build person.aggregate_events
-    builded.my_hash[:foo].should eql("bar")
-    builded.my_hash[:bar].should eql("foo")
+    expect(builded.my_hash[:foo]).to eql("bar")
+    expect(builded.my_hash[:bar]).to eql("foo")
 
     person.add_to_hash :foo, "BAR"
 
@@ -85,6 +85,6 @@ describe 'Property Delta Event Sourcing' do
     #puts events
 
     builded2 = PersonTest.aggregate_build person.aggregate_events
-    builded2.my_hash[:foo].should eql("BAR")
+    expect(builded2.my_hash[:foo]).to eql("BAR")
   end
 end

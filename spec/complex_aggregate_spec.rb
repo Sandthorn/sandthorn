@@ -50,8 +50,8 @@ describe 'when using complex types in events' do
   end
   it 'should be able to build from events' do
     aggr = IAmComplex.aggregate_build @events
-    aggr.a_date.should be_a(Date)
-    aggr.hello.should be_a(Hello)
+    expect(aggr.a_date).to be_a(Date)
+    expect(aggr.hello).to be_a(Hello)
   end
 
   it 'should detect hello changing' do
@@ -62,14 +62,14 @@ describe 'when using complex types in events' do
     hello.change_me << "Otroligt"
     aggr.set_hello! hello
     builded = IAmComplex.aggregate_build aggr.aggregate_events
-    builded.hello.change_me.should include "Fantastisk"
-    builded.hello.change_me.should include "Otroligt"
+    expect(builded.hello.change_me).to include "Fantastisk"
+    expect(builded.hello.change_me).to include "Otroligt"
   end
 
   it 'should detect foo_bar chaning in hello' do
     aggr = IAmComplex.aggregate_build @events
     aggr.set_foo_bar_on_hello "morgan"
     builded = IAmComplex.aggregate_build aggr.aggregate_events
-    builded.hello.foo_bar.should eql "morgan"
+    expect(builded.hello.foo_bar).to eql "morgan"
   end
 end

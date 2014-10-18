@@ -49,7 +49,7 @@ module Sandthorn
         aggregate_attribute_deltas = get_delta
 
         unless aggregate_attribute_deltas.empty?
-          method_name = caller_locations(1,1)[0].label.gsub("block in ", "")
+          method_name = caller_locations(1,1)[0].label.gsub(/block ?(.*) in /, "")
           increase_current_aggregate_version!
 
           data = {

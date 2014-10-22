@@ -38,6 +38,17 @@ module Sandthorn
       
     end
 
+    describe "::event_store" do
+      let(:klass) { Class.new { include Sandthorn::AggregateRoot } }
+      it "is available as a class method" do
+        expect(klass).to respond_to(:event_store)
+      end
+      it "sets the event store as a class level variable and returns it" do
+        klass.event_store(:other)
+        expect(klass.event_store).to eq(:other)
+      end
+    end
+
     describe "when get all aggregates from DirtyClass" do
       
       before(:each) do

@@ -83,6 +83,14 @@ module Sandthorn
           @@aggregate_trace_information = nil
         end
 
+        def event_store(event_store = nil)
+          if event_store
+            @event_store = event_store
+          else
+            @event_store
+          end
+        end
+
         def all
           aggregate_id_list = Sandthorn.get_aggregate_list_by_typename(self.name)
           find aggregate_id_list

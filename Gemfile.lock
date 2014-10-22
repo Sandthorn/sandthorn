@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    sandthorn (0.5.0)
+    sandthorn (0.5.1)
 
 GEM
   remote: https://rubygems.org/

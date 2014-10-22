@@ -1,13 +1,19 @@
+require 'forwardable'
+
 module Sandthorn
   class EventStores
+    extend Forwardable
+    include Enumerable
+
+    def_delegators :stores, :each
 
     def initialize(stores = nil)
-      @stores = Hash.new
+      @store_map = Hash.new
       add_initial(stores)
     end
 
     def add(name, event_store)
-      stores[name] = event_store
+      store_map[name] = event_store
     end
     alias_method :[]=, :add
 
@@ -18,21 +24,25 @@ module Sandthorn
     end
 
     def by_name(name)
-      stores[name] || default_store
+      store_map[name] || default_store
     end
     alias_method :[], :by_name
 
     def default_store
-      stores.fetch(:default)
+      store_map.fetch(:default)
     end
 
     def default_store=(store)
-      stores[:default] = store
+      store_map[:default] = store
+    end
+
+    def stores
+      store_map.values
     end
 
     private
 
-    attr_reader :stores
+    attr_reader :store_map
 
     def add_initial(store)
       if is_event_store?(store)

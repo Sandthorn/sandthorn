@@ -27,6 +27,22 @@ module Sandthorn
       end
     end
 
+    describe "enumerable" do
+      let(:store) { double }
+      let(:other_store) { double }
+      it "should respond to each" do
+        expect(stores).to respond_to(:each)
+      end
+
+      it "should yield each store" do
+        stores.add_many(
+          foo: store,
+          bar: other_store
+        )
+        expect { |block| stores.each(&block) }.to yield_successive_args(store, other_store)
+      end
+    end
+
     describe "#default_store=" do
       it "sets the default" do
         store = double

@@ -28,7 +28,6 @@ Check out examples of Sandthorn:
 ## How do I use Sandthorn?
 
 
-
 Think of it as an object database where you store not only what the new value of an attribute is, but also when and why it changed.
 _Example:_
 
@@ -67,7 +66,9 @@ end
 # Setup the framework with the sequel driver for persistance
 url = "sqlite://spec/db/sequel_driver.sqlite3"
 catch_all_config = [ { driver: SandthornDriverSequel.driver_from_url(url: url) } ]
-Sandthorn.configuration = catch_all_config
+Sandthorn.configure do |sand|
+  sand.drivers = catch_all_config
+end
 
 # Migrate db schema for the sequel driver
 migrator = SandthornDriverSequel::Migration.new url: url
@@ -99,6 +100,8 @@ Or install it yourself as:
 
 # Configuring Sandthorn
 
+## Storage
+
 Sandthorn relies on a driver is specific to the data storage that you are using. This means Sandthorn can be used with any data storage given that a driver exists.
 
 To setup a driver you need to add it to your project's Gemfile and configure it in your application code.
@@ -109,9 +112,10 @@ The driver is configured when your application launches. Here's an example of ho
 
 ```ruby
 url = "sqlite://spec/db/sequel_driver.sqlite3"
-driver = SandthornDriverSequel.driver_from_url(url: url)
-catch_all_config = [ { driver: driver } ]
-Sandthorn.configuration = catch_all_config
+catch_all_config = [ { driver: SandthornDriverSequel.driver_from_url(url: url) } ]
+Sandthorn.configure do |sand|
+  sand.drivers = catch_all_config
+end
 ```
 
 First we specify the path to the sqlite3 database in the `url` variable. Secondly, the specific driver is instantiated with the `url`. Hence, the driver could be instantiated using a different configuration, for example, an address to a Postgres database. Finally, `Sandthorn.configure` accepts a keyword list with options. The only option which is required is `driver`.
@@ -127,6 +131,25 @@ SandthornDriverSequel.migrate_db url: url
 Optionally, when using Sandthorn in your tests you can configure it in a `spec_helper.rb` which is then required by your test suites [example](https://github.com/Sandthorn/sandthorn_examples/blob/master/sandthorn_tictactoe/spec/spec_helper.rb#L20-L30). Note that the Sequel driver accepts a special parameter to empty the database between each test.
 
 The Sequel driver is the only production-ready driver to date.
+
+## Custom serializer/deserializer
+
+The serializer and deserializer convert the event data to and from formats that can be stored.
+
+They can be customized by giving Sandthorn blocks like this:
+
+```ruby
+Sandthorn.configure do |s|
+  s.serializer do |data|
+    YAML.dump(data)
+  end
+  s.deserializer do |data|
+    YAML.load(data)
+  end
+end
+```
+
+YAML is the default serializer.
 
 # Usage
 

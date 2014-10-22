@@ -37,4 +37,23 @@ describe Sandthorn do
       expect(obsolete_aggregates).to be_empty
     end
   end
+
+  describe "::serialize" do
+    it "delegates to the configured serializer" do
+      data = :data
+      serializer = Sandthorn.configuration.serializer
+      expect(serializer).to receive(:call).with(data)
+      Sandthorn.serialize(data)
+    end
+  end
+
+  describe "::deserialize" do
+    it "delegates to the configured deserializer" do
+      data = :data
+      deserializer = Sandthorn.configuration.deserializer
+      expect(deserializer).to receive(:call).with(data)
+      Sandthorn.deserialize(data)
+    end
+  end
+
 end

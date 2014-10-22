@@ -7,11 +7,16 @@ require 'securerandom'
 
 module Sandthorn
   class << self
-    def configuration= configuration
-      @configuration = configuration
+    extend Forwardable
+
+    def_delegators :configuration, :event_stores
+
+    def configure
+      yield(configuration) if block_given?
     end
+
     def configuration
-      @configuration ||= []
+      @configuration ||= Configuration.new
     end
 
     def serialize data
@@ -99,13 +104,35 @@ module Sandthorn
       raise Sandthorn::Errors::ConfigurationError.new "Aggregate class #{class_name} is not configured for Sandthorn" if matches.empty?
       first_match = matches.first
       first_match[:driver]
+
+    def event_store_for(aggregate_type)
+      event_store = event_stores.by_name(aggregate_type.event_store)
+      yield(event_store) if block_given?
+      event_store
     end
     def drivers_for_aggregate_types type_names: []
       return all_drivers if type_names.empty?
       type_names.map { |e| driver_for e }
+
+    def find_event_store(name)
+      event_stores.by_name(name)
     end
     def all_drivers
       configuration.map { |e| e[:driver]  }
+
+    class Configuration
+      attr_accessor :event_stores
+
+      def initialize
+        yield(self) if block_given?
+      end
+
+      def event_store=(store)
+        @event_stores = EventStores.new(store)
+      end
+      alias_method :event_stores=, :event_store=
+
     end
+
   end
 end

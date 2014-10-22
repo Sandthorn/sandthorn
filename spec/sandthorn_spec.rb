@@ -6,6 +6,12 @@ class AnAggregate
   def touched; commit; end
 end
 
+module Outer
+  module Inner
+    class OtherAggregate < AnAggregate; end
+  end
+end
+
 describe Sandthorn do
   before(:each) {
     @aggregate = AnAggregate.new
@@ -29,6 +35,21 @@ describe Sandthorn do
     it "only retrieves aggregates older than min_event_distance" do
       obsolete_aggregates = Sandthorn.obsolete_snapshots type_names: [AnAggregate], min_event_distance: 10
       expect(obsolete_aggregates).to be_empty
+    end
+
+    context "when the aggregate has been declared in a module" do
+
+      before do
+        Outer::Inner::OtherAggregate.new.tap do |agg|
+          agg.touch
+          agg.save
+        end
+      end
+
+      it "doesn't crash" do
+        obsolete_aggregates = Sandthorn.obsolete_snapshots type_names: [Outer::Inner::OtherAggregate], min_event_distance: 0
+        expect(obsolete_aggregates).to all(be_a_kind_of(Outer::Inner::OtherAggregate))
+      end
     end
   end
 end

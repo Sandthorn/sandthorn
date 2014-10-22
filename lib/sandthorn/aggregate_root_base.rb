@@ -38,6 +38,10 @@ module Sandthorn
         self
       end
 
+      def ==(other)
+        other.respond_to?(:aggregate_id) && aggregate_id == other.aggregate_id
+      end
+
       def aggregate_trace args
         @aggregate_trace_information = args
         yield self if block_given?

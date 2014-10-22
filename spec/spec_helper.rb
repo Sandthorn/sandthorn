@@ -36,8 +36,10 @@ def spec_db
 end
 def sqlite_store_setup
   url = spec_db 
-  catch_all_config = [ { driver: SandthornDriverSequel.driver_from_url(url: url) } ]
-  Sandthorn.configuration = catch_all_config
+  driver = SandthornDriverSequel.driver_from_url(url: url)
+  Sandthorn.configure do |c|
+    c.event_store = driver
+  end
   migrator = SandthornDriverSequel::Migration.new url: url
   SandthornDriverSequel.migrate_db url: url
   migrator.send(:clear_for_test)

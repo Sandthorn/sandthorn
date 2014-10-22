@@ -29,9 +29,8 @@ module Sandthorn
             aggregate_events,
             aggregate_originating_version,
             aggregate_id,
-            self.class.name
+            self.class
           )
-
           @aggregate_events = []
           @aggregate_originating_version = @aggregate_current_event_version
         end
@@ -92,7 +91,7 @@ module Sandthorn
         end
 
         def all
-          aggregate_id_list = Sandthorn.get_aggregate_list_by_typename(self.name)
+          aggregate_id_list = Sandthorn.get_aggregate_list_by_type(self)
           find aggregate_id_list
         end
 
@@ -102,17 +101,13 @@ module Sandthorn
         end
 
         def aggregate_find aggregate_id
-          class_name = self.respond_to?(:name) ? self.name : self.class # to be able to extend a string for example.
-          events = Sandthorn.get_aggregate(aggregate_id, class_name)
-
-          unless events and !events.empty?
+          events = Sandthorn.get_aggregate(aggregate_id, self)
+          unless events && !events.empty?
             raise Sandthorn::Errors::AggregateNotFound
           end
-
           transformed_events = events.map do |e|
             e.merge(event_args: Sandthorn.deserialize(e[:event_data]))
           end
-
           aggregate_build transformed_events
         end
 

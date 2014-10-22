@@ -1,5 +1,6 @@
 require "sandthorn/version"
 require "sandthorn/errors"
+require "sandthorn/configuration"
 require "sandthorn/aggregate_root"
 require 'yaml'
 require 'securerandom'

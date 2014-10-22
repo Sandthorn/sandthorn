@@ -8,6 +8,7 @@ require 'coveralls'
 require "ap"
 require "bundler"
 require "sandthorn_driver_sequel"
+require "support/custom_matchers"
 
 Bundler.require
 Coveralls.wear!

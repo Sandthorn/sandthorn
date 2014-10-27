@@ -3,7 +3,7 @@ require 'spec_helper'
 class InitChange
   include Sandthorn::AggregateRoot
   attr_reader :foo
-  def initialize foo:
+  def initialize foo: nil
     @foo = foo
   end
 end

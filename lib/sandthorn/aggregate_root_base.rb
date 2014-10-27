@@ -166,14 +166,7 @@ module Sandthorn
         end
 
         def start_build_from_new events
-          new_args = events.first[:event_args][:method_args]
-
-          if new_args.nil?
-            aggregate = new
-          else
-            aggregate = new(*new_args)
-          end
-
+          aggregate = allocate
           aggregate.send :aggregate_clear_current_event_version!
           aggregate
         end

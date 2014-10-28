@@ -128,7 +128,7 @@ module Sandthorn
             current_aggregate_version = aggregate.aggregate_originating_version
             events.shift
           else
-            aggregate = start_build_from_new events
+            aggregate = create_new_empty_aggregate
           end
 
           attributes = build_instance_vars_from_events events
@@ -165,10 +165,8 @@ module Sandthorn
           snapshot = events.first[:event_args][0]
         end
 
-        def start_build_from_new events
-          aggregate = allocate
-          aggregate.send :aggregate_clear_current_event_version!
-          aggregate
+        def create_new_empty_aggregate
+          allocate
         end
       end
 

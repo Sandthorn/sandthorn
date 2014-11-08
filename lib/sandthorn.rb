@@ -1,30 +1,31 @@
 require "sandthorn/version"
 require "sandthorn/errors"
+require "sandthorn/configuration"
 require "sandthorn/aggregate_root"
 require 'yaml'
 require 'securerandom'
+require 'forwardable'
 
 module Sandthorn
   class << self
-    def configuration= configuration
-      @configuration = configuration
+    extend Forwardable
+
+    def_delegators :configuration, :drivers, :serializer, :deserializer
+
+    def configure
+      yield(configuration) if block_given?
     end
+
     def configuration
-      @configuration ||= []
+      @configuration ||= Sandthorn::Configuration.new
     end
 
     def serialize data
-      #Marshal.dump(data)
-      YAML::dump(data)
-      #Oj.dump(data)
-      #MessagePack.pack(data, symbolize_keys: true)
+      serializer.call(data)
     end
 
     def deserialize data
-      #Marshal.load(data)
-      YAML::load(data)
-      #Oj.load(data)
-      #MessagePack.unpack(data, symbolize_keys: true)
+      deserializer.call(data)
     end
 
     def generate_aggregate_id
@@ -90,7 +91,7 @@ module Sandthorn
       driver
     end
     def identify_driver_from_class class_name
-      matches = configuration.select do |conf|
+      matches = drivers.select do |conf|
         r = Regexp.new "^#{conf[:aggregate_pattern]}"
         pattern = class_name.to_s
         conf[:aggregate_pattern].nil? || r.match(pattern)
@@ -104,7 +105,7 @@ module Sandthorn
       type_names.map { |e| driver_for e }
     end
     def all_drivers
-      configuration.map { |e| e[:driver]  }
+      drivers.map { |e| e[:driver]  }
     end
   end
 end

@@ -5,12 +5,13 @@
 #
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 require 'coveralls'
+Coveralls.wear!
 require "ap"
 require "bundler"
 require "sandthorn_driver_sequel"
+require "support/custom_matchers"
 
 Bundler.require
-Coveralls.wear!
 
 module Helpers
   def class_including(mod)
@@ -36,8 +37,10 @@ def spec_db
 end
 def sqlite_store_setup
   url = spec_db 
-  catch_all_config = [ { driver: SandthornDriverSequel.driver_from_url(url: url) } ]
-  Sandthorn.configuration = catch_all_config
+  driver = SandthornDriverSequel.driver_from_url(url: url)
+  Sandthorn.configure do |c|
+    c.event_store = driver
+  end
   migrator = SandthornDriverSequel::Migration.new url: url
   SandthornDriverSequel.migrate_db url: url
   migrator.send(:clear_for_test)

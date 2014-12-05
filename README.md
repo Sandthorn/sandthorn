@@ -64,10 +64,30 @@ class Ship
   end
 end
 
-# Setup the framework with the sequel driver for persistance
+# Configure a driver
 url = "sqlite://spec/db/sequel_driver.sqlite3"
-catch_all_config = [ { driver: SandthornDriverSequel.driver_from_url(url: url) } ]
-Sandthorn.configuration = catch_all_config
+sql_event_store = SandthornDriverSequel.driver_from_url(url: url)
+Sandthorn.configure do |c|
+  c.event_store = sql_event_store
+end
+
+# Or configure many drivers
+
+Sandthorn.configure do |c|
+  c.event_stores = {
+    default: sql_event_store,
+    other_event_store: other_store
+  }
+end
+
+# Assign your aggregates to a named event store
+
+class Boat
+  include Sandthorn::AggregateRoot
+  event_store :other_event_store
+end
+
+# Aggregates with no explicit event store will use the default event store
 
 # Migrate db schema for the sequel driver
 migrator = SandthornDriverSequel::Migration.new url: url

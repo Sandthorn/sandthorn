@@ -77,16 +77,16 @@ module Sandthorn
       end
     end
 
+    def find_event_store(name)
+      event_stores.by_name(name)
+    end
+
     private
 
     def event_store_for(aggregate_type)
       event_store = event_stores.by_name(aggregate_type.event_store).tap do |store|
         yield(store) if block_given?
       end
-    end
-
-    def find_event_store(name)
-      event_stores.by_name(name)
     end
 
     class Configuration

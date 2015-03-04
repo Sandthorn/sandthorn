@@ -11,6 +11,14 @@ module Sandthorn
 
     def_delegators :configuration, :event_stores
 
+    def default_event_store
+      event_stores.default_store
+    end
+
+    def default_event_store=(store)
+      event_stores.default_store = store
+    end
+
     def configure
       yield(configuration) if block_given?
     end
@@ -90,18 +98,22 @@ module Sandthorn
     end
 
     class Configuration
-      attr_accessor :event_stores
+      extend Forwardable
+
+      def_delegators :default_store, :event_stores, :default_store=
 
       def initialize
         yield(self) if block_given?
+      end
+
+      def event_stores
+        @event_stores ||= EventStores.new
       end
 
       def event_store=(store)
         @event_stores = EventStores.new(store)
       end
       alias_method :event_stores=, :event_store=
-
     end
-
   end
 end

@@ -1,5 +1,6 @@
 require "sandthorn/version"
 require "sandthorn/errors"
+require "sandthorn/event"
 require "sandthorn/aggregate_root"
 require "sandthorn/event_stores"
 require 'yaml'
@@ -68,11 +69,11 @@ module Sandthorn
     def get_events event_store: :default, aggregate_types: [], take: 0, after_sequence_number: 0
       event_store = find_event_store(event_store)
       events = event_store.get_events aggregate_types: aggregate_types, take: take, after_sequence_number: after_sequence_number
-      events.each do |event|
+      events.map do |event|
         event[:event_args] = deserialize event[:event_data]
         event.delete(:event_data)
+        Event.new(event)
       end
-      events
     end
 
     def obsolete_snapshots type_names: [], min_event_distance: 0

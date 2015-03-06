@@ -27,7 +27,6 @@ module Sandthorn
         unless aggregate_events.empty?
           Sandthorn.save_events(
             aggregate_events,
-            aggregate_originating_version,
             aggregate_id,
             self.class
           )

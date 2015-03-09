@@ -29,5 +29,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "autotest-standalone"
   spec.add_development_dependency "sqlite3"  
   spec.add_development_dependency "coveralls"
-  spec.add_development_dependency "sandthorn_driver_sequel", "~> 1.1"
+  spec.add_development_dependency "sandthorn_driver_sequel", "~> 2.0"
 end

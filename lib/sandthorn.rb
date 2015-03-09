@@ -46,8 +46,8 @@ module Sandthorn
       SecureRandom.uuid
     end
 
-    def get_aggregate_events aggregate_id, aggregate_type
-      event_store_for(aggregate_type).get_aggregate_events aggregate_id, aggregate_type
+    def get_aggregate_events aggregate_type, aggregate_id
+      event_store_for(aggregate_type).get_aggregate_events aggregate_id
     end
 
     def save_events aggregate_events, aggregate_id, aggregate_type
@@ -55,15 +55,15 @@ module Sandthorn
     end
 
     def get_aggregate aggregate_id, aggregate_type
-      event_store_for(aggregate_type).get_aggregate aggregate_id, aggregate_type
+      event_store_for(aggregate_type).get_aggregate_events_from_snapshot aggregate_id
     end
 
-    def save_snapshot aggregate_snapshot, aggregate_id
-      event_store_for(aggregate_type).save_snapshot aggregate_snapshot, aggregate_id
+    def save_snapshot(aggregate_type:, aggregate_snapshot:, aggregate_id:)
+      event_store_for(aggregate_type).save_snapshot(aggregate_snapshot, aggregate_id)
     end
 
     def get_aggregate_list_by_type aggregate_type
-      event_store_for(aggregate_type).get_aggregate_list_by_typename aggregate_type
+      event_store_for(aggregate_type).get_aggregate_ids(aggregate_type: aggregate_type)
     end
 
     def get_events event_store: :default, aggregate_types: [], take: 0, after_sequence_number: 0

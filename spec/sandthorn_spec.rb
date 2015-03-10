@@ -52,4 +52,12 @@ describe Sandthorn do
       end
     end
   end
+
+  describe "::save_snapshot" do
+    context "when a keyword is missing" do
+      it "raises an ArgumentError" do
+        expect { Sandthorn.save_snapshot }.to raise_error(ArgumentError)
+      end
+    end
+  end
 end

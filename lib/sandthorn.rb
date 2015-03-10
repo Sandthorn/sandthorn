@@ -58,7 +58,11 @@ module Sandthorn
       event_store_for(aggregate_type).get_aggregate_events_from_snapshot aggregate_id
     end
 
-    def save_snapshot(aggregate_type:, aggregate_snapshot:, aggregate_id:)
+    def save_snapshot(
+        aggregate_type: missing_key(:aggregate_type),
+        aggregate_snapshot: missing_key(:aggregate_snapshot),
+        aggregate_id: missing_key(:aggregate_id)
+    )
       event_store_for(aggregate_type).save_snapshot(aggregate_snapshot, aggregate_id)
     end
 
@@ -96,6 +100,10 @@ module Sandthorn
       event_store = event_stores.by_name(aggregate_type.event_store).tap do |store|
         yield(store) if block_given?
       end
+    end
+
+    def missing_key(key)
+      raise ArgumentError, "missing keyword: #{key}"
     end
 
     class Configuration

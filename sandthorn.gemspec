@@ -6,8 +6,8 @@ require 'sandthorn/version'
 Gem::Specification.new do |spec|
   spec.name          = "sandthorn"
   spec.version       = Sandthorn::VERSION
-  spec.authors       = ["Lars Krantz", "Morgan Hallgren"]
-  spec.email         = ["lars.krantz@alaz.se", "morgan.hallgren@gmail.com"]
+  spec.authors       = ["Lars Krantz", "Morgan Hallgren", "Jesper Josefsson"]
+  spec.email         = ["lars.krantz@alaz.se", "morgan.hallgren@gmail.com", "jesper.josefsson@gmail.com"]
   spec.description   = %q{Event sourcing gem}
   spec.summary       = %q{Event sourcing gem}
   spec.homepage      = ""
@@ -29,5 +29,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "autotest-standalone"
   spec.add_development_dependency "sqlite3"  
   spec.add_development_dependency "coveralls"
-  spec.add_development_dependency "sandthorn_driver_sequel", "~> 1.1"
+  spec.add_development_dependency "sandthorn_driver_sequel", "~> 2.0"
 end

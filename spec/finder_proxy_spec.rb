@@ -50,14 +50,16 @@ module Sandthorn
     describe "#all" do
       before do
         Timecop.freeze(1999, 1, 1)
+        aggregates_tmp = []
         3.times do
           aggregate = FooAggregate.new
           3.times { aggregate.inc }
-          aggregate.save
+          aggregates_tmp << aggregate.save
         end
+        @last_sequence_number = Sandthorn.get_aggregate_events(FooAggregate, aggregates_tmp.last.aggregate_id).last[:sequence_number]
       end
       it "returns all available aggregates at the given point" do
-        aggregates = FinderProxy.new(FooAggregate, sequence_number: 1).all
+        aggregates = FinderProxy.new(FooAggregate, sequence_number: @last_sequence_number).all
         expect(aggregates.length).to eq(3)
       end
 

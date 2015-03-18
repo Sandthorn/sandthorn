@@ -109,7 +109,7 @@ module Sandthorn
 
     def unpack(events)
       events.map do |e|
-        e.merge(event_args: UpptecEventFramework.deserialize(e[:event_data]))
+        e.merge(event_args: Sandthorn.deserialize(e[:event_data]))
       end
     end
   end

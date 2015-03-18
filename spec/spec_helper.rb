@@ -7,6 +7,7 @@
 require 'coveralls'
 Coveralls.wear!
 require "ap"
+require "timecop"
 require "bundler"
 require "sandthorn_driver_sequel"
 require "support/custom_matchers"

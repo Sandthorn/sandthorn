@@ -38,7 +38,9 @@ module Sandthorn
       end
 
       def ==(other)
-        other.respond_to?(:aggregate_id) && aggregate_id == other.aggregate_id
+        other.respond_to?(:aggregate_id)\
+        && aggregate_id == other.aggregate_id\
+        && other.aggregate_current_event_version == aggregate_current_event_version
       end
 
       def aggregate_trace args
@@ -101,6 +103,14 @@ module Sandthorn
         def find id
           return aggregate_find id unless id.respond_to?(:each)
           return id.map { |e| aggregate_find e }
+        end
+
+        def aggregate_build_to(aggregate_id, sequence_number: nil)
+          AggregateBuilder.new(self).build(aggregate_id, sequence_number: sequence_number)
+        end
+
+        def at(*args, &block)
+          FinderProxy.new(self, *args, &block)
         end
 
         def aggregate_find aggregate_id

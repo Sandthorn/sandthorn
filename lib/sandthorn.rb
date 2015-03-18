@@ -1,10 +1,14 @@
-require "sandthorn/version"
-require "sandthorn/errors"
-require "sandthorn/event"
-require "sandthorn/aggregate_root"
-require "sandthorn/event_stores"
 require 'yaml'
 require 'securerandom'
+
+require "sandthorn/version"
+require "sandthorn/errors"
+require "sandthorn/refinements"
+require "sandthorn/aggregate_builder"
+require "sandthorn/event"
+require "sandthorn/finder_proxy"
+require "sandthorn/aggregate_root"
+require "sandthorn/event_stores"
 
 module Sandthorn
   class << self

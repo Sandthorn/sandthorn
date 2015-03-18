@@ -36,7 +36,7 @@ module Sandthorn
         end
       end
       aggregate.send :clear_aggregate_events
-      aggregate.send :load_aggregate_stored_instance_variables
+      #aggregate.send :load_aggregate_stored_instance_variables
       return aggregate
     end
 
@@ -75,7 +75,7 @@ module Sandthorn
 
     def set_aggregate_deltas(aggregate, attribute_deltas)
       attribute_deltas.each do |delta|
-        aggregate.instance_variable_set delta[:attribute_name], delta[:new_value]
+        aggregate.instance_variable_set "@#{delta[:attribute_name]}", delta[:new_value]
       end
     end
 

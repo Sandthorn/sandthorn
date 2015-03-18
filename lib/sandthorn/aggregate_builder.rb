@@ -104,7 +104,7 @@ module Sandthorn
     end
 
     def all_events(aggregate_id)
-      unpack(Sandthorn.get_aggregate_events(aggregate_id, @aggregate_klass.to_s))
+      unpack(Sandthorn.get_aggregate_events(@aggregate_klass, aggregate_id))
     end
 
     def unpack(events)

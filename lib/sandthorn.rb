@@ -3,7 +3,7 @@ require "sandthorn/errors"
 require "sandthorn/event"
 require "sandthorn/aggregate_root"
 require "sandthorn/event_stores"
-require 'yaml'
+require 'oj'
 require 'securerandom'
 
 module Sandthorn
@@ -30,15 +30,16 @@ module Sandthorn
 
     def serialize data
       #Marshal.dump(data)
-      YAML::dump(data)
-      #Oj.dump(data)
+      #YAML::dump(data)
+      Oj.dump(data)
       #MessagePack.pack(data, symbolize_keys: true)
     end
 
     def deserialize data
       #Marshal.load(data)
-      YAML::load(data)
-      #Oj.load(data)
+      #YAML::load(data)
+      #puts data
+      Oj.load(data)
       #MessagePack.unpack(data, symbolize_keys: true)
     end
 

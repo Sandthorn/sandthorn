@@ -20,8 +20,6 @@ Gem::Specification.new do |spec|
   spec.required_ruby_version = '>= 2.0'
 
 
-  spec.add_dependency "oj"
-
   spec.add_development_dependency "bundler", "~> 1.3"
   spec.add_development_dependency "rake"
   spec.add_development_dependency "rspec", "~> 3.0"

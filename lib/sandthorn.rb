@@ -3,14 +3,14 @@ require "sandthorn/errors"
 require "sandthorn/event"
 require "sandthorn/aggregate_root"
 require "sandthorn/event_stores"
-require 'oj'
+require 'yaml'
 require 'securerandom'
 
 module Sandthorn
   class << self
     extend Forwardable
 
-    def_delegators :configuration, :event_stores
+    def_delegators :configuration, :event_stores, :serialize, :deserialize
 
     def default_event_store
       event_stores.default_store
@@ -26,21 +26,6 @@ module Sandthorn
 
     def configuration
       @configuration ||= Configuration.new
-    end
-
-    def serialize data
-      #Marshal.dump(data)
-      #YAML::dump(data)
-      Oj.dump(data)
-      #MessagePack.pack(data, symbolize_keys: true)
-    end
-
-    def deserialize data
-      #Marshal.load(data)
-      #YAML::load(data)
-      #puts data
-      Oj.load(data)
-      #MessagePack.unpack(data, symbolize_keys: true)
     end
 
     def generate_aggregate_id
@@ -123,6 +108,26 @@ module Sandthorn
       def event_store=(store)
         @event_stores = EventStores.new(store)
       end
+
+      def serializer= block
+        @serializer = block if block.is_a? Proc
+      end
+
+      def deserializer= block
+        @deserializer = block if block.is_a? Proc
+      end
+
+      def serialize data
+        return @serializer.call(data) if @serializer
+        YAML::dump(data)
+      end
+
+      def deserialize data
+        return @deserializer.call data if @deserializer
+        YAML::load data
+      end
+
+      
       alias_method :event_stores=, :event_store=
     end
   end

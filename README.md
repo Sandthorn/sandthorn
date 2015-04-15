@@ -130,11 +130,12 @@ The driver is configured when your application launches. Here's an example of ho
 ```ruby
 url = "sqlite://spec/db/sequel_driver.sqlite3"
 driver = SandthornDriverSequel.driver_from_url(url: url)
-catch_all_config = [ { driver: driver } ]
-Sandthorn.configuration = catch_all_config
+Sandthorn.configure do |conf|
+  conf.event_stores = { default: driver }
+end
 ```
 
-First we specify the path to the sqlite3 database in the `url` variable. Secondly, the specific driver is instantiated with the `url`. Hence, the driver could be instantiated using a different configuration, for example, an address to a Postgres database. Finally, `Sandthorn.configure` accepts a keyword list with options. The only option which is required is `driver`.
+First we specify the path to the sqlite3 database in the `url` variable. Secondly, the specific driver is instantiated with the `url`. Hence, the driver could be instantiated using a different configuration, for example, an address to a Postgres database. Finally, `Sandthorn.configure` accepts a keyword list with options. It´s here the driver is bound to Sandthorn via a context.
 
 The first time you use the Sequel driver it is necessary to install the database schema.
 

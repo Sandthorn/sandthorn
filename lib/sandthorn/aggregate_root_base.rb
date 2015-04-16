@@ -108,8 +108,13 @@ module Sandthorn
           unless events && !events.empty?
             raise Sandthorn::Errors::AggregateNotFound
           end
+          
           transformed_events = events.map do |e|
-            e.merge(event_args: Sandthorn.deserialize(e[:event_data]))
+            if e[:event_name].to_sym == :aggregate_set_from_snapshot
+              e.merge(event_args: Sandthorn.deserialize_snapshot(e[:event_data]))
+            else
+              e.merge(event_args: Sandthorn.deserialize(e[:event_data]))
+            end
           end
           aggregate_build transformed_events
         end

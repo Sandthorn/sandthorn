@@ -10,7 +10,7 @@ module Sandthorn
   class << self
     extend Forwardable
 
-    def_delegators :configuration, :event_stores, :serialize, :deserialize
+    def_delegators :configuration, :event_stores, :serialize, :deserialize, :serialize_snapshot, :deserialize_snapshot
 
     def default_event_store
       event_stores.default_store
@@ -27,6 +27,8 @@ module Sandthorn
     def configuration
       @configuration ||= Configuration.new
     end
+
+    
 
     def generate_aggregate_id
       SecureRandom.uuid
@@ -124,6 +126,24 @@ module Sandthorn
 
       def deserialize data
         return @deserializer.call data if @deserializer
+        YAML::load data
+      end
+
+      def snapshot_serializer= block
+        @snapshot_serializer = block if block.is_a? Proc
+      end
+
+      def snapshot_deserializer= block
+        @snapshot_deserializer = block if block.is_a? Proc
+      end
+
+      def serialize_snapshot data
+        return @snapshot_serializer.call data if @snapshot_serializer
+        YAML::dump data
+      end
+
+      def deserialize_snapshot data
+        return @snapshot_deserializer.call data if @snapshot_deserializer
         YAML::load data
       end
 

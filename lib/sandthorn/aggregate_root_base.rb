@@ -11,7 +11,6 @@ module Sandthorn
 
       alias :id :aggregate_id
 
-
       def aggregate_base_initialize
         @aggregate_current_event_version = 0
         @aggregate_originating_version = 0
@@ -21,7 +20,7 @@ module Sandthorn
       def save
         aggregate_events.each do |event|
           event[:event_data] = Sandthorn.serialize event[:event_args]
-          event[:event_args] = nil #Not send extra data over the wire
+          event[:event_args] = nil # Not send extra data over the wire
         end
 
         unless aggregate_events.empty?
@@ -41,13 +40,13 @@ module Sandthorn
         other.respond_to?(:aggregate_id) && aggregate_id == other.aggregate_id
       end
 
-      def aggregate_trace args
+      def aggregate_trace(args)
         @aggregate_trace_information = args
         yield self if block_given?
         @aggregate_trace_information = nil
       end
 
-      def commit *args
+      def commit(*args)
         aggregate_attribute_deltas = get_delta
 
         unless aggregate_attribute_deltas.empty?
@@ -79,7 +78,7 @@ module Sandthorn
       module ClassMethods
 
         @@aggregate_trace_information = nil
-        def aggregate_trace args
+        def aggregate_trace(args)
           @@aggregate_trace_information = args
           yield self
           @@aggregate_trace_information = nil
@@ -98,12 +97,12 @@ module Sandthorn
           find aggregate_id_list
         end
 
-        def find id
+        def find(id)
           return aggregate_find id unless id.respond_to?(:each)
           return id.map { |e| aggregate_find e }
         end
 
-        def aggregate_find aggregate_id
+        def aggregate_find(aggregate_id)
           events = Sandthorn.get_aggregate(aggregate_id, self)
           unless events && !events.empty?
             raise Sandthorn::Errors::AggregateNotFound
@@ -120,7 +119,7 @@ module Sandthorn
           aggregate_build ([transformed_snapshot_event] + transformed_events).compact
         end
 
-        def new *args
+        def new(*args)
           super.tap do |aggregate|
             aggregate.aggregate_trace @@aggregate_trace_information do |aggr|
               aggr.aggregate_base_initialize
@@ -132,7 +131,7 @@ module Sandthorn
           end
         end
 
-        def aggregate_build events
+        def aggregate_build(events)
           current_aggregate_version = 0
 
           if first_event_snapshot?(events)
@@ -155,7 +154,7 @@ module Sandthorn
 
         private
 
-        def build_instance_vars_from_events events
+        def build_instance_vars_from_events(events)
           events.each_with_object({}) do |event, instance_vars|
             event_args = event[:event_args]
             event_name = event[:event_name]
@@ -169,11 +168,11 @@ module Sandthorn
           end
         end
 
-        def first_event_snapshot? events
+        def first_event_snapshot?(events)
           events.first[:event_name].to_sym == :aggregate_set_from_snapshot
         end
 
-        def start_build_from_snapshot events
+        def start_build_from_snapshot(events)
           snapshot = events.first[:event_args][0]
         end
 
@@ -184,7 +183,7 @@ module Sandthorn
 
       private
 
-      def set_instance_variables! attributes
+      def set_instance_variables!(attributes)
         attributes.each_pair do |k,v|
           self.instance_variable_set "@#{k}", v
         end
@@ -199,7 +198,7 @@ module Sandthorn
         end
       end
 
-      def set_orginating_aggregate_version! aggregate_version
+      def set_orginating_aggregate_version!(aggregate_version)
         @aggregate_originating_version = aggregate_version
       end
 
@@ -207,7 +206,7 @@ module Sandthorn
         @aggregate_current_event_version += 1
       end
 
-      def set_current_aggregate_version! aggregate_version
+      def set_current_aggregate_version!(aggregate_version)
         @aggregate_current_event_version = aggregate_version
       end
 
@@ -219,7 +218,7 @@ module Sandthorn
         @aggregate_current_event_version = 0
       end
 
-      def set_aggregate_id aggregate_id
+      def set_aggregate_id(aggregate_id)
         @aggregate_id = aggregate_id
       end
 

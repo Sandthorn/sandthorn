@@ -1,4 +1,4 @@
-require 'spec_helper'
+require "spec_helper"
 
 module Sandthorn
   module AggregateRoot
@@ -7,35 +7,33 @@ module Sandthorn
       attr_reader :name, :age
       attr :sex
       attr_writer :writer
-      
-      def initialize args = {}
+
+      def initialize(args = {})
         @name = args.fetch(:name, nil)
         @sex = args.fetch(:sex, nil)
         @writer = args.fetch(:writer, nil)
       end
 
-      def change_name value
+      def change_name(value)
         unless name == value
           @name = value
           commit
         end
       end
 
-      def change_sex value
+      def change_sex(value)
         unless sex == value
           @sex = value
           commit
         end
       end
 
-      def change_writer value
+      def change_writer(value)
         unless writer == value
           @writer = value
           commit
         end
       end
-
-      
     end
 
     describe "::event_store" do
@@ -50,14 +48,13 @@ module Sandthorn
     end
 
     describe "when get all aggregates from DirtyClass" do
-      
       before(:each) do
         @first = DirtyClass.new.save
         @middle = DirtyClass.new.save
         @last = DirtyClass.new.save
       end
 
-      let(:subject) { DirtyClass.all.map{ |s| s.id} }
+      let(:subject) { DirtyClass.all.map{ |s| s.id } }
       let(:ids) { [@first.id, @middle.id, @last.id] }
 
       context "all" do
@@ -69,28 +66,24 @@ module Sandthorn
           expect(subject).to match_array(ids)
         end
       end
-
     end
 
-
     describe "when making a change on a aggregate" do
-      let(:dirty_obejct) { 
+      let(:dirty_obejct) {
         o = DirtyClass.new
         o
       }
 
       context "new with args" do
-
         let(:subject) { DirtyClass.new(name: "Mogge", sex: "hen", writer: true) }
         it "should set the values" do
           expect(subject.name).to eql "Mogge"
           expect(subject.sex).to eql "hen"
-          expect{subject.writer}.to raise_error
+          expect{ subject.writer }.to raise_error
         end
       end
 
       context "when changing name (attr_reader)" do
-        
         it "should get new_name" do
           dirty_obejct.change_name "new_name"
           expect(dirty_obejct.name).to eql "new_name"
@@ -115,7 +108,7 @@ module Sandthorn
 
       context "when changing writer (attr_writer)" do
         it "should raise error" do
-          expect{dirty_obejct.change_writer "new_writer"}.to raise_error
+          expect{ dirty_obejct.change_writer "new_writer" }.to raise_error
         end
       end
 
@@ -145,16 +138,13 @@ module Sandthorn
         end
 
         it "should raise error if trying to find id that not exist" do
-          expect{DirtyClass.find("666")}.to raise_error
+          expect{ DirtyClass.find("666") }.to raise_error
         end
       end
-
-
     end
 
     describe "event data" do
-
-      let(:dirty_obejct) { 
+      let(:dirty_obejct) {
         o = DirtyClass.new :name => "old_value", :sex => "hen"
         o.save
       }
@@ -162,16 +152,13 @@ module Sandthorn
       let(:dirty_obejct_after_find) { DirtyClass.find dirty_obejct.id }
 
       context "after find" do
-
         it "should set the old_value on the event" do
           dirty_obejct_after_find.change_name "new_name"
           expect(dirty_obejct_after_find.aggregate_events.last[:event_args][:attribute_deltas].first[:old_value]).to eql "old_value"
         end
-
       end
 
       context "old_value should be set" do
-      
         it "should set the old_value on the event" do
           dirty_obejct.change_name "new_name"
           expect(dirty_obejct.aggregate_events.last[:event_args][:attribute_deltas].first[:old_value]).to eql "old_value"

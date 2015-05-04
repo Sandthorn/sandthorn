@@ -24,10 +24,10 @@
 #   class AnotherContext < TestContextSwitching
 #   end
 #   describe "when using different contexts configuration" do
-#     before(:each) do 
+#     before(:each) do
 #       Sandthorn.configuration = configuration
 #       migrate
-      
+
 #     end
 #     let(:configuration) do
 #       c = []
@@ -46,22 +46,22 @@
 #     let(:setup) do
 #       [
 #         { url: spec_db, context: :context_test, aggregate_pattern: Sandthorn::TestContextSwitching },
-#         { url: spec_db, context: :nil, aggregate_pattern: Sandthorn } 
-#       ] 
+#         { url: spec_db, context: :nil, aggregate_pattern: Sandthorn }
+#       ]
 #     end
 #     let(:create_in_context_test) { t = TestContextSwitching.new; t.change_foo :hello_context_1; t.aggregate_save; t;}
 #     let(:create_in_default_context) { t = AnotherContext.new; t.change_foo :hello_default_context; t.aggregate_save; t;}
 #     def exists_in_context? aggregate, context = nil
-#       driver = SandthornDriverSequel::SequelDriver.new url: spec_db     
+#       driver = SandthornDriverSequel::SequelDriver.new url: spec_db
 #       table = "aggregates"
 #       table = "#{context}_#{table}" if context
 #       driver.execute do |db|
-#         return db[table.to_sym].where(aggregate_id: aggregate.aggregate_id).any?          
+#         return db[table.to_sym].where(aggregate_id: aggregate.aggregate_id).any?
 #       end
 #     end
 #     context "when trying to access an aggregate in a non configured context" do
 #       it "should raise configuration error" do
-#         expect { UnknownModule::Foo.find "boo" }.to raise_exception Sandthorn::Errors::ConfigurationError 
+#         expect { UnknownModule::Foo.find "boo" }.to raise_exception Sandthorn::Errors::ConfigurationError
 #       end
 #     end
 #     context "when saving the aggregates" do
@@ -75,7 +75,7 @@
 #           expect(exists_in_context?(create_in_default_context, :context_test)).to be_false
 #         end
 #       end
-#     end   
+#     end
 #     context "getting events should respect context" do
 #       before(:each) {create_in_context_test;create_in_default_context; }
 #       context "when getting for specific context" do

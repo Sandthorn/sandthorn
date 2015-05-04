@@ -1,4 +1,4 @@
-require 'sandthorn/aggregate_root_marshal'
+require "sandthorn/aggregate_root_marshal"
 
 module Sandthorn
   module AggregateRoot

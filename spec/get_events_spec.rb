@@ -1,7 +1,7 @@
-require 'spec_helper'
+require "spec_helper"
 
-class AnAggregate 
-	include Sandthorn::AggregateRoot
+class AnAggregate
+	 include Sandthorn::AggregateRoot
 end
 
 class AnotherAggregate
@@ -10,7 +10,6 @@ class AnotherAggregate
 end
 
 describe Sandthorn do
-
   describe "::get_events" do
     context "when getting events using Sandthorn.get_events for an aggregate type" do
       before do
@@ -58,7 +57,6 @@ describe Sandthorn do
           it_behaves_like :default_event_store
         end
       end
-
     end
   end
 

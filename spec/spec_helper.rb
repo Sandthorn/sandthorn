@@ -4,7 +4,7 @@
 # loaded once.
 #
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
-require 'coveralls'
+require "coveralls"
 Coveralls.wear!
 require "ap"
 require "bundler"
@@ -15,7 +15,7 @@ Bundler.require
 
 module Helpers
   def class_including(mod)
-    Class.new.tap {|c| c.send :include, mod }
+    Class.new.tap { |c| c.send :include, mod }
   end
 end
 
@@ -28,7 +28,7 @@ RSpec.configure do |config|
   # order dependency and want to debug it, you can fix the order by providing
   # the seed, which is printed after each run.
   #     --seed 1234
-  config.order = 'random'
+  config.order = "random"
   config.before(:each) { sqlite_store_setup }
 end
 
@@ -36,7 +36,7 @@ def spec_db
   "sqlite://spec/db/sequel_driver.sqlite3"
 end
 def sqlite_store_setup
-  url = spec_db 
+  url = spec_db
   driver = SandthornDriverSequel.driver_from_url(url: url)
   Sandthorn.configure do |c|
     c.event_store = driver

@@ -1,4 +1,4 @@
-require 'forwardable'
+require "forwardable"
 
 module Sandthorn
   class EventStores
@@ -59,6 +59,5 @@ module Sandthorn
     def is_event_store?(store)
       store.respond_to?(:get_events)
     end
-
   end
 end

@@ -1,0 +1,14 @@
+Style/StringLiterals:
+  Enabled: true
+  EnforcedStyle: double_quotes
+
+Style/Documentation:
+  Enabled: false
+
+# This should be lowered
+Metrics/LineLength:
+  Max: 152
+
+# This is bad practice but too painful to fix right now
+Style/AccessorMethodName:
+  Enabled: false

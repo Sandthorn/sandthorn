@@ -1,15 +1,15 @@
-require 'spec_helper'
+require "spec_helper"
 
 class InitChange
   include Sandthorn::AggregateRoot
   attr_reader :foo
-  def initialize foo: nil
+  def initialize(foo: nil)
     @foo = foo
   end
 end
 def change_init
   InitChange.class_eval do
-    define_method :initialize, lambda { @foo = :foo }
+    define_method :initialize, -> { @foo = :foo }
   end
 end
 describe "when the initialize-method changes" do

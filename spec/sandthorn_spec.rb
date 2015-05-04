@@ -1,9 +1,13 @@
-require 'spec_helper'
+require "spec_helper"
 
 class AnAggregate
   include Sandthorn::AggregateRoot
-  def touch; touched; end
-  def touched; commit; end
+  def touch
+    touched
+  end
+  def touched
+    commit
+  end
 end
 
 module Outer
@@ -38,7 +42,6 @@ describe Sandthorn do
     end
 
     context "when the aggregate has been declared in a module" do
-
       before do
         Outer::Inner::OtherAggregate.new.tap do |agg|
           agg.touch

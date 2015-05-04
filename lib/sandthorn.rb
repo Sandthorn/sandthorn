@@ -3,8 +3,8 @@ require "sandthorn/errors"
 require "sandthorn/event"
 require "sandthorn/aggregate_root"
 require "sandthorn/event_stores"
-require 'yaml'
-require 'securerandom'
+require "yaml"
+require "securerandom"
 
 module Sandthorn
   class << self
@@ -27,8 +27,6 @@ module Sandthorn
     def configuration
       @configuration ||= Configuration.new
     end
-
-    
 
     def generate_aggregate_id
       SecureRandom.uuid
@@ -58,7 +56,7 @@ module Sandthorn
       event_store_for(aggregate_type).get_aggregate_ids(aggregate_type: aggregate_type)
     end
 
-    def get_events event_store: :default, aggregate_types: [], take: 0, after_sequence_number: 0
+    def get_events(event_store: :default, aggregate_types: [], take: 0, after_sequence_number: 0)
       event_store = find_event_store(event_store)
       events = event_store.get_events aggregate_types: aggregate_types, take: take, after_sequence_number: after_sequence_number
       events.map do |event|
@@ -167,7 +165,6 @@ module Sandthorn
         snapshot_deserializer.call(data)
       end
 
-      
       alias_method :event_stores=, :event_store=
     end
   end

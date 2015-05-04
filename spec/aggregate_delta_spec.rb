@@ -31,23 +31,23 @@ class PersonTest
     record_event element
   end
 
-  def add_to_hash(name,value)
+  def add_to_hash(name, value)
     @my_hash[name] = value
-    record_event name,value
+    record_event name, value
   end
 end
 
 describe "Property Delta Event Sourcing" do
-  let(:person) { PersonTest.new "Lasse",40,:married }
+  let(:person) { PersonTest.new "Lasse", 40, :married }
 
   it "should be able to set name" do
-    person.change_name  "Klabbarparen"
+    person.change_name "Klabbarparen"
     expect(person.name).to eql("Klabbarparen")
     # puts person.aggregate_events
   end
 
   it "should be able to build from events" do
-    person.change_name  "Klabbarparen"
+    person.change_name "Klabbarparen"
     builded = PersonTest.aggregate_build person.aggregate_events
     expect(builded.name).to eql(person.name)
     expect(builded.aggregate_id).to eql(person.aggregate_id)

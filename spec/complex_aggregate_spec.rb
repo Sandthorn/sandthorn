@@ -33,6 +33,7 @@ class IAmComplex
   end
 
   private
+
   def set_hello_event(hello)
     @hello = hello
     commit hello
@@ -41,7 +42,7 @@ end
 
 describe "when using complex types in events" do
   before(:each) do
-    aggr = IAmComplex.new Date.new 2012,01,20
+    aggr = IAmComplex.new Date.new 2012, 01, 20
     aggr.set_hello! Hello.new "foo"
     @events = aggr.aggregate_events
   end

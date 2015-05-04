@@ -5,7 +5,7 @@ module Sandthorn
     class DirtyClass
       include Sandthorn::AggregateRoot
       attr_reader :name, :age
-      attr :sex
+      attr_reader :sex
       attr_writer :writer
 
       def initialize(args = {})
@@ -54,7 +54,7 @@ module Sandthorn
         @last = DirtyClass.new.save
       end
 
-      let(:subject) { DirtyClass.all.map{ |s| s.id } }
+      let(:subject) { DirtyClass.all.map(&:id) }
       let(:ids) { [@first.id, @middle.id, @last.id] }
 
       context "all" do
@@ -69,17 +69,17 @@ module Sandthorn
     end
 
     describe "when making a change on a aggregate" do
-      let(:dirty_obejct) {
+      let(:dirty_obejct) do
         o = DirtyClass.new
         o
-      }
+      end
 
       context "new with args" do
         let(:subject) { DirtyClass.new(name: "Mogge", sex: "hen", writer: true) }
         it "should set the values" do
           expect(subject.name).to eql "Mogge"
           expect(subject.sex).to eql "hen"
-          expect{ subject.writer }.to raise_error
+          expect { subject.writer }.to raise_error
         end
       end
 
@@ -108,7 +108,7 @@ module Sandthorn
 
       context "when changing writer (attr_writer)" do
         it "should raise error" do
-          expect{ dirty_obejct.change_writer "new_writer" }.to raise_error
+          expect { dirty_obejct.change_writer "new_writer" }.to raise_error
         end
       end
 
@@ -138,16 +138,16 @@ module Sandthorn
         end
 
         it "should raise error if trying to find id that not exist" do
-          expect{ DirtyClass.find("666") }.to raise_error
+          expect { DirtyClass.find("666") }.to raise_error
         end
       end
     end
 
     describe "event data" do
-      let(:dirty_obejct) {
-        o = DirtyClass.new :name => "old_value", :sex => "hen"
+      let(:dirty_obejct) do
+        o = DirtyClass.new name: "old_value", sex: "hen"
         o.save
-      }
+      end
 
       let(:dirty_obejct_after_find) { DirtyClass.find dirty_obejct.id }
 

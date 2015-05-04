@@ -10,7 +10,7 @@ module BankAccountInterestCommands
     interest_calculation_time = until_date - @last_interest_calculation
     days_with_interest = interest_calculation_time.to_i
     unpaid_interest = @balance * @current_interest_info[:interest_rate] * days_with_interest / 365.2425
-    added_unpaid_interest_event unpaid_interest,until_date
+    added_unpaid_interest_event unpaid_interest, until_date
   end
 
   def pay_out_unpaid_interest!
@@ -19,7 +19,7 @@ module BankAccountInterestCommands
 
   def change_interest!(new_interest_rate, interest_valid_from)
     calculate_interest!
-    changed_interest_rate_event new_interest_rate,interest_valid_from
+    changed_interest_rate_event new_interest_rate, interest_valid_from
   end
 end
 module BankAccountWithdrawalCommands
@@ -39,15 +39,15 @@ module BankAccountVisaCardPurchasesCommands
     transaction_id = visa.charge_card "3030-3333-4252-2535", merchant_id, amount
     paid_with_visa_card_event amount, transaction_id
   end
-
 end
 
 class VisaCardTransactionGateway
   def initialize
     @visa_connector = "foo_bar"
   end
-  def charge_card(visa_card_number, merchant_id, amount)
-    transaction_id = SecureRandom.uuid
+
+  def charge_card(_visa_card_number, _merchant_id, _amount)
+    SecureRandom.uuid
   end
 end
 
@@ -57,7 +57,7 @@ module BankAccountDepositCommmands
   end
 
   def transfer_money_from_another_account!(amount, from_account_number)
-    incoming_transfer_event amount,from_account_number
+    incoming_transfer_event amount, from_account_number
   end
 end
 
@@ -72,7 +72,7 @@ class BankAccount
   attr_reader :last_interest_calculation
 
   def initialize(*args)
-    account_number = args[0]
+    _account_number = args[0]
     interest_rate = args[1]
     creation_date = args[2]
 
@@ -88,7 +88,7 @@ class BankAccount
   def changed_interest_rate_event(new_interest_rate, interest_valid_from)
     @current_interest_info[:interest_rate] = new_interest_rate
     @current_interest_info[:interest_valid_from] = interest_valid_from
-    record_event new_interest_rate,interest_valid_from
+    record_event new_interest_rate, interest_valid_from
   end
 
   def added_unpaid_interest_event(interest_amount, calculated_until)
@@ -105,7 +105,7 @@ class BankAccount
 
   def withdrew_amount_from_atm_event(amount, atm_id)
     @balance -= amount
-    record_event amount,atm_id
+    record_event amount, atm_id
   end
 
   def withdrew_amount_from_cashier_event(amount, cashier_id)
@@ -115,7 +115,7 @@ class BankAccount
 
   def paid_with_visa_card_event(amount, visa_card_transaction_id)
     @balance -= amount
-    record_event amount,visa_card_transaction_id
+    record_event amount, visa_card_transaction_id
   end
 
   def charged_cashier_withdrawal_fee_event(amount)
@@ -124,29 +124,29 @@ class BankAccount
   end
 
   def deposited_to_cashier_event(amount, cashier_id)
-    @balance = self.balance + amount
-    record_event amount,cashier_id
+    @balance = balance + amount
+    record_event amount, cashier_id
   end
 
   def incoming_transfer_event(amount, from_account_number)
-    current_balance = self.balance
+    current_balance = balance
     @balance = amount + current_balance
     record_event amount, from_account_number
   end
 end
 
 def a_test_account
-  a = BankAccount.new "91503010111",0.031415, Date.new(2011,10,12)
+  a = BankAccount.new "91503010111", 0.031415, Date.new(2011, 10, 12)
   a.extend BankAccountDepositCommmands
-  a.transfer_money_from_another_account! 90000, "FOOBAR"
-  a.deposit_at_bank_office! 10000, "Lars Idorn"
+  a.transfer_money_from_another_account! 90_000, "FOOBAR"
+  a.deposit_at_bank_office! 10_000, "Lars Idorn"
 
   a.extend BankAccountVisaCardPurchasesCommands
   a.charge_card! 1000, "Starbucks Coffee"
 
   a.extend BankAccountInterestCommands
   a.calculate_interest!
-  return a
+  a
 end
 
 # Tests part
@@ -178,7 +178,7 @@ describe "when generating state on an aggregate root" do
   end
 
   it "account should have properties set" do
-    expect(@account.balance).to eql 99000
+    expect(@account.balance).to eql 99_000
     expect(@account.unpaid_interest_balance).to be > 1000
   end
 
@@ -213,7 +213,7 @@ describe Sandthorn::AggregateRootSnapshot do
     end
     it "should raise SnapshotError if aggregate has unsaved events" do
       subject.paid_with_visa_card_event 2000, ""
-      expect{ subject.snapshot }.to raise_error Sandthorn::Errors::SnapshotError
+      expect { subject.snapshot }.to raise_error Sandthorn::Errors::SnapshotError
     end
   end
 end
@@ -221,7 +221,7 @@ end
 describe "when saving to repository" do
   let(:account) { a_test_account.extend Sandthorn::AggregateRootSnapshot }
   it "should raise an error if trying to save before creating a snapshot" do
-    expect(-> { account.save_snapshot }).to raise_error (Sandthorn::Errors::SnapshotError)
+    expect(-> { account.save_snapshot }).to raise_error(Sandthorn::Errors::SnapshotError)
   end
   it "should not raise an error if snapshot was created" do
     account.save

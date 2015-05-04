@@ -5,7 +5,7 @@ module Sandthorn
     module Marshal
       include Sandthorn::AggregateRoot::Base
 
-      def aggregate_initialize(*args)
+      def aggregate_initialize(*_args)
         @aggregate_attribute_deltas = []
         @aggregate_stored_instance_variables = {}
       end

@@ -7,7 +7,7 @@ module Sandthorn
       include Sandthorn::AggregateRoot
       attr_reader :name
 
-      def initialize(args = {})
+      def initialize(_args = {})
       end
 
       def change_name(value)
@@ -19,9 +19,9 @@ module Sandthorn
     end
 
     describe "benchmark", benchmark: true do
-      let(:test_object) {
+      let(:test_object) do
         TestClass.new.save
-      }
+      end
       n = 500
       it "should new, change_name, save and find 500 aggregates" do
         Benchmark.bm do |x|

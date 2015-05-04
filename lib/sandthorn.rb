@@ -70,7 +70,7 @@ module Sandthorn
       obsolete = event_stores.flat_map { |event_store| event_store.obsolete_snapshots(aggregate_types: type_names, max_event_distance: min_event_distance) }
       obsolete.map do |single_obsolete|
         type = Kernel.const_get single_obsolete[:aggregate_type]
-        aggregate = type.aggregate_find(single_obsolete[:aggregate_id]).tap do |agg|
+        type.aggregate_find(single_obsolete[:aggregate_id]).tap do |agg|
           yield agg if block_given?
         end
       end
@@ -83,7 +83,7 @@ module Sandthorn
     private
 
     def event_store_for(aggregate_type)
-      event_store = event_stores.by_name(aggregate_type.event_store).tap do |store|
+      event_stores.by_name(aggregate_type.event_store).tap do |store|
         yield(store) if block_given?
       end
     end

@@ -5,6 +5,7 @@ class AnAggregate
   def touch
     touched
   end
+
   def touched
     commit
   end
@@ -17,11 +18,11 @@ module Outer
 end
 
 describe Sandthorn do
-  before(:each) {
+  before(:each) do
     @aggregate = AnAggregate.new
     @aggregate.touch
     @aggregate.save
-  }
+  end
 
   describe "::obsolete_snapshot" do
     it "retrieves a list of obsolete snapshots" do

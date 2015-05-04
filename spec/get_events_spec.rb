@@ -1,7 +1,7 @@
 require "spec_helper"
 
 class AnAggregate
-	 include Sandthorn::AggregateRoot
+  include Sandthorn::AggregateRoot
 end
 
 class AnotherAggregate

@@ -15,6 +15,7 @@ class UsualSuspect
   end
 
   private
+
   def suspect_was_charged(crime_name)
     @charges << crime_name
     record_event crime_name

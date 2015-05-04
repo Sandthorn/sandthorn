@@ -12,3 +12,6 @@ Metrics/LineLength:
 # This is bad practice but too painful to fix right now
 Style/AccessorMethodName:
   Enabled: false
+
+Style/GuardClause:
+  MinBodyLength: 4

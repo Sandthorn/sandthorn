@@ -111,40 +111,60 @@ module Sandthorn
         @event_stores = EventStores.new(store)
       end
 
-      def serializer= block
+      def serializer=(block)
         @serializer = block if block.is_a? Proc
       end
 
-      def deserializer= block
+      def deserializer=(block)
         @deserializer = block if block.is_a? Proc
       end
 
-      def serialize data
-        return @serializer.call(data) if @serializer
-        YAML::dump(data)
+      def serializer
+        @serializer || default_serializer
       end
 
-      def deserialize data
-        return @deserializer.call data if @deserializer
-        YAML::load data
+      def deserializer
+        @deserializer || default_deserializer
       end
 
-      def snapshot_serializer= block
+      def default_serializer
+        -> (data) { YAML.dump(data) }
+      end
+
+      def default_deserializer
+        -> (data) { YAML.load(data) }
+      end
+
+      def serialize(data)
+        serializer.call(data)
+      end
+
+      def deserialize(data)
+        deserializer.call(data)
+      end
+
+      def snapshot_serializer=(block)
         @snapshot_serializer = block if block.is_a? Proc
       end
 
-      def snapshot_deserializer= block
+      def snapshot_deserializer=(block)
         @snapshot_deserializer = block if block.is_a? Proc
       end
 
-      def serialize_snapshot data
-        return @snapshot_serializer.call data if @snapshot_serializer
-        YAML::dump data
+      def snapshot_serializer
+        @snapshot_serializer || default_serializer
+      end
+
+      def snapshot_deserializer
+        @snapshot_deserializer || default_deserializer
+      end
+
+      def serialize_snapshot(data)
+        snapshot_serializer.call(data)
       end
 
       def deserialize_snapshot data
-        return @snapshot_deserializer.call data if @snapshot_deserializer
-        YAML::load data
+        snapshot_deserializer.call(data)
       end
 
       

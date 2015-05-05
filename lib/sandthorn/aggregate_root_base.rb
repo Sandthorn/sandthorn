@@ -115,7 +115,7 @@ module Sandthorn
           end
 
           transformed_events = events.map do |e|
-              e.merge(event_args: Sandthorn.deserialize(e[:event_data]))
+            e.merge(event_args: Sandthorn.deserialize(e[:event_data]))
           end
           aggregate_build ([transformed_snapshot_event] + transformed_events).compact
         end

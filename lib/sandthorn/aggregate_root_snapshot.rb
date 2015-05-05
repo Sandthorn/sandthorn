@@ -25,7 +25,7 @@ module Sandthorn
       unless aggregate_snapshot
         raise Errors::SnapshotError, "No snapshot has been created!"
       end
-      @aggregate_snapshot[:event_data] = Sandthorn.serialize @aggregate_snapshot[:event_args]
+      @aggregate_snapshot[:event_data] = Sandthorn.serialize_snapshot @aggregate_snapshot[:event_args]
       @aggregate_snapshot[:event_args] = nil
       Sandthorn.save_snapshot(aggregate_snapshot: @aggregate_snapshot, aggregate_id: @aggregate_id, aggregate_type: self.class)
       @aggregate_snapshot = nil
@@ -41,7 +41,7 @@ module Sandthorn
       end
 
       @aggregate_snapshot[:event_data] = Sandthorn
-        .serialize aggregate_snapshot[:event_args]
+        .serialize_snapshot aggregate_snapshot[:event_args]
 
       @aggregate_snapshot[:event_args] = nil
       Sandthorn.save_snapshot aggregate_snapshot, aggregate_id

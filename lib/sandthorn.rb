@@ -10,7 +10,7 @@ module Sandthorn
   class << self
     extend Forwardable
 
-    def_delegators :configuration, :event_stores
+    def_delegators :configuration, :event_stores, :serialize, :deserialize, :serialize_snapshot, :deserialize_snapshot
 
     def default_event_store
       event_stores.default_store
@@ -28,19 +28,7 @@ module Sandthorn
       @configuration ||= Configuration.new
     end
 
-    def serialize data
-      #Marshal.dump(data)
-      YAML::dump(data)
-      #Oj.dump(data)
-      #MessagePack.pack(data, symbolize_keys: true)
-    end
-
-    def deserialize data
-      #Marshal.load(data)
-      YAML::load(data)
-      #Oj.load(data)
-      #MessagePack.unpack(data, symbolize_keys: true)
-    end
+    
 
     def generate_aggregate_id
       SecureRandom.uuid
@@ -122,6 +110,64 @@ module Sandthorn
       def event_store=(store)
         @event_stores = EventStores.new(store)
       end
+
+      def serializer=(block)
+        @serializer = block if block.is_a? Proc
+      end
+
+      def deserializer=(block)
+        @deserializer = block if block.is_a? Proc
+      end
+
+      def serializer
+        @serializer || default_serializer
+      end
+
+      def deserializer
+        @deserializer || default_deserializer
+      end
+
+      def default_serializer
+        -> (data) { YAML.dump(data) }
+      end
+
+      def default_deserializer
+        -> (data) { YAML.load(data) }
+      end
+
+      def serialize(data)
+        serializer.call(data)
+      end
+
+      def deserialize(data)
+        deserializer.call(data)
+      end
+
+      def snapshot_serializer=(block)
+        @snapshot_serializer = block if block.is_a? Proc
+      end
+
+      def snapshot_deserializer=(block)
+        @snapshot_deserializer = block if block.is_a? Proc
+      end
+
+      def snapshot_serializer
+        @snapshot_serializer || default_serializer
+      end
+
+      def snapshot_deserializer
+        @snapshot_deserializer || default_deserializer
+      end
+
+      def serialize_snapshot(data)
+        snapshot_serializer.call(data)
+      end
+
+      def deserialize_snapshot data
+        snapshot_deserializer.call(data)
+      end
+
+      
       alias_method :event_stores=, :event_store=
     end
   end

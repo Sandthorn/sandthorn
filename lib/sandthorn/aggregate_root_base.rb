@@ -108,10 +108,16 @@ module Sandthorn
           unless events && !events.empty?
             raise Sandthorn::Errors::AggregateNotFound
           end
+          
+          if first_event_snapshot?(events)
+            transformed_snapshot_event = events.first.merge(event_args: Sandthorn.deserialize_snapshot(events.first[:event_data]))
+            events.shift
+          end
+
           transformed_events = events.map do |e|
             e.merge(event_args: Sandthorn.deserialize(e[:event_data]))
           end
-          aggregate_build transformed_events
+          aggregate_build ([transformed_snapshot_event] + transformed_events).compact
         end
 
         def new *args

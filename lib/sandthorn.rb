@@ -32,15 +32,15 @@ module Sandthorn
       SecureRandom.uuid
     end
 
-    def get_aggregate_events aggregate_type, aggregate_id
+    def get_aggregate_events(aggregate_type, aggregate_id)
       event_store_for(aggregate_type).get_aggregate_events aggregate_id
     end
 
-    def save_events aggregate_events, aggregate_id, aggregate_type
+    def save_events(aggregate_events, aggregate_id, aggregate_type)
       event_store_for(aggregate_type).save_events aggregate_events, aggregate_id, *aggregate_type
     end
 
-    def get_aggregate aggregate_id, aggregate_type
+    def get_aggregate(aggregate_id, aggregate_type)
       event_store_for(aggregate_type).get_aggregate_events_from_snapshot aggregate_id
     end
 
@@ -52,13 +52,17 @@ module Sandthorn
       event_store_for(aggregate_type).save_snapshot(aggregate_snapshot, aggregate_id)
     end
 
-    def get_aggregate_list_by_type aggregate_type
+    def get_aggregate_list_by_type(aggregate_type)
       event_store_for(aggregate_type).get_aggregate_ids(aggregate_type: aggregate_type)
     end
 
-    def get_events(event_store: :default, aggregate_types: [], take: 0, after_sequence_number: 0)
+    def get_events(event_store: :default, aggregate_types: [], take: 0, after_sequence_number: 0) # rubocop:disable MethodLength
       event_store = find_event_store(event_store)
-      events = event_store.get_events aggregate_types: aggregate_types, take: take, after_sequence_number: after_sequence_number
+      events = event_store.get_events(
+        aggregate_types: aggregate_types,
+        take: take,
+        after_sequence_number: after_sequence_number
+      )
       events.map do |event|
         event[:event_args] = deserialize event[:event_data]
         event.delete(:event_data)
@@ -66,8 +70,10 @@ module Sandthorn
       end
     end
 
-    def obsolete_snapshots type_names: [], min_event_distance: 0
-      obsolete = event_stores.flat_map { |event_store| event_store.obsolete_snapshots(aggregate_types: type_names, max_event_distance: min_event_distance) }
+    def obsolete_snapshots(type_names: [], min_event_distance: 0)
+      obsolete = event_stores.flat_map do |event_store|
+        event_store.obsolete_snapshots(aggregate_types: type_names, max_event_distance: min_event_distance)
+      end
       obsolete.map do |single_obsolete|
         type = Kernel.const_get single_obsolete[:aggregate_type]
         type.aggregate_find(single_obsolete[:aggregate_id]).tap do |agg|
@@ -89,7 +95,7 @@ module Sandthorn
     end
 
     def missing_key(key)
-      raise ArgumentError, "missing keyword: #{key}"
+      fail ArgumentError, "missing keyword: #{key}"
     end
 
     class Configuration
@@ -161,7 +167,7 @@ module Sandthorn
         snapshot_serializer.call(data)
       end
 
-      def deserialize_snapshot data
+      def deserialize_snapshot(data)
         snapshot_deserializer.call(data)
       end
 

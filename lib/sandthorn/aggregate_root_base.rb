@@ -100,12 +100,12 @@ module Sandthorn
           id.map { |e| aggregate_find e }
         end
 
-        def aggregate_find(aggregate_id)
+        def aggregate_find(aggregate_id) # rubocop:disable AbcSize, MethodLength
           events = Sandthorn.get_aggregate(aggregate_id, self)
           unless events && !events.empty?
             fail Sandthorn::Errors::AggregateNotFound
           end
-          
+
           if first_event_snapshot?(events)
             transformed_snapshot_event = events.first.merge(event_args: Sandthorn.deserialize_snapshot(events.first[:event_data]))
             events.shift

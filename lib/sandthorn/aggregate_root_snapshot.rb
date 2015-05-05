@@ -43,7 +43,7 @@ module Sandthorn
       end
 
       @aggregate_snapshot[:event_data] = Sandthorn
-        .serialize_snapshot aggregate_snapshot[:event_args]
+                                         .serialize_snapshot aggregate_snapshot[:event_args]
 
       @aggregate_snapshot[:event_args] = nil
       Sandthorn.save_snapshot aggregate_snapshot, aggregate_id

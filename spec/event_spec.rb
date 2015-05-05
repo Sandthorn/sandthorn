@@ -1,50 +1,50 @@
-require 'spec_helper'
+require "spec_helper"
 
 module Sandthorn
   describe Event do
     let(:event_data) do
       JSON.parse(
-      '{"aggregate_type":"SandthornProduct",
-          "aggregate_version":1,
-          "aggregate_id":"62d88e96-c551-4157-a837-1674e3f2698d",
-          "sequence_number":114,
-          "event_name":"new",
-          "timestamp":"2014-08-16 20:02:05 UTC",
-          "event_args":{"method_name":"new",
-          "method_args":[{"name":"Hahah",
-          "price":"50",
-          "stock_status":"outofstock"}],
-          "attribute_deltas":[{"attribute_name":"name",
-          "old_value":null,
-      "new_value":"Hahah"},
-          {"attribute_name":"price",
-          "old_value":null,
-      "new_value":50},
-          {"attribute_name":"stock_status",
-          "old_value":null,
-      "new_value":"outofstock"},
-          {"attribute_name":"active",
-          "old_value":null,
-      "new_value":true},
-          {"attribute_name":"on_sale",
-          "old_value":null,
-      "new_value":false},
-          {"attribute_name":"aggregate_id",
-          "old_value":null,
-      "new_value":"62d88e96-c551-4157-a837-1674e3f2698d"}]}}', symbolize_names: true)
+        '{"aggregate_type":"SandthornProduct",
+            "aggregate_version":1,
+            "aggregate_id":"62d88e96-c551-4157-a837-1674e3f2698d",
+            "sequence_number":114,
+            "event_name":"new",
+            "timestamp":"2014-08-16 20:02:05 UTC",
+            "event_args":{"method_name":"new",
+            "method_args":[{"name":"Hahah",
+            "price":"50",
+            "stock_status":"outofstock"}],
+            "attribute_deltas":[{"attribute_name":"name",
+            "old_value":null,
+        "new_value":"Hahah"},
+            {"attribute_name":"price",
+            "old_value":null,
+        "new_value":50},
+            {"attribute_name":"stock_status",
+            "old_value":null,
+        "new_value":"outofstock"},
+            {"attribute_name":"active",
+            "old_value":null,
+        "new_value":true},
+            {"attribute_name":"on_sale",
+            "old_value":null,
+        "new_value":false},
+            {"attribute_name":"aggregate_id",
+            "old_value":null,
+        "new_value":"62d88e96-c551-4157-a837-1674e3f2698d"}]}}', symbolize_names: true)
     end
 
     let(:subject) { Event.new(event_data) }
     describe "primitive attributes" do
       attrs = %i(
-      aggregate_id
-      aggregate_type
-      aggregate_version
-      timestamp
-      event_name
-      event_args
-      method_args
-      trace
+        aggregate_id
+        aggregate_type
+        aggregate_version
+        timestamp
+        event_name
+        event_args
+        method_args
+        trace
       )
 
       attrs.each do |attr|

@@ -1,4 +1,4 @@
-require 'delegate'
+require "delegate"
 
 module Sandthorn
   class Event < SimpleDelegator

@@ -147,6 +147,17 @@ SandthornDriverSequel.migrate_db url: url
 
 Optionally, when using Sandthorn in your tests you can configure it in a `spec_helper.rb` which is then required by your test suites [example](https://github.com/Sandthorn/sandthorn_examples/blob/master/sandthorn_tictactoe/spec/spec_helper.rb#L20-L30). Note that the Sequel driver accepts a special parameter to empty the database between each test.
 
+Its possible to configure how events and snapshots are serialized / deserialized. The default are YAML but can be overloaded in the configure block.
+
+```ruby
+Sandthorn.configure do |conf|
+  conf.serializer = Proc.new { |data| Oj::dump(data) }
+  conf.deserializer = Proc.new { |data| Oj::load(data) }
+  conf.snapshot_serializer = Proc.new { |data| Oj::dump(data) }
+  conf.snapshot_deserializer = Proc.new { |data| Oj::load(data) }
+end
+```
+
 The Sequel driver is the only production-ready driver to date.
 
 # Usage

@@ -1,21 +1,22 @@
-require 'spec_helper'
-require 'sandthorn/event_inspector'
-require 'sandthorn/aggregate_root_snapshot'
+require "spec_helper"
+require "sandthorn/event_inspector"
+require "sandthorn/aggregate_root_snapshot"
 
 class UsualSuspect
   include Sandthorn::AggregateRoot
 
-  def initialize full_name
+  def initialize(full_name)
     @full_name = full_name
     @charges = []
   end
 
-  def charge_suspect_of_crime! crime_name
+  def charge_suspect_of_crime!(crime_name)
     suspect_was_charged crime_name
   end
-  
+
   private
-  def suspect_was_charged crime_name
+
+  def suspect_was_charged(crime_name)
     @charges << crime_name
     record_event crime_name
   end
@@ -37,7 +38,7 @@ describe "using a traced change" do
       simple = Simple.new
       simple.extend Sandthorn::EventInspector
       simple.extend Sandthorn::AggregateRootSnapshot
-      
+
       simple.extend Go
       simple.aggregate_trace "123" do |traced|
         traced.go
@@ -58,7 +59,7 @@ describe "using a traced change" do
     end
   end
   context "when changing aggregate in a traced context" do
-    let(:suspect) {UsualSuspect.new("Conny").extend Sandthorn::EventInspector}
+    let(:suspect) { UsualSuspect.new("Conny").extend Sandthorn::EventInspector }
     it "should record modififier in the event" do
       suspect.aggregate_trace "Ture Sventon" do |s|
         s.charge_suspect_of_crime! "Theft"
@@ -68,12 +69,12 @@ describe "using a traced change" do
     end
 
     it "should record optional other tracing information" do
-      trace_info = {ip: "127.0.0.1", client: "Mozilla"}
-      suspect.aggregate_trace trace_info do |s| 
-        s.charge_suspect_of_crime! "Murder"       
+      trace_info = { ip: "127.0.0.1", client: "Mozilla" }
+      suspect.aggregate_trace trace_info do |s|
+        s.charge_suspect_of_crime! "Murder"
       end
       event = suspect.events_with_trace_info.last
-      expect(event[:trace]).to eql trace_info 
+      expect(event[:trace]).to eql trace_info
     end
   end
   context "when initializing a new aggregate in a traced context" do
@@ -85,7 +86,7 @@ describe "using a traced change" do
       end
     end
     it "should record tracing for all events in the trace block" do
-      trace_info = {gender: :unknown, occupation: :master} 
+      trace_info = { gender: :unknown, occupation: :master }
       UsualSuspect.aggregate_trace trace_info do
         suspect = UsualSuspect.new("Sonny").extend Sandthorn::EventInspector
         suspect.charge_suspect_of_crime! "Hit and run"
@@ -94,7 +95,7 @@ describe "using a traced change" do
       end
     end
     it "should record tracing for all events in the trace block" do
-      trace_info = {user_aggregate_id: "foo-bar-x", gender: :unknown, occupation: :master} 
+      trace_info = { user_aggregate_id: "foo-bar-x", gender: :unknown, occupation: :master }
       UsualSuspect.aggregate_trace trace_info do
         suspect = UsualSuspect.new("Conny").extend Sandthorn::EventInspector
         suspect.charge_suspect_of_crime! "Desception"
@@ -102,6 +103,5 @@ describe "using a traced change" do
         expect(event[:trace]).to eql trace_info
       end
     end
-  end 
-
+  end
 end

@@ -10,8 +10,8 @@ module Sandthorn
 
     def aggregate_snapshot!
       if @aggregate_events.count > 0
-        raise Errors::SnapshotError,
-          "Can't take snapshot on object with unsaved events"
+        fail Errors::SnapshotError,
+             "Can't take snapshot on object with unsaved events"
       end
 
       @aggregate_snapshot = {
@@ -23,15 +23,17 @@ module Sandthorn
 
     def save_snapshot
       unless aggregate_snapshot
-        raise Errors::SnapshotError, "No snapshot has been created!"
+        fail Errors::SnapshotError, "No snapshot has been created!"
       end
       @aggregate_snapshot[:event_data] = Sandthorn.serialize_snapshot @aggregate_snapshot[:event_args]
       @aggregate_snapshot[:event_args] = nil
       Sandthorn.save_snapshot(aggregate_snapshot: @aggregate_snapshot, aggregate_id: @aggregate_id, aggregate_type: self.class)
       @aggregate_snapshot = nil
     end
+
     private
-    def aggregate_create_event_when_extended
+
+    def aggregate_create_event_when_extended # rubocop:disable AbcSize, MethodLength
       self.aggregate_snapshot!
       vars = extract_relevant_aggregate_instance_variables
       vars.each do |var_name|
@@ -41,7 +43,7 @@ module Sandthorn
       end
 
       @aggregate_snapshot[:event_data] = Sandthorn
-        .serialize_snapshot aggregate_snapshot[:event_args]
+                                         .serialize_snapshot aggregate_snapshot[:event_args]
 
       @aggregate_snapshot[:event_args] = nil
       Sandthorn.save_snapshot aggregate_snapshot, aggregate_id

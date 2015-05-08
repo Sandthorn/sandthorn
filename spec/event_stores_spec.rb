@@ -1,4 +1,4 @@
-require 'spec_helper'
+require "spec_helper"
 
 module Sandthorn
   describe EventStores do
@@ -17,8 +17,8 @@ module Sandthorn
       context "when given number of stores" do
         it "adds them all" do
           stores = {
-              default: double,
-              other: double
+            default: double,
+            other: double
           }
           repo = EventStores.new(stores)
           expect(repo.by_name(:default)).to eq(stores[:default])

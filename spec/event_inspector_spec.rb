@@ -19,7 +19,7 @@
 #   end
 #   def new_damaged_item_was_added hello
 #     record_event hello
-#   end 
+#   end
 # end
 
 # module Sandthorn
@@ -51,7 +51,7 @@
 #     context "when inspecting non saved events" do
 #       context "with no tracing information" do
 #         let(:subject) { aggregate.this_is_an_event;aggregate }
-        
+
 #         it "should have the new event" do
 #           subject.has_event?(:new).should be_true
 #         end
@@ -70,7 +70,7 @@
 #           end
 #           aggregate
 #         end
-        
+
 #         it "should report true on has_unsaved_event? :this_is_an_event" do
 #           subject.has_unsaved_event?(:this_is_an_event, trace: {user_id: 123, ip: "1234"}).should be_true
 #         end
@@ -79,11 +79,11 @@
 #           subject.has_unsaved_event?(:this_is_an_event, trace: {another_user_id: 123}).should be_false
 #         end
 #       end
-#     end 
+#     end
 #     context "when inspecting saved events" do
 #       context "with no tracing information" do
 #         let(:subject) { aggregate.this_is_an_event;aggregate.save;aggregate }
-        
+
 #         it "should report true on has_unsaved_event? :this_is_an_event" do
 #           subject.has_saved_event?(:this_is_an_event).should be_true
 #         end
@@ -99,7 +99,7 @@
 #           aggregate.save
 #           aggregate
 #         end
-        
+
 #         it "should report true on has_unsaved_event? :this_is_an_event" do
 #           subject.has_saved_event?(:this_is_an_event, trace: {user_id: 123, ip: "1234"}).should be_true
 #         end
@@ -110,7 +110,7 @@
 #         it "should be able to check complex trace" do
 #           subject.aggregate_trace client_ip: "10", user_id: "123" do |trace|
 #             trace.new_damaged_item_was_added "foobar"
-#             trace.save  
+#             trace.save
 #           end
 #           subject.has_saved_event?(:new_damaged_item_was_added, trace: {user_id: "123", client_ip: "10"})
 #         end
@@ -119,7 +119,7 @@
 #     context "when inspecting any events" do
 #       context "with no tracing information" do
 #         let(:subject) { aggregate.this_is_an_event;aggregate.save;aggregate.another_event;aggregate }
-        
+
 #         it "should report true on has_unsaved_event? :this_is_an_event" do
 #           subject.has_event?(:this_is_an_event).should be_true
 #           subject.has_event?(:another_event).should be_true
@@ -137,7 +137,7 @@
 #           end
 #           aggregate
 #         end
-        
+
 #         it "should report true on has_unsaved_event? :this_is_an_event" do
 #           subject.has_event?(:this_is_an_event, trace: {user_id: 123, ip: "1234"}).should be_true
 #           subject.has_event?(:another_event, trace: {user_id: 123, ip: "1234"}).should be_true

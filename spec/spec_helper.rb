@@ -4,7 +4,7 @@
 # loaded once.
 #
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
-require 'coveralls'
+require "coveralls"
 Coveralls.wear!
 require "ap"
 require "bundler"
@@ -15,8 +15,15 @@ Bundler.require
 
 module Helpers
   def class_including(mod)
-    Class.new.tap {|c| c.send :include, mod }
+    Class.new.tap { |c| c.send :include, mod }
   end
+end
+
+Sandthorn.configure do |c|
+  c.serializer = proc { |data| YAML.dump(data) }
+  c.deserializer = proc { |data| YAML.load(data) }
+  c.snapshot_serializer = proc { |data| YAML.dump(data) }
+  c.snapshot_deserializer = proc { |data| YAML.load(data) }
 end
 
 RSpec.configure do |config|
@@ -28,22 +35,19 @@ RSpec.configure do |config|
   # order dependency and want to debug it, you can fix the order by providing
   # the seed, which is printed after each run.
   #     --seed 1234
-  config.order = 'random'
+  config.order = "random"
   config.before(:each) { sqlite_store_setup }
 end
 
 def spec_db
   "sqlite://spec/db/sequel_driver.sqlite3"
 end
+
 def sqlite_store_setup
-  url = spec_db 
+  url = spec_db
   driver = SandthornDriverSequel.driver_from_url(url: url)
   Sandthorn.configure do |c|
     c.event_store = driver
-    c.serializer = Proc.new { |data| YAML::dump(data) }
-    c.deserializer = Proc.new { |data| YAML::load(data) }
-    c.snapshot_serializer = Proc.new { |data| YAML::dump(data) }
-    c.snapshot_deserializer = Proc.new { |data| YAML::load(data) }
   end
   migrator = SandthornDriverSequel::Migration.new url: url
   SandthornDriverSequel.migrate_db url: url

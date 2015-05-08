@@ -1,9 +1,14 @@
-require 'spec_helper'
+require "spec_helper"
 
 class AnAggregate
   include Sandthorn::AggregateRoot
-  def touch; touched; end
-  def touched; commit; end
+  def touch
+    touched
+  end
+
+  def touched
+    commit
+  end
 end
 
 module Outer
@@ -13,11 +18,11 @@ module Outer
 end
 
 describe Sandthorn do
-  before(:each) {
+  before(:each) do
     @aggregate = AnAggregate.new
     @aggregate.touch
     @aggregate.save
-  }
+  end
 
   describe "::obsolete_snapshot" do
     it "retrieves a list of obsolete snapshots" do
@@ -38,7 +43,6 @@ describe Sandthorn do
     end
 
     context "when the aggregate has been declared in a module" do
-
       before do
         Outer::Inner::OtherAggregate.new.tap do |agg|
           agg.touch

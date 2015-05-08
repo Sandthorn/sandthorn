@@ -1,4 +1,4 @@
-require 'forwardable'
+require "forwardable"
 
 module Sandthorn
   class EventStores
@@ -8,7 +8,7 @@ module Sandthorn
     def_delegators :stores, :each
 
     def initialize(stores = nil)
-      @store_map = Hash.new
+      @store_map = {}
       add_initial(stores)
     end
 
@@ -45,20 +45,19 @@ module Sandthorn
     attr_reader :store_map
 
     def add_initial(store)
-      if is_event_store?(store)
+      if event_store?(store)
         self.default_store = store
-      elsif is_many_event_stores?(store)
+      elsif many_event_stores?(store)
         add_many(store)
       end
     end
 
-    def is_many_event_stores?(store)
+    def many_event_stores?(store)
       store.respond_to?(:each_pair)
     end
 
-    def is_event_store?(store)
+    def event_store?(store)
       store.respond_to?(:get_events)
     end
-
   end
 end

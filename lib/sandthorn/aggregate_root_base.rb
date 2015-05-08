@@ -1,7 +1,6 @@
 module Sandthorn
   module AggregateRoot
     module Base
-
       attr_reader :aggregate_id
       attr_reader :aggregate_events
       attr_reader :aggregate_current_event_version
@@ -9,8 +8,7 @@ module Sandthorn
       attr_reader :aggregate_stored_serialized_object
       attr_reader :aggregate_trace_information
 
-      alias :id :aggregate_id
-
+      alias_method :id, :aggregate_id
 
       def aggregate_base_initialize
         @aggregate_current_event_version = 0
@@ -18,10 +16,10 @@ module Sandthorn
         @aggregate_events = []
       end
 
-      def save
+      def save # rubocop:disable MethodLength
         aggregate_events.each do |event|
           event[:event_data] = Sandthorn.serialize event[:event_args]
-          event[:event_args] = nil #Not send extra data over the wire
+          event[:event_args] = nil # Not send extra data over the wire
         end
 
         unless aggregate_events.empty?
@@ -41,17 +39,17 @@ module Sandthorn
         other.respond_to?(:aggregate_id) && aggregate_id == other.aggregate_id
       end
 
-      def aggregate_trace args
+      def aggregate_trace(args)
         @aggregate_trace_information = args
         yield self if block_given?
         @aggregate_trace_information = nil
       end
 
-      def commit *args
+      def commit(*args) # rubocop:disable MethodLength
         aggregate_attribute_deltas = get_delta
 
         unless aggregate_attribute_deltas.empty?
-          method_name = caller_locations(1,1)[0].label.gsub(/block ?(.*) in /, "")
+          method_name = caller_locations(1, 1)[0].label.gsub(/block ?(.*) in /, "")
           increase_current_aggregate_version!
 
           data = {
@@ -61,7 +59,7 @@ module Sandthorn
           }
           trace_information = @aggregate_trace_information
           unless trace_information.nil? || trace_information.empty?
-            data.merge!({ trace: trace_information })
+            data.merge!(trace: trace_information)
           end
 
           @aggregate_events << ({
@@ -74,15 +72,14 @@ module Sandthorn
         self
       end
 
-      alias :record_event :commit
+      alias_method :record_event, :commit
 
       module ClassMethods
-
-        @@aggregate_trace_information = nil
-        def aggregate_trace args
-          @@aggregate_trace_information = args
+        @aggregate_trace_information = nil
+        def aggregate_trace(args)
+          @aggregate_trace_information = args
           yield self
-          @@aggregate_trace_information = nil
+          @aggregate_trace_information = nil
         end
 
         def event_store(event_store = nil)
@@ -98,17 +95,17 @@ module Sandthorn
           find aggregate_id_list
         end
 
-        def find id
+        def find(id)
           return aggregate_find id unless id.respond_to?(:each)
-          return id.map { |e| aggregate_find e }
+          id.map { |e| aggregate_find e }
         end
 
-        def aggregate_find aggregate_id
+        def aggregate_find(aggregate_id) # rubocop:disable AbcSize, MethodLength
           events = Sandthorn.get_aggregate(aggregate_id, self)
           unless events && !events.empty?
-            raise Sandthorn::Errors::AggregateNotFound
+            fail Sandthorn::Errors::AggregateNotFound
           end
-          
+
           if first_event_snapshot?(events)
             transformed_snapshot_event = events.first.merge(event_args: Sandthorn.deserialize_snapshot(events.first[:event_data]))
             events.shift
@@ -117,12 +114,13 @@ module Sandthorn
           transformed_events = events.map do |e|
             e.merge(event_args: Sandthorn.deserialize(e[:event_data]))
           end
-          aggregate_build ([transformed_snapshot_event] + transformed_events).compact
+          events = [transformed_snapshot_event] + transformed_events
+          aggregate_build(events.compact)
         end
 
-        def new *args
+        def new(*args)
           super.tap do |aggregate|
-            aggregate.aggregate_trace @@aggregate_trace_information do |aggr|
+            aggregate.aggregate_trace(@aggregate_trace_information) do |aggr|
               aggr.aggregate_base_initialize
               aggr.aggregate_initialize
               aggr.send :set_aggregate_id, Sandthorn.generate_aggregate_id
@@ -132,7 +130,7 @@ module Sandthorn
           end
         end
 
-        def aggregate_build events
+        def aggregate_build(events) # rubocop:disable AbcSize, MethodLength
           current_aggregate_version = 0
 
           if first_event_snapshot?(events)
@@ -155,26 +153,24 @@ module Sandthorn
 
         private
 
-        def build_instance_vars_from_events events
+        def build_instance_vars_from_events(events)
           events.each_with_object({}) do |event, instance_vars|
             event_args = event[:event_args]
-            event_name = event[:event_name]
             attribute_deltas = event_args[:attribute_deltas]
-            unless attribute_deltas.nil?
-              deltas = attribute_deltas.each_with_object({}) do |delta, acc|
-                acc[delta[:attribute_name]] = delta[:new_value]
-              end
-              instance_vars.merge! deltas
+            next if attribute_deltas.nil?
+            deltas = attribute_deltas.each_with_object({}) do |delta, acc|
+              acc[delta[:attribute_name]] = delta[:new_value]
             end
+            instance_vars.merge! deltas
           end
         end
 
-        def first_event_snapshot? events
+        def first_event_snapshot?(events)
           events.first[:event_name].to_sym == :aggregate_set_from_snapshot
         end
 
-        def start_build_from_snapshot events
-          snapshot = events.first[:event_args][0]
+        def start_build_from_snapshot(events)
+          events.first[:event_args][0]
         end
 
         def create_new_empty_aggregate
@@ -184,9 +180,9 @@ module Sandthorn
 
       private
 
-      def set_instance_variables! attributes
-        attributes.each_pair do |k,v|
-          self.instance_variable_set "@#{k}", v
+      def set_instance_variables!(attributes)
+        attributes.each_pair do |k, v|
+          instance_variable_set "@#{k}", v
         end
       end
 
@@ -199,7 +195,7 @@ module Sandthorn
         end
       end
 
-      def set_orginating_aggregate_version! aggregate_version
+      def set_orginating_aggregate_version!(aggregate_version)
         @aggregate_originating_version = aggregate_version
       end
 
@@ -207,7 +203,7 @@ module Sandthorn
         @aggregate_current_event_version += 1
       end
 
-      def set_current_aggregate_version! aggregate_version
+      def set_current_aggregate_version!(aggregate_version)
         @aggregate_current_event_version = aggregate_version
       end
 
@@ -219,10 +215,9 @@ module Sandthorn
         @aggregate_current_event_version = 0
       end
 
-      def set_aggregate_id aggregate_id
+      def set_aggregate_id(aggregate_id)
         @aggregate_id = aggregate_id
       end
-
     end
   end
 end

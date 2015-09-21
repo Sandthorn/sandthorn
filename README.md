@@ -23,7 +23,7 @@ If you have been following [Uncle Bob](http://blog.8thlight.com/uncle-bob/2014/0
 Check out examples of Sandthorn:
 
 * [Examples](https://github.com/Sandthorn/sandthorn_examples) including a product shop and TicTacToe game.
-* Live [demo](http://demo.sandthorn.org) comparing Active Record and Sandthorn.
+* Live [demo](http://infinite-mesa-8629.herokuapp.com/) comparing Active Record and Sandthorn.
 
 ## How do I use Sandthorn?
 

@@ -85,7 +85,7 @@ module Sandthorn
       end
     end
 
-    describe "#mapp_aggregate_type_to_event_store" do
+    describe "#map_aggregate_type_to_event_store" do
 
       let(:klass) {
         class AnAggregate 
@@ -93,15 +93,15 @@ module Sandthorn
         end
       }
 
-      it "mapps the aggregate_type to the event_store" do
+      it "maps the aggregate_type to the event_store" do
         store = double
         stores.add(:foo, store)
-        stores.mapp_aggregate_type_to_event_store(klass, :foo)
+        stores.map_aggregate_type_to_event_store(klass, :foo)
         expect(klass.event_store).to eq(:foo)
       end
     end
 
-    describe "#mapp_aggregate_types_to_event_store" do
+    describe "#map_aggregate_types_to_event_store" do
 
       let(:klass) {
         class AnAggregate 
@@ -109,10 +109,10 @@ module Sandthorn
         end
       }
 
-      it "mapps an array of aggregate_types to event_stores" do
+      it "maps an array of aggregate_types to event_stores" do
         store = double
         stores.add(:foo, store)
-        stores.mapp_aggregate_types_to_event_store([{ aggregate_type: klass, event_store: :foo }])
+        stores.map_aggregate_types_to_event_store([{ aggregate_type: klass, event_store: :foo }])
         expect(klass.event_store).to eq(:foo)
       end
     end

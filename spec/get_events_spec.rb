@@ -66,7 +66,7 @@ describe Sandthorn do
     url = "sqlite://spec/db/other_db.sqlite3"
     driver = SandthornDriverSequel.driver_from_url(url: url)
     Sandthorn.event_stores.add(:other, driver)
-    Sandthorn.event_stores.mapp_aggregate_type_to_event_store(AnotherAggregate, :other)
+    Sandthorn.event_stores.map_aggregate_type_to_event_store(AnotherAggregate, :other)
     migrator = SandthornDriverSequel::Migration.new url: url
     SandthornDriverSequel.migrate_db url: url
     migrator.send(:clear_for_test)

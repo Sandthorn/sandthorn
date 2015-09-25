@@ -44,9 +44,9 @@ module Sandthorn
       aggregate_type.event_store(event_store)
     end
 
-    def map_aggregate_types_to_event_store(array = [])
-      array.each do |item|
-        map_aggregate_type_to_event_store(item[:aggregate_type], item[:event_store]) if(item[:aggregate_type] && item[:event_store])
+    def map_aggregate_types_to_event_store(aggregate_types = [], event_store)
+      aggregate_types.each do |aggregate_type|
+        map_aggregate_type_to_event_store(aggregate_type, event_store)
       end
     end
 

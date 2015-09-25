@@ -112,7 +112,7 @@ module Sandthorn
       it "maps an array of aggregate_types to event_stores" do
         store = double
         stores.add(:foo, store)
-        stores.map_aggregate_types_to_event_store([{ aggregate_type: klass, event_store: :foo }])
+        stores.map_aggregate_types_to_event_store([klass], :foo)
         expect(klass.event_store).to eq(:foo)
       end
     end

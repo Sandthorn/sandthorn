@@ -4,6 +4,13 @@ module Sandthorn
   describe EventStores do
     let(:stores) { EventStores.new }
 
+    before do
+      class AnAggregate 
+        include Sandthorn::AggregateRoot
+      end
+    end
+    
+
     describe "#initialize" do
       context "when given a single event_store" do
         it "sets it as the default event store" do
@@ -75,6 +82,38 @@ module Sandthorn
         store = double
         stores.add(:foo, store)
         expect(stores[:foo]).to eq(store)
+      end
+    end
+
+    describe "#mapp_aggregate_type_to_event_store" do
+
+      let(:klass) {
+        class AnAggregate 
+          include Sandthorn::AggregateRoot
+        end
+      }
+
+      it "mapps the aggregate_type to the event_store" do
+        store = double
+        stores.add(:foo, store)
+        stores.mapp_aggregate_type_to_event_store(klass, :foo)
+        expect(klass.event_store).to eq(:foo)
+      end
+    end
+
+    describe "#mapp_aggregate_types_to_event_store" do
+
+      let(:klass) {
+        class AnAggregate 
+          include Sandthorn::AggregateRoot
+        end
+      }
+
+      it "mapps an array of aggregate_types to event_stores" do
+        store = double
+        stores.add(:foo, store)
+        stores.mapp_aggregate_types_to_event_store([{ aggregate_type: klass, event_store: :foo }])
+        expect(klass.event_store).to eq(:foo)
       end
     end
   end

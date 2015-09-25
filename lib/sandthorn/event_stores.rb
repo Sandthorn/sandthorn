@@ -40,6 +40,16 @@ module Sandthorn
       store_map.values
     end
 
+    def mapp_aggregate_type_to_event_store(aggregate_type, event_store)
+      aggregate_type.event_store(event_store)
+    end
+
+    def mapp_aggregate_types_to_event_store(array = [])
+      array.each do |item|
+        mapp_aggregate_type_to_event_store(item[:aggregate_type], item[:event_store]) if(item[:aggregate_type] && item[:event_store])
+      end
+    end
+
     private
 
     attr_reader :store_map

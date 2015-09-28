@@ -40,13 +40,9 @@ module Sandthorn
       store_map.values
     end
 
-    def map_aggregate_type_to_event_store(aggregate_type, event_store)
-      aggregate_type.event_store(event_store)
-    end
-
-    def map_aggregate_types_to_event_store(aggregate_types = [], event_store)
-      aggregate_types.each do |aggregate_type|
-        map_aggregate_type_to_event_store(aggregate_type, event_store)
+    def map_types(hash)
+      hash.each_pair do |event_store, aggregate_types|
+        map_aggregate_types_to_event_store(aggregate_types, event_store)
       end
     end
 
@@ -68,6 +64,16 @@ module Sandthorn
 
     def is_event_store?(store)
       store.respond_to?(:get_events)
+    end
+
+    def map_aggregate_type_to_event_store(aggregate_type, event_store)
+      aggregate_type.event_store(event_store)
+    end
+
+    def map_aggregate_types_to_event_store(aggregate_types = [], event_store)
+      aggregate_types.each do |aggregate_type|
+        map_aggregate_type_to_event_store(aggregate_type, event_store)
+      end
     end
 
   end

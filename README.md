@@ -158,6 +158,11 @@ The Sequel driver is the only production-ready driver to date.
 Its possible to map aggregate_types to events stores from the configuration setup. This makes it possible to work with data from different stores that are using the same context, and will override any event_store setting within an aggregate.
 
 ```ruby
+url_foo = "sqlite://spec/db/sequel_driver_foo.sqlite3"
+driver_foo = SandthornDriverSequel.driver_from_url(url: url_foo)
+
+url_bar = "sqlite://spec/db/sequel_driver_bar.sqlite3"
+driver_bar = SandthornDriverSequel.driver_from_url(url: url_bar)
 
 class AnAggregate
   Include Sandthorn::AggregateRoot
@@ -168,7 +173,7 @@ class AnOtherAggregate
 end
 
 Sandthorn.configure do |conf|
-  conf.event_stores = { foo: driver, bar: other_driver }
+  conf.event_stores = { foo: driver_foo, bar: driver_bar }
   conf.map_types = { foo: [AnAggregate], bar: [AnOtherAggregate] }
 end
 ```

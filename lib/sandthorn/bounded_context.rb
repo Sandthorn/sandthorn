@@ -1,7 +1,7 @@
 module Sandthorn
   module BoundedContext
     module ClassMethods
-      def aggregate_list()
+      def aggregate_list
         @aggregate_list = p_aggregate_list(self)
       end
 

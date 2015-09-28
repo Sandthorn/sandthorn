@@ -27,21 +27,19 @@ module Sandthorn
       end
     end
 
-    context "when namespace holds one aggregate" do
 
-      it "aggregate_list should include AnAggregate" do
-        expect(TestModule.aggregate_list).to include(TestModule::AnAggregate)
-      end
-
-      it "aggregate_list should not include NotAnAggregate" do
-        expect(TestModule.aggregate_list).not_to include(TestModule::NotAnAggregate)
-      end
-
-      it "aggregate_list should include DeepAnAggregate in a nested Module" do
-        expect(TestModule.aggregate_list).to include(TestModule::Deep::DeepAggregate)
-      end
-
+    it "aggregate_list should include AnAggregate" do
+      expect(TestModule.aggregate_list).to include(TestModule::AnAggregate)
     end
+
+    it "aggregate_list should not include NotAnAggregate" do
+      expect(TestModule.aggregate_list).not_to include(TestModule::NotAnAggregate)
+    end
+
+    it "aggregate_list should include DeepAnAggregate in a nested Module" do
+      expect(TestModule.aggregate_list).to include(TestModule::Deep::DeepAggregate)
+    end
+
 
   end
 end

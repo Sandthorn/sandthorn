@@ -255,9 +255,9 @@ In this case, the resulting events from the commands `new` and `mark` will have 
 
 ## Bounded Context
 
-A bounded context is a system divider that split large systems into smaller parts. [Bounded Context](http://martinfowler.com/bliki/BoundedContext.html) by Martin Fowler
+A bounded context is a system divider that split large systems into smaller parts. [Bounded Context by Martin Fowler](http://martinfowler.com/bliki/BoundedContext.html) 
 
-A module can include `Sandthorn::BoundedContext` and all aggregates within the module can be retreived via the ::aggregate_list method on the module. A use case is to use it when Sandthorn is configured and setup a bounded context with a driver.
+A module can include `Sandthorn::BoundedContext` and all aggregates within the module can be retreived via the ::aggregate_list method on the module. A use case is to use it when Sandthorn is configured and setup all aggregates in a bounded context to a driver.
 
 ```ruby
 require 'sandthorn/bounded_context'

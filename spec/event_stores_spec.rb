@@ -85,36 +85,34 @@ module Sandthorn
       end
     end
 
-    describe "#map_aggregate_type_to_event_store" do
+    describe "#map_types" do
 
-      let(:klass) {
-        class AnAggregate 
+      context "map two events stores" do
+        
+        class AnAggregate1
           include Sandthorn::AggregateRoot
         end
-      }
 
-      it "maps the aggregate_type to the event_store" do
-        store = double
-        stores.add(:foo, store)
-        stores.map_types(foo: [klass])
-        expect(klass.event_store).to eq(:foo)
+        class AnAggregate2
+          include Sandthorn::AggregateRoot
+        end
+
+        before do
+          store = double
+          stores.add(:foo, store)
+          stores.add(:bar, store)
+          stores.map_types(foo: [AnAggregate1], bar: [AnAggregate2])
+        end
+
+        it "should map event_store foo to AnAggregate1" do
+          expect(AnAggregate1.event_store).to eq(:foo)
+        end
+
+        it "should map event_store bar to AnAggregate2" do
+          expect(AnAggregate2.event_store).to eq(:bar)
+        end
       end
     end
 
-    describe "#map_aggregate_types_to_event_store" do
-
-      let(:klass) {
-        class AnAggregate 
-          include Sandthorn::AggregateRoot
-        end
-      }
-
-      it "maps an array of aggregate_types to event_stores" do
-        store = double
-        stores.add(:foo, store)
-        stores.map_types(foo: [klass])
-        expect(klass.event_store).to eq(:foo)
-      end
-    end
   end
 end

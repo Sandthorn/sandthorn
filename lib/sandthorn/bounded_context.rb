@@ -1,12 +1,12 @@
 module Sandthorn
   module BoundedContext
-
     module ClassMethods
       def aggregate_list()
         @aggregate_list = p_aggregate_list(self)
       end
 
       private
+      
       def p_aggregate_list(bounded_context_module)
         return [] unless bounded_context_module.respond_to?(:constants)
         
@@ -30,6 +30,5 @@ module Sandthorn
     def self.included( other )
       other.extend( ClassMethods )
     end
-
   end
 end

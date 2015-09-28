@@ -3,14 +3,12 @@ require 'sandthorn/bounded_context'
 
 module Sandthorn
   describe BoundedContext do
-  
     it 'should respond to `aggregate_list`' do
       expect(BoundedContext).to respond_to(:aggregate_list)
     end
   end
 
   describe "::aggregate_list" do
-    
     module TestModule
       include Sandthorn::BoundedContext
       class AnAggregate 
@@ -26,7 +24,6 @@ module Sandthorn
         end
       end
     end
-
 
     it "aggregate_list should include AnAggregate" do
       expect(TestModule.aggregate_list).to include(TestModule::AnAggregate)

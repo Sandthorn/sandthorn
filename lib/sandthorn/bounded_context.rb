@@ -17,9 +17,7 @@ module Sandthorn
           classes.include?(mo) || mo == Sandthorn::BoundedContext::ClassMethods
         end
         
-        modules.each do |mo|
-          aggregate_list.concat(p_aggregate_list(mo))
-        end
+        aggregate_list += modules.flat_map { |mo| p_aggregate_list(mo) }
         
         aggregate_list
       end

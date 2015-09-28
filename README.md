@@ -119,11 +119,14 @@ Or install it yourself as:
 
 # Configuring Sandthorn
 
-Sandthorn relies on a driver is specific to the data storage that you are using. This means Sandthorn can be used with any data storage given that a driver exists.
+## Driver
+
+Sandthorn relies on a driver that is specific to the data storage that you are using. This means Sandthorn can be used with any data storage given that a driver exists.
 
 To setup a driver you need to add it to your project's Gemfile and configure it in your application code.
 
     gem 'sandthorn_driver_sequel'
+
 
 The driver is configured when your application launches. Here's an example of how to do it using the Sequel driver and a sqlite3 database.
 
@@ -147,6 +150,31 @@ SandthornDriverSequel.migrate_db url: url
 
 Optionally, when using Sandthorn in your tests you can configure it in a `spec_helper.rb` which is then required by your test suites [example](https://github.com/Sandthorn/sandthorn_examples/blob/master/sandthorn_tictactoe/spec/spec_helper.rb#L20-L30). Note that the Sequel driver accepts a special parameter to empty the database between each test.
 
+The Sequel driver is the only production-ready driver to date.
+
+
+## Map aggregate types to event stores
+
+Its possible to map aggregate_types to events stores from the configuration setup. This makes it possible to work with data from different stores that are using the same context, and will override any event_store setting within an aggregate.
+
+```ruby
+
+class AnAggregate
+  Include Sandthorn::AggregateRoot
+end
+
+class AnOtherAggregate
+  Include Sandthorn::AggregateRoot
+end
+
+Sandthorn.configure do |conf|
+  conf.event_stores = { foo: driver, bar: other_driver }
+  conf.map_types = { foo: [AnAggregate], bar: [AnOtherAggregate] }
+end
+```
+
+## Data serialization / deserialization
+
 Its possible to configure how events and snapshots are serialized / deserialized. The default are YAML but can be overloaded in the configure block.
 
 ```ruby
@@ -158,7 +186,6 @@ Sandthorn.configure do |conf|
 end
 ```
 
-The Sequel driver is the only production-ready driver to date.
 
 # Usage
 

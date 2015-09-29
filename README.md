@@ -194,6 +194,8 @@ end
 
 # Usage
 
+## Aggregate Root
+
 Any object that should have event sourcing capability must include the methods provided by `Sandthorn::AggregateRoot`. These make it possible to `commit` events and `save` changes to an aggregate. Use the `include` directive as follows:
 
 ```ruby
@@ -283,6 +285,30 @@ end
 
 In this case, the resulting events from the commands `new` and `mark` will have the trace `{ip: :127.0.0.1}` attached to them.
 
+## Bounded Context
+
+A bounded context is a system divider that split large systems into smaller parts. [Bounded Context by Martin Fowler](http://martinfowler.com/bliki/BoundedContext.html) 
+
+A module can include `Sandthorn::BoundedContext` and all aggregates within the module can be retreived via the ::aggregate_types method on the module. A use case is to use it when Sandthorn is configured and setup all aggregates in a bounded context to a driver.
+
+```ruby
+require 'sandthorn/bounded_context'
+
+module TicTacToe
+  include Sandthorn::BoundedContext
+
+  class Board
+    include Sandthorn::AggregateRoot
+  end
+end
+
+Sandthorn.configure do |conf|
+  conf.event_stores = { foo: driver_foo}
+  conf.map_types = { foo: TicTacToe.aggregate_types }
+end
+
+TicTacToe.aggregate_types -> [TicTacToy::Board]
+```
 
 # Development
 

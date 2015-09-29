@@ -257,7 +257,7 @@ In this case, the resulting events from the commands `new` and `mark` will have 
 
 A bounded context is a system divider that split large systems into smaller parts. [Bounded Context by Martin Fowler](http://martinfowler.com/bliki/BoundedContext.html) 
 
-A module can include `Sandthorn::BoundedContext` and all aggregates within the module can be retreived via the ::aggregate_list method on the module. A use case is to use it when Sandthorn is configured and setup all aggregates in a bounded context to a driver.
+A module can include `Sandthorn::BoundedContext` and all aggregates within the module can be retreived via the ::aggregate_types method on the module. A use case is to use it when Sandthorn is configured and setup all aggregates in a bounded context to a driver.
 
 ```ruby
 require 'sandthorn/bounded_context'
@@ -272,10 +272,10 @@ end
 
 Sandthorn.configure do |conf|
   conf.event_stores = { foo: driver_foo}
-  conf.map_types = { foo: TicTacToe.aggregate_list }
+  conf.map_types = { foo: TicTacToe.aggregate_types }
 end
 
-TicTacToe.aggregate_list -> [TicTacToy::Board]
+TicTacToe.aggregate_types -> [TicTacToy::Board]
 ```
 
 # Development

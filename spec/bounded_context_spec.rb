@@ -3,12 +3,12 @@ require 'sandthorn/bounded_context'
 
 module Sandthorn
   describe BoundedContext do
-    it 'should respond to `aggregate_list`' do
-      expect(BoundedContext).to respond_to(:aggregate_list)
+    it 'should respond to `aggregate_types`' do
+      expect(BoundedContext).to respond_to(:aggregate_types)
     end
   end
 
-  describe "::aggregate_list" do
+  describe "::aggregate_types" do
     module TestModule
       include Sandthorn::BoundedContext
       class AnAggregate 
@@ -25,16 +25,16 @@ module Sandthorn
       end
     end
 
-    it "aggregate_list should include AnAggregate" do
-      expect(TestModule.aggregate_list).to include(TestModule::AnAggregate)
+    it "aggregate_types should include AnAggregate" do
+      expect(TestModule.aggregate_types).to include(TestModule::AnAggregate)
     end
 
-    it "aggregate_list should not include NotAnAggregate" do
-      expect(TestModule.aggregate_list).not_to include(TestModule::NotAnAggregate)
+    it "aggregate_types should not include NotAnAggregate" do
+      expect(TestModule.aggregate_types).not_to include(TestModule::NotAnAggregate)
     end
 
-    it "aggregate_list should include DeepAnAggregate in a nested Module" do
-      expect(TestModule.aggregate_list).to include(TestModule::Deep::DeepAggregate)
+    it "aggregate_types should include DeepAnAggregate in a nested Module" do
+      expect(TestModule.aggregate_types).to include(TestModule::Deep::DeepAggregate)
     end
   end
 end

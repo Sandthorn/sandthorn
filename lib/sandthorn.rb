@@ -167,6 +167,10 @@ module Sandthorn
         snapshot_deserializer.call(data)
       end
 
+      def map_types= data
+        @event_stores.map_types data
+      end
+
       
       alias_method :event_stores=, :event_store=
     end

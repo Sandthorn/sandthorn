@@ -60,4 +60,13 @@ describe Sandthorn do
       end
     end
   end
+
+  describe "::configure" do
+
+    it "should respond_to map_types=" do
+      Sandthorn.configure do |conf|
+        expect(conf).to respond_to(:map_types=)
+      end
+    end
+  end
 end

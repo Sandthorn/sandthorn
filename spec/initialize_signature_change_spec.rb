@@ -12,7 +12,10 @@ def change_init
     define_method :initialize, lambda { @foo = :foo }
   end
 end
+
+
 describe "when the initialize-method changes" do
+
   it "should be possible to replay anyway" do
     aggregate = InitChange.new foo: :bar
     events = aggregate.aggregate_events
@@ -22,4 +25,29 @@ describe "when the initialize-method changes" do
     replayed = InitChange.aggregate_build(events)
     expect(replayed.foo).to eql :bar
   end
+end
+
+describe "when a new attribute is added with a default value" do
+
+  it "should set the new attribute with its default value on already created aggregates" do
+    aggregate = InitChange.new
+    events = aggregate.aggregate_events
+    
+    class InitChange
+      include Sandthorn::AggregateRoot
+      attr_reader :foo, :bar
+      def initialize foo: nil
+        @foo = foo
+        @bar = []
+      end
+    end
+
+    with_change = InitChange.new foo: :foo
+    expect(with_change.bar).to eql([])
+
+    replayed = InitChange.aggregate_build(events)
+    expect(replayed.bar).to eql([])
+
+  end
+
 end

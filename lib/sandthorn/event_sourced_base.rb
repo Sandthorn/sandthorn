@@ -82,7 +82,7 @@ module Sandthorn
           @@event_sourced_attributes = array.map do |attribute|
             "@#{attribute}"
           end
-          @@event_sourced_attributes << "@id"
+          @@event_sourced_attributes << "@id" #To be removed from here at some point, I hope
         end
 
         def event_sourced_attributes

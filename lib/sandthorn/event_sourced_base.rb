@@ -79,18 +79,14 @@ module Sandthorn
 
         @@event_sourced_attributes = []
         def event_sourced_attributes=(array)
-          @@event_sourced_attributes = array
+          @@event_sourced_attributes = array.map do |attribute|
+            "@#{attribute}"
+          end
+          @@event_sourced_attributes << "@id"
         end
 
         def event_sourced_attributes
           @@event_sourced_attributes  
-        end
-
-        def instance_variables
-          array = event_sourced_attributes.map do |attribute|
-            "@#{attribute}"
-          end
-          return array << "@id" #Remove @id from here later
         end
 
         @@trace_information = nil
@@ -139,7 +135,7 @@ module Sandthorn
           super.tap do |aggregate|
             aggregate.trace @@trace_information do |aggr|
               aggr.base_initialize
-              aggr.aggregate_initialize instance_variables
+              aggr.aggregate_initialize event_sourced_attributes
               aggr.send :set_id, Sandthorn.generate_id
               aggr.send :commit, *args
               return aggr
@@ -163,7 +159,7 @@ module Sandthorn
           aggregate.send :clearevents_
           aggregate.send :set_orginating_aggregate_version!, current_aggregate_version
           aggregate.send :set_current_aggregate_version!, current_aggregate_version
-          aggregate.send :aggregate_initialize, instance_variables
+          aggregate.send :aggregate_initialize, event_sourced_attributes
           aggregate.send :set_instance_variables!, attributes
           aggregate
         end

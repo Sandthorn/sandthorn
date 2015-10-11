@@ -41,7 +41,7 @@ module Sandthorn
 
     describe "::event_sourced_attributes=" do
       it "should return the defined event_sourced_attributes" do
-        expect(DirtyClass.event_sourced_attributes).to eq([:name, :sex, :writer])
+        expect(DirtyClass.event_sourced_attributes).to eq(["@name", "@sex", "@writer", "@id"])
       end
     end
 

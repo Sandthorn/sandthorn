@@ -1,11 +1,11 @@
-require 'sandthorn/event_sourced_marshal'
 require 'sandthorn/event_sourced_base'
+require 'sandthorn/event_sourced_marshal'
 
 module Sandthorn
   module EventSourced
     include Sandthorn::EventSourced::Base
     include Sandthorn::EventSourced::Marshal
-    
+
     def self.included(base)
       base.extend(Sandthorn::EventSourced::Base::ClassMethods)
 

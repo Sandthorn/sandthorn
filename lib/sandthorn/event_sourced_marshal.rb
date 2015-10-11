@@ -2,10 +2,10 @@ module Sandthorn
   module EventSourced
     module Marshal 
 
-      def aggregate_initialize instance_variabled
+      def aggregate_initialize event_sourced_attributes
         @attribute_deltas = []
         @stored_instance_variables = {}
-        @instance_variabled = instance_variabled
+        @instance_variabled = event_sourced_attributes
       end
 
       def set_instance_variables! attribute

@@ -39,9 +39,14 @@ module Sandthorn
       
     end
 
+    class DirtyClassChild < DirtyClass
+      include Sandthorn::EventSourced
+      event_sourced_attr :extra
+    end
+
     describe "::event_sourced_attributes=" do
       it "should return the defined event_sourced_attributes" do
-        expect(DirtyClass.event_sourced_attributes).to eq(["@name", "@sex", "@writer", "@id"])
+        expect(DirtyClass.event_sourced_attributes).to eq(["@id", "@name", "@sex", "@writer", "@extra"])
       end
     end
 

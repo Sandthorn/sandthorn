@@ -143,6 +143,24 @@ module Sandthorn
         it "should have originating_version == 1 post save" do
           expect(dirty_obejct.save.originating_version).to eql 1
         end
+
+      end
+
+      context ".==" do
+        before do
+          dirty_obejct.save
+        end
+
+        it "should be the same object with ==" do
+          reloaded_dirty_object = DirtyClass.find dirty_obejct.aggregate_id 
+          expect(reloaded_dirty_object == dirty_obejct).to be_truthy
+        end
+
+        it "should not be the same object if one mutated" do
+          reloaded_dirty_object = DirtyClass.find dirty_obejct.aggregate_id 
+          dirty_obejct.change_name("new name")
+          expect(dirty_obejct == reloaded_dirty_object).to be_falsy
+        end
       end
 
       context "find" do

@@ -37,7 +37,9 @@ module Sandthorn
       end
 
       def ==(other)
-        other.respond_to?(:id) && id == other.id
+        return false unless other.respond_to?(:current_event_version) && current_event_version == other.current_event_version
+        return false unless other.respond_to?(:id) && id == other.id
+        return true
       end
 
       def trace args

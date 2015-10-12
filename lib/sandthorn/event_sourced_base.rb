@@ -160,7 +160,7 @@ module Sandthorn
           attributes = build_instance_vars_from_events events
           current_aggregate_version = events.last[:aggregate_version] unless events.empty?
           aggregate.send :clearevents_
-          aggregate.send :set_orginating_aggregate_version!, current_aggregate_version
+          aggregate.send :set_originating_aggregate_version!, current_aggregate_version
           aggregate.send :set_current_aggregate_version!, current_aggregate_version
           aggregate.send :aggregate_initialize, event_sourced_attributes
           aggregate.send :set_instance_variables!, attributes
@@ -204,7 +204,7 @@ module Sandthorn
         end
       end
 
-      def set_orginating_aggregate_version! aggregate_version
+      def set_originating_aggregate_version! aggregate_version
         @originating_version = aggregate_version
       end
 

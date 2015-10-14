@@ -10,7 +10,14 @@ module Sandthorn
       base.extend(Sandthorn::EventSourced::Base::ClassMethods)
 
       def base.event_sourced_attr(*args)
-        self.event_sourced_attributes= args
+        ancestors_event_soured_attributes = self.ancestors.map do |klass|
+          klass.event_sourced_attributes if klass.include?(Sandthorn::EventSourced)
+        end
+
+        ancestors_event_soured_attributes.compact!
+        ancestors_event_soured_attributes.flatten!
+
+        self.event_sourced_attributes = args.concat(ancestors_event_soured_attributes.map { |item| item.to_s.delete("@") })
       end
 
     end

@@ -44,9 +44,34 @@ module Sandthorn
       event_sourced_attr :extra
     end
 
+    describe "execute events on an ancestor" do
+
+      let(:object) do
+        DirtyClassChild.new()
+      end
+
+      it "should have ancestor methods" do
+        expect(object.respond_to?(:change_name)).to be_truthy
+      end
+
+      it "should generate events that comes from ancestors class definition" do
+        object.change_name "Morgan"
+        expect(object.events.last[:event_name]).to eql "change_name"
+      end
+    end
+
     describe "::event_sourced_attributes=" do
-      it "should return the defined event_sourced_attributes" do
-        expect(DirtyClass.event_sourced_attributes).to eq(["@id", "@name", "@sex", "@writer", "@extra"])
+      
+      context "::DirtyClass" do
+        it "should only have the event_sourced_attributes that are defined on the class" do
+          expect(DirtyClass.event_sourced_attributes).to eq(["@id", "@name", "@sex", "@writer"])
+        end
+      end
+
+      context "::DirtyClassChild" do
+        it "should have the event_sourced_attributes that are defined on the class and from DirtyClass" do
+          expect(DirtyClassChild.event_sourced_attributes).to eq(["@id", "@extra", "@name", "@sex", "@writer"])
+        end
       end
     end
 

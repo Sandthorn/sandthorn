@@ -79,17 +79,18 @@ module Sandthorn
 
       module ClassMethods
 
-        @@event_sourced_attributes = ["@id"] #id is a internal attribute
         def event_sourced_attributes=(array)
+          @event_sourced_attributes = ["@id"] #id is a internal attribute
+
           attributes = array.map do |attribute|
             "@#{attribute}"
           end
-          @@event_sourced_attributes.concat attributes
-          @@event_sourced_attributes.uniq!
+          @event_sourced_attributes.concat attributes
+          @event_sourced_attributes.uniq!
         end
 
         def event_sourced_attributes
-          @@event_sourced_attributes  
+          @event_sourced_attributes  
         end
 
         @@trace_information = nil

@@ -35,7 +35,9 @@ module Sandthorn
         end
       end
 
-      
+      def no_state_change_only_empty_event
+        commit
+      end
     end
 
     describe "::event_store" do
@@ -206,6 +208,20 @@ module Sandthorn
           expect(dirty_obejct.aggregate_events.last[:event_args][:attribute_deltas].first[:new_value]).to eql "shemale"
         end
       end
+    end
+
+    context "events should be created event if no state change is made" do
+      let(:dirty_obejct) do
+        o = DirtyClass.new
+        o.save
+        o.no_state_change_only_empty_event
+        o
+      end
+
+      it "should have one unsaved event" do
+        expect(dirty_obejct.aggregate_events.first[:event_name]).to eql("no_state_change_only_empty_event")
+      end
+
     end
   end
 end

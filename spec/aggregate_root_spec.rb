@@ -218,8 +218,12 @@ module Sandthorn
         o
       end
 
-      it "should have one unsaved event" do
+      it "should have the event no_state_change_only_empty_event" do
         expect(dirty_obejct.aggregate_events.first[:event_name]).to eql("no_state_change_only_empty_event")
+      end
+
+      it "should have attribute_deltas set to empty array" do
+        expect(dirty_obejct.aggregate_events.first[:event_args][:attribute_deltas]).to eql([])
       end
 
     end

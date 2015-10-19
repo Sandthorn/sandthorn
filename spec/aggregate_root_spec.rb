@@ -212,10 +212,9 @@ module Sandthorn
 
     context "events should be created event if no state change is made" do
       let(:dirty_object) do
-        o = DirtyClass.new
-        o.save
-        o.no_state_change_only_empty_event
-        o
+        DirtyClass.new.save.tap do |o|
+          o.no_state_change_only_empty_event
+        end
       end
 
       it "should have the event no_state_change_only_empty_event" do

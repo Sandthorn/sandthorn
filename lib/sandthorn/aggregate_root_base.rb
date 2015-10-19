@@ -50,26 +50,23 @@ module Sandthorn
       def commit *args
         aggregate_attribute_deltas = get_delta
 
-        unless aggregate_attribute_deltas.empty?
-          method_name = caller_locations(1,1)[0].label.gsub(/block ?(.*) in /, "")
-          increase_current_aggregate_version!
-
-          data = {
-            method_name: method_name,
-            method_args: args,
-            attribute_deltas: aggregate_attribute_deltas
-          }
-          trace_information = @aggregate_trace_information
-          unless trace_information.nil? || trace_information.empty?
-            data.merge!({ trace: trace_information })
-          end
-
-          @aggregate_events << ({
-            aggregate_version: @aggregate_current_event_version,
-            event_name: method_name,
-            event_args: data
-          })
+        method_name = caller_locations(1,1)[0].label.gsub(/block ?(.*) in /, "")
+        increase_current_aggregate_version!
+        data = {
+          method_name: method_name,
+          method_args: args,
+          attribute_deltas: aggregate_attribute_deltas
+        }
+        trace_information = @aggregate_trace_information
+        unless trace_information.nil? || trace_information.empty?
+          data.merge!({ trace: trace_information })
         end
+
+        @aggregate_events << ({
+          aggregate_version: @aggregate_current_event_version,
+          event_name: method_name,
+          event_args: data
+        })
 
         self
       end

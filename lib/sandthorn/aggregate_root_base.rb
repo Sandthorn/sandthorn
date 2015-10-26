@@ -47,10 +47,9 @@ module Sandthorn
         @aggregate_trace_information = nil
       end
 
-      def commit *args
+      def commit_with_method_name method_name, *args
         aggregate_attribute_deltas = get_delta
 
-        method_name = caller_locations(1,1)[0].label.gsub(/block ?(.*) in /, "")
         increase_current_aggregate_version!
         data = {
           method_name: method_name,
@@ -69,6 +68,11 @@ module Sandthorn
         })
 
         self
+      end
+
+      def commit *args
+        method_name = caller_locations(1,1)[0].label.gsub(/block ?(.*) in /, "")
+        commit_with_method_name method_name, args
       end
 
       alias :record_event :commit
@@ -148,6 +152,16 @@ module Sandthorn
           aggregate.send :aggregate_initialize
           aggregate.send :set_instance_variables!, attributes
           aggregate
+        end
+
+        def events(*event_names)
+          event_names.each do |name|
+            define_method(name) do |*args, &block|
+              block.call() if block
+              commit_with_method_name(name, args)
+            end
+            private name.to_s
+          end
         end
 
         private

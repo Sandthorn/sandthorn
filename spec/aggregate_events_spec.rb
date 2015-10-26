@@ -49,6 +49,10 @@ module Sandthorn
       it "should store the event params as methods args" do
         expect(subject.has_event?(:name_changed)).to be_truthy
       end
+
+      it "should store the args to the event" do
+        expect(subject.aggregate_events[1][:event_args][:method_args][0][0]).to eql("new name")
+      end
     end
 
     describe ".some_other" do

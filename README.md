@@ -64,7 +64,7 @@ class Ship
   end
 end
 
-# Configure a driver
+# Configure one driver
 url = "sqlite://spec/db/sequel_driver.sqlite3"
 sql_event_store = SandthornDriverSequel.driver_from_url(url: url)
 Sandthorn.configure do |c|
@@ -72,6 +72,10 @@ Sandthorn.configure do |c|
 end
 
 # Or configure many drivers
+url = "sqlite://spec/db/sequel_driver.sqlite3"
+sql_event_store = SandthornDriverSequel.driver_from_url(url: url)
+url_two = "sqlite://spec/db/sequel_driver_two.sqlite3"
+other_store = SandthornDriverSequel.driver_from_url(url: url_two)
 
 Sandthorn.configure do |c|
   c.event_stores = {
@@ -208,6 +212,28 @@ end
 
 All objects that include `Sandthorn::AggregateRoot` is provided with an `aggregate_id` which is a [UUID](http://en.wikipedia.org/wiki/Universally_unique_identifier).
 
+### `Sandthorn::AggregateRoot::events`
+
+An abstraction over `commit` that creates events methods that can be used from within a command method.
+
+In this exampel the `events` method will generate a method called `marked`, this method take *args as input that will result in the method argument on the event. It also take a block that will be executed before the event is commited and is used to groups the state changes to the event (but is only optional right now).
+
+```ruby
+class Board
+  include Sandthorn::AggregateRoot
+  
+  events :marked
+  
+  def mark player, pos_x, pos_y
+    # change some state
+    marked(player) do
+      @pos_x = pos_x
+      @pos_y = pos_y
+    end
+  end
+end
+```
+
 ### `Sandthorn::AggregateRoot.commit`
 
 It is required that an event is commited to the aggregate to be stored as an event. `commit` extracts the object's delta and locally caches the state changes that has been applied to the aggregate. Commonly, commit is called when an event is applied. In [CQRS](http://martinfowler.com/bliki/CQRS.html), events are named using past tense.
@@ -224,6 +250,8 @@ end
 ```
 
 `commit` determines the state changes by monitoring the object's readable fields.
+
+Since version 0.10.0 of Sandthorn the concept `events` have been introduced to abstract away the usage of `commit`. Commit still works as before but we think that the `events` abstraction makes the aggregate more readable. 
 
 ### `Sandthorn::AggregateRoot.save`
 

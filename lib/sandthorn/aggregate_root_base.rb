@@ -52,22 +52,10 @@ module Sandthorn
 
         method_name = caller_locations(1,1)[0].label.gsub(/block ?(.*) in /, "")
         increase_current_aggregate_version!
-        data = {
-          method_name: method_name,
-          method_args: args,
-          attribute_deltas: aggregate_attribute_deltas
-        }
-        trace_information = @aggregate_trace_information
-        unless trace_information.nil? || trace_information.empty?
-          data.merge!({ trace: trace_information })
-        end
 
-        @aggregate_events << ({
-          aggregate_version: @aggregate_current_event_version,
-          event_name: method_name,
-          event_args: data
-        })
+        event = self.class.build_event(method_name, args, aggregate_attribute_deltas, @aggregate_current_event_version, @aggregate_trace_information)
 
+        @aggregate_events << event
         self
       end
 
@@ -148,6 +136,43 @@ module Sandthorn
           aggregate.send :aggregate_initialize
           aggregate.send :set_instance_variables!, attributes
           aggregate
+        end
+
+        def class_events(*event_names)
+          event_names.each do |name|
+            define_singleton_method name do |aggregate_id = nil ,*args|
+              aggregate_id = Sandthorn.generate_aggregate_id unless aggregate_id
+
+              event = build_event(name.to_s, args, [], nil)
+              event[:event_data] = Sandthorn.serialize event[:event_args]
+              event[:event_args] = nil #Not send extra data over the wire
+
+              Sandthorn.save_events([event],
+                aggregate_id,
+                self)
+              return aggregate_id
+            end
+          end
+        end
+
+        def build_event name, args, attribute_deltas, aggregate_version, trace_information = nil
+          
+          data = {
+            method_name: name,
+            method_args: args,
+            attribute_deltas: attribute_deltas
+          }
+
+          unless trace_information.nil? || trace_information.empty?
+            data.merge!({ trace: trace_information })
+          end
+
+          return {
+            aggregate_version: aggregate_version,
+            event_name: name,
+            event_args: data
+          }
+
         end
 
         private

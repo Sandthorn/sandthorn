@@ -30,6 +30,9 @@ RSpec.configure do |config|
   #     --seed 1234
   config.order = 'random'
   config.before(:each) { sqlite_store_setup }
+  config.after(:each) do
+    Sandthorn.event_stores.default_store.driver.instance_variable_get(:@db).disconnect
+  end
 end
 
 def spec_db

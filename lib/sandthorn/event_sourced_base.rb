@@ -1,72 +1,76 @@
 module Sandthorn
-  module AggregateRoot
+  module EventSourced
     module Base
 
-      attr_reader :aggregate_id
-      attr_reader :aggregate_events
-      attr_reader :aggregate_current_event_version
-      attr_reader :aggregate_originating_version
-      attr_reader :aggregate_stored_serialized_object
-      attr_reader :aggregate_trace_information
+      attr_reader :id
+      attr_reader :events
+      attr_reader :current_event_version
+      attr_reader :originating_version
+      attr_reader :aggregate_stored_serialized_object #USED?
+      attr_reader :trace_information
 
-      alias :id :aggregate_id
+      alias :aggregate_id :id
 
-
-      def aggregate_base_initialize
-        @aggregate_current_event_version = 0
-        @aggregate_originating_version = 0
-        @aggregate_events = []
+      def base_initialize
+        @current_event_version = 0
+        @originating_version = 0
+        @events = []
       end
 
       def save
-        aggregate_events.each do |event|
+        events.each do |event|
           event[:event_data] = Sandthorn.serialize event[:event_args]
           event[:event_args] = nil #Not send extra data over the wire
         end
 
-        unless aggregate_events.empty?
+        unless events.empty?
           Sandthorn.save_events(
-            aggregate_events,
-            aggregate_id,
+            events,
+            id,
             self.class
           )
-          @aggregate_events = []
-          @aggregate_originating_version = @aggregate_current_event_version
+          @events = []
+          @originating_version = @current_event_version
         end
 
         self
       end
 
       def ==(other)
-        other.respond_to?(:aggregate_id) && aggregate_id == other.aggregate_id
+        return false unless other.respond_to?(:current_event_version) && current_event_version == other.current_event_version
+        return false unless other.respond_to?(:id) && id == other.id
+        return true
       end
 
-      def aggregate_trace args
-        @aggregate_trace_information = args
+      def trace args
+        @trace_information = args
         yield self if block_given?
-        @aggregate_trace_information = nil
+        @trace_information = nil
       end
 
       def commit *args
-        aggregate_attribute_deltas = get_delta
+        attribute_deltas = get_delta
 
-        method_name = caller_locations(1,1)[0].label.gsub(/block ?(.*) in /, "")
-        increase_current_aggregate_version!
-        data = {
-          method_name: method_name,
-          method_args: args,
-          attribute_deltas: aggregate_attribute_deltas
-        }
-        trace_information = @aggregate_trace_information
-        unless trace_information.nil? || trace_information.empty?
-          data.merge!({ trace: trace_information })
+        unless attribute_deltas.empty?
+          method_name = caller_locations(1,1)[0].label.gsub(/block ?(.*) in /, "")
+          increase_current_version!
+
+          data = {
+            method_name: method_name,
+            method_args: args,
+            attribute_deltas: attribute_deltas
+          }
+          trace_information = @trace_information
+          unless trace_information.nil? || trace_information.empty?
+            data.merge!({ trace: trace_information })
+          end
+
+          @events << ({
+            aggregate_version: @current_event_version,
+            event_name: method_name,
+            event_args: data
+          })
         end
-
-        @aggregate_events << ({
-          aggregate_version: @aggregate_current_event_version,
-          event_name: method_name,
-          event_args: data
-        })
 
         self
       end
@@ -75,11 +79,25 @@ module Sandthorn
 
       module ClassMethods
 
-        @@aggregate_trace_information = nil
-        def aggregate_trace args
-          @@aggregate_trace_information = args
+        def event_sourced_attributes=(array)
+          @event_sourced_attributes = ["@id"] #id is a internal attribute
+
+          attributes = array.map do |attribute|
+            "@#{attribute}"
+          end
+          @event_sourced_attributes.concat attributes
+          @event_sourced_attributes.uniq!
+        end
+
+        def event_sourced_attributes
+          @event_sourced_attributes  
+        end
+
+        @@trace_information = nil
+        def trace args
+          @@trace_information = args
           yield self
-          @@aggregate_trace_information = nil
+          @@trace_information = nil
         end
 
         def event_store(event_store = nil)
@@ -91,8 +109,8 @@ module Sandthorn
         end
 
         def all
-          aggregate_id_list = Sandthorn.get_aggregate_list_by_type(self)
-          find aggregate_id_list
+          id_list = Sandthorn.get_aggregate_list_by_type(self)
+          find id_list
         end
 
         def find id
@@ -100,8 +118,8 @@ module Sandthorn
           return id.map { |e| aggregate_find e }
         end
 
-        def aggregate_find aggregate_id
-          events = Sandthorn.get_aggregate(aggregate_id, self)
+        def aggregate_find id
+          events = Sandthorn.get_aggregate(id, self)
           unless events && !events.empty?
             raise Sandthorn::Errors::AggregateNotFound
           end
@@ -119,10 +137,10 @@ module Sandthorn
 
         def new *args
           super.tap do |aggregate|
-            aggregate.aggregate_trace @@aggregate_trace_information do |aggr|
-              aggr.aggregate_base_initialize
-              aggr.aggregate_initialize
-              aggr.send :set_aggregate_id, Sandthorn.generate_id
+            aggregate.trace @@trace_information do |aggr|
+              aggr.base_initialize
+              aggr.aggregate_initialize event_sourced_attributes
+              aggr.send :set_id, Sandthorn.generate_id
               aggr.send :commit, *args
               return aggr
             end
@@ -134,7 +152,7 @@ module Sandthorn
 
           if first_event_snapshot?(events)
             aggregate = start_build_from_snapshot events
-            current_aggregate_version = aggregate.aggregate_originating_version
+            current_aggregate_version = aggregate.originating_version
             events.shift
           else
             aggregate = create_new_empty_aggregate
@@ -142,10 +160,10 @@ module Sandthorn
 
           attributes = build_instance_vars_from_events events
           current_aggregate_version = events.last[:aggregate_version] unless events.empty?
-          aggregate.send :clear_aggregate_events
-          aggregate.send :set_orginating_aggregate_version!, current_aggregate_version
+          aggregate.send :clearevents_
+          aggregate.send :set_originating_aggregate_version!, current_aggregate_version
           aggregate.send :set_current_aggregate_version!, current_aggregate_version
-          aggregate.send :aggregate_initialize
+          aggregate.send :aggregate_initialize, event_sourced_attributes
           aggregate.send :set_instance_variables!, attributes
           aggregate
         end
@@ -187,37 +205,28 @@ module Sandthorn
         end
       end
 
-      def extract_relevant_aggregate_instance_variables
-        instance_variables.select do |variable|
-          equals_aggregate_id = variable.to_s == "@aggregate_id"
-          does_not_contain_aggregate = !variable.to_s.start_with?("@aggregate_")
-
-          equals_aggregate_id || does_not_contain_aggregate
-        end
+      def set_originating_aggregate_version! aggregate_version
+        @originating_version = aggregate_version
       end
 
-      def set_orginating_aggregate_version! aggregate_version
-        @aggregate_originating_version = aggregate_version
-      end
-
-      def increase_current_aggregate_version!
-        @aggregate_current_event_version += 1
+      def increase_current_version!
+        @current_event_version += 1
       end
 
       def set_current_aggregate_version! aggregate_version
-        @aggregate_current_event_version = aggregate_version
+        @current_event_version = aggregate_version
       end
 
-      def clear_aggregate_events
-        @aggregate_events = []
+      def clearevents_
+        @events = []
       end
 
       def aggregate_clear_current_event_version!
-        @aggregate_current_event_version = 0
+        @current_event_version = 0
       end
 
-      def set_aggregate_id aggregate_id
-        @aggregate_id = aggregate_id
+      def set_id id
+        @id = id
       end
 
     end

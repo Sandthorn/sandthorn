@@ -3,6 +3,7 @@ require "sandthorn/errors"
 require "sandthorn/event"
 require "sandthorn/aggregate_root"
 require "sandthorn/event_stores"
+require "sandthorn/event_sourced"
 require 'yaml'
 require 'securerandom'
 
@@ -30,7 +31,7 @@ module Sandthorn
 
     
 
-    def generate_aggregate_id
+    def generate_id
       SecureRandom.uuid
     end
 

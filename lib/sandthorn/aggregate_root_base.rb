@@ -140,18 +140,21 @@ module Sandthorn
 
         def class_events(*event_names)
           event_names.each do |name|
-            define_singleton_method name do |aggregate_id = nil ,*args|
+            define_singleton_method name do |aggregate_id = nil, *args, &block|
+              
+
               aggregate_id = Sandthorn.generate_aggregate_id unless aggregate_id
 
               event = build_event(name.to_s, args, [], nil)
               event[:event_data] = Sandthorn.serialize event[:event_args]
-              event[:event_args] = nil #Not send extra data over the wire
+              event[:event_args] = nil 
 
               Sandthorn.save_events([event],
                 aggregate_id,
                 self)
               return aggregate_id
             end
+            self.singleton_class.class_eval { private name.to_s }
           end
         end
 

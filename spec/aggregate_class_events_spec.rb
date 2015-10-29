@@ -4,11 +4,19 @@ module Sandthorn
   class ClassEventsSpec
     include AggregateRoot
 
-    class_events :one_event, :some_other_event, :third_event
+    class_events :one_event, :some_other_event, :created_event
     attr_reader :name
 
     def initialize name
       @name = name
+    end
+
+    def self.create name
+      created_event(nil, name)
+    end
+
+    def self.call_one_event aggregate_id = nil, hash = {}, value = 0
+      one_event(aggregate_id, hash, value)
     end
     
   end
@@ -26,7 +34,7 @@ module Sandthorn
       end
       
       it "should create the events on the class" do
-        expect(subject.class.methods).to include(:one_event)
+        expect(ClassEventsSpec.private_methods).to include(:one_event)
       end
 
     end
@@ -34,7 +42,7 @@ module Sandthorn
     context "when adding class_events to existing aggregate" do
 
       before do
-        ClassEventsSpec.one_event(subject.aggregate_id, args, 1)
+        ClassEventsSpec.call_one_event(subject.aggregate_id, args, 1)
       end
 
       let(:args) do
@@ -69,7 +77,7 @@ module Sandthorn
 
     context "when adding class_events to none existing aggregate" do
       let(:aggregate_id) do
-        ClassEventsSpec.one_event()
+        ClassEventsSpec.call_one_event()
       end
 
       let(:events) do
@@ -86,6 +94,24 @@ module Sandthorn
 
       it "should have event name one_event" do
         expect(events.first[:event_name]).to eql "one_event"
+      end
+    end
+
+    describe "::create" do
+      let(:aggregate_id) do
+        ClassEventsSpec.create("create_name")
+      end
+
+      it "should create an ClassEventsSpec aggregate" do
+        expect(ClassEventsSpec.find(aggregate_id)).to be_a ClassEventsSpec
+      end
+
+      it "should have created an created_event" do
+        expect(Sandthorn.get_aggregate_events(ClassEventsSpec, aggregate_id).first[:event_name]).to eql "created_event"
+      end
+
+      it "should have set the method_args to create_name" do
+        expect(Sandthorn.deserialize(Sandthorn.get_aggregate_events(ClassEventsSpec, aggregate_id).first[:event_data])[:method_args].first).to eql "create_name"
       end
     end
   end

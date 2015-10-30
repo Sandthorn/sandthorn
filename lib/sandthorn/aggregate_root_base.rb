@@ -52,17 +52,6 @@ module Sandthorn
         commit_with_event_name(event_name, args)
       end
 
-      def commit_with_event_name event_name, *args
-        aggregate_attribute_deltas = get_delta
-
-        increase_current_aggregate_version!
-
-        event = self.class.build_event(event_name, args, aggregate_attribute_deltas, @aggregate_current_event_version, @aggregate_trace_information)
-
-        @aggregate_events << event
-        self
-      end
-
       alias :record_event :commit
 
       module ClassMethods
@@ -152,7 +141,7 @@ module Sandthorn
                   aggregate.aggregate_initialize
                   aggregate.send :set_aggregate_id, Sandthorn.generate_aggregate_id
                   aggregate.instance_eval(&block) if block
-                  aggregate.send :commit_with_event_name, name.to_s, *args
+                  aggregate.send :commit_with_event_name, name.to_s, args
                   return aggregate
                 end
               else
@@ -259,6 +248,15 @@ module Sandthorn
 
       def set_aggregate_id aggregate_id
         @aggregate_id = aggregate_id
+      end
+
+      def commit_with_event_name event_name, args
+        aggregate_attribute_deltas = get_delta
+        increase_current_aggregate_version!
+        event = self.class.build_event(event_name, args, aggregate_attribute_deltas, @aggregate_current_event_version, @aggregate_trace_information)
+
+        @aggregate_events << event
+        self
       end
 
     end

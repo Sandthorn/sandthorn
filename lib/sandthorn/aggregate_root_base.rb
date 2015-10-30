@@ -48,12 +48,16 @@ module Sandthorn
       end
 
       def commit *args
+        event_name = caller_locations(1,1)[0].label.gsub(/block ?(.*) in /, "")
+        commit_with_event_name(event_name, args)
+      end
+
+      def commit_with_event_name event_name, *args
         aggregate_attribute_deltas = get_delta
 
-        method_name = caller_locations(1,1)[0].label.gsub(/block ?(.*) in /, "")
         increase_current_aggregate_version!
 
-        event = self.class.build_event(method_name, args, aggregate_attribute_deltas, @aggregate_current_event_version, @aggregate_trace_information)
+        event = self.class.build_event(event_name, args, aggregate_attribute_deltas, @aggregate_current_event_version, @aggregate_trace_information)
 
         @aggregate_events << event
         self
@@ -142,17 +146,26 @@ module Sandthorn
           event_names.each do |name|
             define_singleton_method name do |aggregate_id = nil, *args, &block|
               
+              unless aggregate_id #new aggregate
+                a = create_new_empty_aggregate.tap  do |aggregate|
+                  aggregate.aggregate_base_initialize
+                  aggregate.aggregate_initialize
+                  aggregate.send :set_aggregate_id, Sandthorn.generate_aggregate_id
+                  aggregate.instance_eval(&block) if block
+                  aggregate.send :commit_with_event_name, name.to_s, *args
+                  return aggregate
+                end
+              else
+                event = build_event(name.to_s, args, [], nil)
+                event[:event_data] = Sandthorn.serialize event[:event_args]
+                event[:event_args] = nil
 
-              aggregate_id = Sandthorn.generate_aggregate_id unless aggregate_id
-
-              event = build_event(name.to_s, args, [], nil)
-              event[:event_data] = Sandthorn.serialize event[:event_args]
-              event[:event_args] = nil 
-
-              Sandthorn.save_events([event],
-                aggregate_id,
-                self)
-              return aggregate_id
+                Sandthorn.save_events([event],
+                  aggregate_id,
+                  self)
+                
+                return aggregate_id
+              end
             end
             self.singleton_class.class_eval { private name.to_s }
           end

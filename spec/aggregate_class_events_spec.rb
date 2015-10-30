@@ -12,7 +12,7 @@ module Sandthorn
     end
 
     def self.create name
-      created_event(nil, name)
+      created_event(nil, name) { @name = name }
     end
 
     def self.call_one_event aggregate_id = nil, hash = {}, value = 0
@@ -77,7 +77,9 @@ module Sandthorn
 
     context "when adding class_events to none existing aggregate" do
       let(:aggregate_id) do
-        ClassEventsSpec.call_one_event()
+        a = ClassEventsSpec.call_one_event()
+        a.save
+        a.aggregate_id
       end
 
       let(:events) do
@@ -99,11 +101,17 @@ module Sandthorn
 
     describe "::create" do
       let(:aggregate_id) do
-        ClassEventsSpec.create("create_name")
+        a = ClassEventsSpec.create("create_name")
+        a.save
+        a.aggregate_id
       end
 
       it "should create an ClassEventsSpec aggregate" do
         expect(ClassEventsSpec.find(aggregate_id)).to be_a ClassEventsSpec
+      end
+
+      it "should set instance variable in aggregate" do
+        expect(ClassEventsSpec.find(aggregate_id).name).to eql "create_name"
       end
 
       it "should have created an created_event" do

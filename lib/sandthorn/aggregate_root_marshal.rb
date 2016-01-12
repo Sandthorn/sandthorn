@@ -1,5 +1,3 @@
-require "sandthorn/aggregate_root_base"
-
 module Sandthorn
   module AggregateRoot
     module Marshal 

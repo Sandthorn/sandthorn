@@ -1,3 +1,4 @@
+require 'sandthorn/aggregate_root_base'
 require 'sandthorn/aggregate_root_marshal'
 
 module Sandthorn

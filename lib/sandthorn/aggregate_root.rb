@@ -3,7 +3,8 @@ require 'sandthorn/aggregate_root_marshal'
 
 module Sandthorn
   module AggregateRoot
-    include Sandthorn::AggregateRoot::Marshal
+    include Base
+    include Marshal
 
     def self.included(base)
       base.extend(Sandthorn::AggregateRoot::Base::ClassMethods)

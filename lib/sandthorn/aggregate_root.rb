@@ -7,7 +7,7 @@ module Sandthorn
     include Marshal
 
     def self.included(base)
-      base.extend(Sandthorn::AggregateRoot::Base::ClassMethods)
+      base.extend(Base::ClassMethods)
     end
   end
 end

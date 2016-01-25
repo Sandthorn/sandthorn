@@ -211,7 +211,7 @@ module Sandthorn
         @aggregate_id = aggregate_id
       end
 
-      def commit_with_event_name(event_name, *args)
+      def commit_with_event_name(event_name, args)
         aggregate_attribute_deltas = get_delta
 
         increase_current_aggregate_version!

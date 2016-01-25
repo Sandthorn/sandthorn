@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'sandthorn/event_inspector'
 
 module Sandthorn
   class EventsSpec
@@ -51,7 +52,7 @@ module Sandthorn
       end
 
       it "should store the args to the event" do
-        expect(subject.aggregate_events[1][:event_args][:method_args][0][0]).to eql("new name")
+        expect(subject.aggregate_events[1][:event_args][:method_args][0]).to eql("new name")
       end
     end
 
@@ -66,7 +67,7 @@ module Sandthorn
       end
 
       it "should store the args to the event" do
-        expect(subject.aggregate_events[1][:event_args][:method_args][0]).to eql([1,2])
+        expect(subject.aggregate_events[1][:event_args][:method_args]).to eql([1,2])
       end
     end
 
@@ -81,7 +82,7 @@ module Sandthorn
       end
 
       it "should store the args to the event" do
-        expect(subject.aggregate_events[1][:event_args][:method_args][0][0]).to eql("hej")
+        expect(subject.aggregate_events[1][:event_args][:method_args][0]).to eql("hej")
       end
     end
   end

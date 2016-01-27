@@ -101,15 +101,14 @@ module Sandthorn
         def new *args, &block
 
           aggregate = allocate
+          aggregate.aggregate_base_initialize
+          aggregate.aggregate_initialize
+
           aggregate.default_attributes if aggregate.respond_to?(:default_attributes)
           aggregate.send :initialize, *args, &block 
-          
+          aggregate.send :set_aggregate_id, Sandthorn.generate_aggregate_id
+
           aggregate.aggregate_trace @@aggregate_trace_information do |aggr|
-            
-            aggr.aggregate_base_initialize
-            aggr.aggregate_initialize
-            
-            aggr.send :set_aggregate_id, Sandthorn.generate_aggregate_id
             aggr.send :commit, *args
             return aggr
           end

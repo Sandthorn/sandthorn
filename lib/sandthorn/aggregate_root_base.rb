@@ -98,16 +98,22 @@ module Sandthorn
           aggregate_build ([transformed_snapshot_event] + transformed_events).compact
         end
 
-        def new *args
-          super.tap do |aggregate|
-            aggregate.aggregate_trace @@aggregate_trace_information do |aggr|
-              aggr.aggregate_base_initialize
-              aggr.aggregate_initialize
-              aggr.send :set_aggregate_id, Sandthorn.generate_aggregate_id
-              aggr.send :commit, *args
-              return aggr
-            end
+        def new *args, &block
+
+          aggregate = allocate
+          aggregate.default_attributes if aggregate.respond_to?(:default_attributes)
+          aggregate.send :initialize, *args, &block 
+          
+          aggregate.aggregate_trace @@aggregate_trace_information do |aggr|
+            
+            aggr.aggregate_base_initialize
+            aggr.aggregate_initialize
+            
+            aggr.send :set_aggregate_id, Sandthorn.generate_aggregate_id
+            aggr.send :commit, *args
+            return aggr
           end
+
         end
 
         def aggregate_build events
@@ -124,9 +130,11 @@ module Sandthorn
           attributes = build_instance_vars_from_events events
           current_aggregate_version = events.last[:aggregate_version] unless events.empty?
           aggregate.send :clear_aggregate_events
+          aggregate.default_attributes if aggregate.respond_to?(:default_attributes)
           aggregate.send :set_orginating_aggregate_version!, current_aggregate_version
           aggregate.send :set_current_aggregate_version!, current_aggregate_version
           aggregate.send :aggregate_initialize
+          
           aggregate.send :set_instance_variables!, attributes
           aggregate
         end

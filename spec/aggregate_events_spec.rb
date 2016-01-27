@@ -54,6 +54,10 @@ module Sandthorn
       it "should store the args to the event" do
         expect(subject.aggregate_events[1][:event_args][:method_args][0]).to eql("new name")
       end
+
+      it "should store the event_name" do
+        expect(subject.aggregate_events[1][:event_name]).to eql("name_changed")
+      end
     end
 
     describe ".some_other" do

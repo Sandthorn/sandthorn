@@ -135,7 +135,7 @@ module Sandthorn
           event_names.each do |name|
             define_method(name) do |*args, &block|
               block.call() if block
-              commit_with_event_name(name, args)
+              commit_with_event_name(name.to_s, args)
             end
             private name.to_s
           end

@@ -234,6 +234,18 @@ class Board
 end
 ```
 
+### `Sandthorn::AggregateRoot::default_attributes`
+
+Its possible to add a default_attributes method on an aggregate and set default values to new and already created aggregates.
+
+The default_attributes method will be run before initialize on Class.new and before the events when an aggregate is rebuilt. This will make is possible to add default attributes to an aggregate during its hole life cycle.
+
+```ruby
+def default_attributes
+  @new_array = []
+end
+```
+
 ### `Sandthorn::AggregateRoot.commit`
 
 It is required that an event is commited to the aggregate to be stored as an event. `commit` extracts the object's delta and locally caches the state changes that has been applied to the aggregate. Commonly, commit is called when an event is applied. In [CQRS](http://martinfowler.com/bliki/CQRS.html), events are named using past tense.

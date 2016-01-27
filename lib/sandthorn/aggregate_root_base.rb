@@ -52,6 +52,10 @@ module Sandthorn
         commit_with_event_name(event_name, args)
       end
 
+      def default_attributes
+        #NOOP
+      end
+
       alias :record_event :commit
 
       module ClassMethods
@@ -104,7 +108,7 @@ module Sandthorn
           aggregate.aggregate_base_initialize
           aggregate.aggregate_initialize
 
-          aggregate.default_attributes if aggregate.respond_to?(:default_attributes)
+          aggregate.default_attributes
           aggregate.send :initialize, *args, &block 
           aggregate.send :set_aggregate_id, Sandthorn.generate_aggregate_id
 
@@ -114,6 +118,8 @@ module Sandthorn
           end
 
         end
+
+
 
         def aggregate_build events
           current_aggregate_version = 0
@@ -129,7 +135,7 @@ module Sandthorn
           attributes = build_instance_vars_from_events events
           current_aggregate_version = events.last[:aggregate_version] unless events.empty?
           aggregate.send :clear_aggregate_events
-          aggregate.default_attributes if aggregate.respond_to?(:default_attributes)
+          aggregate.default_attributes
           aggregate.send :set_orginating_aggregate_version!, current_aggregate_version
           aggregate.send :set_current_aggregate_version!, current_aggregate_version
           aggregate.send :aggregate_initialize

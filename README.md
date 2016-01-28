@@ -238,7 +238,7 @@ end
 
 Its possible to add a default_attributes method on an aggregate and set default values to new and already created aggregates.
 
-The default_attributes method will be run before initialize on Class.new and before the events when an aggregate is rebuilt. This will make is possible to add default attributes to an aggregate during its hole life cycle.
+The `default_attributes` method will be run before initialize on Class.new and before the events when an aggregate is rebuilt. This will make is possible to add default attributes to an aggregate during its hole life cycle.
 
 ```ruby
 def default_attributes

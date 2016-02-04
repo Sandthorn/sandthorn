@@ -62,8 +62,6 @@ module Sandthorn
       event_store = find_event_store(event_store)
       events = event_store.get_events aggregate_types: aggregate_types, take: take, after_sequence_number: after_sequence_number
       events.map do |event|
-        event[:event_args] = deserialize event[:event_data]
-        event.delete(:event_data)
         Event.new(event)
       end
     end
@@ -111,38 +109,6 @@ module Sandthorn
         @event_stores = EventStores.new(store)
       end
 
-      def serializer=(block)
-        @serializer = block if block.is_a? Proc
-      end
-
-      def deserializer=(block)
-        @deserializer = block if block.is_a? Proc
-      end
-
-      def serializer
-        @serializer || default_serializer
-      end
-
-      def deserializer
-        @deserializer || default_deserializer
-      end
-
-      def default_serializer
-        -> (data) { YAML.dump(data) }
-      end
-
-      def default_deserializer
-        -> (data) { YAML.load(data) }
-      end
-
-      def serialize(data)
-        serializer.call(data)
-      end
-
-      def deserialize(data)
-        deserializer.call(data)
-      end
-
       def snapshot_serializer=(block)
         @snapshot_serializer = block if block.is_a? Proc
       end
@@ -171,7 +137,6 @@ module Sandthorn
         @event_stores.map_types data
       end
 
-      
       alias_method :event_stores=, :event_store=
     end
   end

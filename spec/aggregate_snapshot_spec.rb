@@ -243,7 +243,7 @@ describe 'when saving to repository' do
   end
 
   it 'should raise error if trying to create snapshot before events are saved on object' do
-    expect(lambda {account.aggregate_snapshot!}).to raise_error
+    expect(lambda {account.aggregate_snapshot!}).to raise_error Sandthorn::Errors::SnapshotError
   end
 
   it 'should not raise an error if trying to create snapshot on object when events are saved' do

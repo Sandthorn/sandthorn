@@ -19,12 +19,7 @@ module Sandthorn
       end
 
       def save
-        aggregate_events.each do |event|
-          event[:event_data] = Sandthorn.serialize event[:event_args]
-          event[:event_args] = nil #Not send extra data over the wire
-        end
-
-        unless aggregate_events.empty?
+        if aggregate_events.any?
           Sandthorn.save_events(
             aggregate_events,
             aggregate_id,
@@ -90,26 +85,22 @@ module Sandthorn
           unless events && !events.empty?
             raise Sandthorn::Errors::AggregateNotFound
           end
-          
+
           if first_event_snapshot?(events)
             transformed_snapshot_event = events.first.merge(event_args: Sandthorn.deserialize_snapshot(events.first[:event_data]))
             events.shift
           end
 
-          transformed_events = events.map do |e|
-            e.merge(event_args: Sandthorn.deserialize(e[:event_data]))
-          end
-          aggregate_build ([transformed_snapshot_event] + transformed_events).compact
+          aggregate_build ([transformed_snapshot_event] + events).compact
         end
 
         def new *args, &block
-
           aggregate = allocate
           aggregate.aggregate_base_initialize
           aggregate.aggregate_initialize
 
           aggregate.default_attributes
-          aggregate.send :initialize, *args, &block 
+          aggregate.send :initialize, *args, &block
           aggregate.send :set_aggregate_id, Sandthorn.generate_aggregate_id
 
           aggregate.aggregate_trace @@aggregate_trace_information do |aggr|
@@ -139,7 +130,7 @@ module Sandthorn
           aggregate.send :set_orginating_aggregate_version!, current_aggregate_version
           aggregate.send :set_current_aggregate_version!, current_aggregate_version
           aggregate.send :aggregate_initialize
-          
+
           aggregate.send :set_instance_variables!, attributes
           aggregate
         end

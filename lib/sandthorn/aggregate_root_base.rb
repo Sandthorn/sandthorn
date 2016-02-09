@@ -10,6 +10,7 @@ module Sandthorn
       attr_reader :aggregate_trace_information
 
       alias :id :aggregate_id
+      alias :aggregate_version :aggregate_current_event_version
 
 
       def aggregate_base_initialize
@@ -86,12 +87,7 @@ module Sandthorn
             raise Sandthorn::Errors::AggregateNotFound
           end
 
-          if first_event_snapshot?(events)
-            transformed_snapshot_event = events.first.merge(event_args: Sandthorn.deserialize_snapshot(events.first[:event_data]))
-            events.shift
-          end
-
-          aggregate_build ([transformed_snapshot_event] + events).compact
+          aggregate_build events
         end
 
         def new *args, &block
@@ -110,25 +106,26 @@ module Sandthorn
 
         end
 
-
-
         def aggregate_build events
           current_aggregate_version = 0
 
           if first_event_snapshot?(events)
-            aggregate = start_build_from_snapshot events
-            current_aggregate_version = aggregate.aggregate_originating_version
+            aggregate = events.first[:aggregate]
             events.shift
           else
             aggregate = create_new_empty_aggregate
           end
 
+          if events.any?
+            current_aggregate_version = events.last[:aggregate_version] 
+            aggregate.send :set_orginating_aggregate_version!, current_aggregate_version
+            aggregate.send :set_current_aggregate_version!, current_aggregate_version
+          end
+
           attributes = build_instance_vars_from_events events
-          current_aggregate_version = events.last[:aggregate_version] unless events.empty?
           aggregate.send :clear_aggregate_events
+
           aggregate.default_attributes
-          aggregate.send :set_orginating_aggregate_version!, current_aggregate_version
-          aggregate.send :set_current_aggregate_version!, current_aggregate_version
           aggregate.send :aggregate_initialize
 
           aggregate.send :set_instance_variables!, attributes
@@ -162,11 +159,7 @@ module Sandthorn
         end
 
         def first_event_snapshot? events
-          events.first[:event_name].to_sym == :aggregate_set_from_snapshot
-        end
-
-        def start_build_from_snapshot events
-          snapshot = events.first[:event_args][0]
+          events.first[:aggregate]
         end
 
         def create_new_empty_aggregate

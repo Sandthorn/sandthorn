@@ -185,17 +185,10 @@ describe 'when generating state on an aggregate root' do
     expect(@account.unpaid_interest_balance).to be > 1000
   end
 
-  it 'should store snapshot data in aggregate_snapshot' do
-    expect(@account.aggregate_snapshot).to be_a(Hash)
-  end
-
-  it 'should store aggregate_version in aggregate_snapshot' do
-    expect(@account.aggregate_snapshot[:aggregate_version]).to eql(@original_account.aggregate_current_event_version)
-  end
 
   it 'should be able to load up from snapshot' do
 
-    events = [@account.aggregate_snapshot]
+    events = [aggregate: @account]
     loaded = BankAccount.aggregate_build events
 
     expect(loaded.balance).to eql(@original_account.balance)
@@ -227,9 +220,7 @@ end
 
 describe 'when saving to repository' do
   let(:account) {a_test_account.extend Sandthorn::AggregateRootSnapshot}
-  it 'should raise an error if trying to save before creating a snapshot' do
-    expect(lambda {account.save_snapshot}).to raise_error (Sandthorn::Errors::SnapshotError)
-  end
+
   it 'should not raise an error if snapshot was created' do
     account.save
     account.aggregate_snapshot!

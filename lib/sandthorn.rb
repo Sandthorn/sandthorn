@@ -10,7 +10,7 @@ module Sandthorn
   class << self
     extend Forwardable
 
-    def_delegators :configuration, :event_stores, :serialize, :deserialize, :serialize_snapshot, :deserialize_snapshot
+    def_delegators :configuration, :event_stores
 
     def default_event_store
       event_stores.default_store
@@ -28,8 +28,6 @@ module Sandthorn
       @configuration ||= Configuration.new
     end
 
-    
-
     def generate_aggregate_id
       SecureRandom.uuid
     end
@@ -46,12 +44,8 @@ module Sandthorn
       event_store_for(aggregate_type).get_aggregate_events_from_snapshot aggregate_id
     end
 
-    def save_snapshot(
-        aggregate_type: missing_key(:aggregate_type),
-        aggregate_snapshot: missing_key(:aggregate_snapshot),
-        aggregate_id: missing_key(:aggregate_id)
-    )
-      event_store_for(aggregate_type).save_snapshot(aggregate_snapshot, aggregate_id)
+    def save_snapshot(aggregate)
+      event_store_for(aggregate.class).save_snapshot(aggregate)
     end
 
     def get_aggregate_list_by_type aggregate_type
@@ -107,30 +101,6 @@ module Sandthorn
 
       def event_store=(store)
         @event_stores = EventStores.new(store)
-      end
-
-      def snapshot_serializer=(block)
-        @snapshot_serializer = block if block.is_a? Proc
-      end
-
-      def snapshot_deserializer=(block)
-        @snapshot_deserializer = block if block.is_a? Proc
-      end
-
-      def snapshot_serializer
-        @snapshot_serializer || default_serializer
-      end
-
-      def snapshot_deserializer
-        @snapshot_deserializer || default_deserializer
-      end
-
-      def serialize_snapshot(data)
-        snapshot_serializer.call(data)
-      end
-
-      def deserialize_snapshot data
-        snapshot_deserializer.call(data)
       end
 
       def map_types= data

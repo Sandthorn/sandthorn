@@ -147,7 +147,7 @@ module Sandthorn
         end
 
         it "should raise error if trying to find id that not exist" do
-          expect{DirtyClass.find("666")}.to raise_error NoMethodError
+          expect{DirtyClass.find("666")}.to raise_error Sandthorn::Errors::AggregateNotFound
         end
       end
 

@@ -91,7 +91,7 @@ module Sandthorn
         end
 
         def new *args, &block
-          aggregate = allocate
+          aggregate = create_new_empty_aggregate()
           aggregate.aggregate_base_initialize
           aggregate.aggregate_initialize
 
@@ -107,8 +107,6 @@ module Sandthorn
         end
 
         def aggregate_build events
-          current_aggregate_version = 0
-
           if first_event_snapshot?(events)
             aggregate = events.first[:aggregate]
             events.shift
@@ -147,7 +145,6 @@ module Sandthorn
         def build_instance_vars_from_events events
           events.each_with_object({}) do |event, instance_vars|
             event_args = event[:event_args]
-            event_name = event[:event_name]
             attribute_deltas = event_args[:attribute_deltas]
             unless attribute_deltas.nil?
               deltas = attribute_deltas.each_with_object({}) do |delta, acc|

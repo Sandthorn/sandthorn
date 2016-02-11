@@ -182,19 +182,20 @@ Sandthorn.configure do |conf|
 end
 ```
 
-## Data serialization / deserialization
+## Data serialization
 
-Its possible to configure how events and snapshots are serialized / deserialized. The default are YAML but can be overloaded in the configure block.
+Its possible to configure how events and snapshots are serialized. Since version `0.11.0` of Sandthorn the serialization of events and snapshots is the responsibility of the driver. This means drivers can have different serialization mechanism, independent of each other.
+
+The default serializer of the Sequel driver is YAML.
+
+Here's how to use the Oj gem to serialize data in the Sequel driver:
 
 ```ruby
-Sandthorn.configure do |conf|
-  conf.serializer = Proc.new { |data| Oj::dump(data) }
-  conf.deserializer = Proc.new { |data| Oj::load(data) }
-  conf.snapshot_serializer = Proc.new { |data| Oj::dump(data) }
-  conf.snapshot_deserializer = Proc.new { |data| Oj::load(data) }
-end
+oj_driver = SandthornDriverSequel.driver_from_connection(connection: Sequel.sqlite) { |conf|
+  conf.event_serializer = Proc.new { |data| Oj::dump(data) }
+  conf.event_deserializer = Proc.new { |data| Oj::load(data) }
+}
 ```
-
 
 # Usage
 

@@ -72,8 +72,9 @@ module Sandthorn
         end
 
         def all
-          aggregate_id_list = Sandthorn.get_aggregate_list_by_type(self)
-          find aggregate_id_list
+          Sandthorn.all(self).map { |events| 
+            aggregate_build events 
+          }
         end
 
         def find id
@@ -82,7 +83,7 @@ module Sandthorn
         end
 
         def aggregate_find aggregate_id
-          events = Sandthorn.get_aggregate(aggregate_id, self)
+          events = Sandthorn.find(aggregate_id, self)
           unless events && !events.empty?
             raise Sandthorn::Errors::AggregateNotFound
           end

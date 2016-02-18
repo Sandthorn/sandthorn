@@ -52,6 +52,14 @@ module Sandthorn
       event_store_for(aggregate_type).get_aggregate_ids(aggregate_type: aggregate_type)
     end
 
+    def all aggregate_type
+      event_store_for(aggregate_type).all(aggregate_type)
+    end
+
+    def find aggregate_id, aggregate_type
+      event_store_for(aggregate_type).find(aggregate_id)
+    end
+
     def get_events event_store: :default, aggregate_types: [], take: 0, after_sequence_number: 0
       event_store = find_event_store(event_store)
       events = event_store.get_events aggregate_types: aggregate_types, take: take, after_sequence_number: after_sequence_number

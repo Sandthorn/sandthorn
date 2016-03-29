@@ -64,7 +64,7 @@ class Ship
   end
 end
 
-# Configure a driver
+# Configure one driver
 url = "sqlite://spec/db/sequel_driver.sqlite3"
 sql_event_store = SandthornDriverSequel.driver_from_url(url: url)
 Sandthorn.configure do |c|
@@ -72,6 +72,10 @@ Sandthorn.configure do |c|
 end
 
 # Or configure many drivers
+url = "sqlite://spec/db/sequel_driver.sqlite3"
+sql_event_store = SandthornDriverSequel.driver_from_url(url: url)
+url_two = "sqlite://spec/db/sequel_driver_two.sqlite3"
+other_store = SandthornDriverSequel.driver_from_url(url: url_two)
 
 Sandthorn.configure do |c|
   c.event_stores = {
@@ -178,19 +182,20 @@ Sandthorn.configure do |conf|
 end
 ```
 
-## Data serialization / deserialization
+## Data serialization
 
-Its possible to configure how events and snapshots are serialized / deserialized. The default are YAML but can be overloaded in the configure block.
+Its possible to configure how events and snapshots are serialized. Since version `0.11.0` of Sandthorn the serialization of events and snapshots is the responsibility of the driver. This means drivers can have different serialization mechanism, independent of each other.
+
+The default serializer of the Sequel driver is YAML.
+
+Here's how to use the Oj gem to serialize data in the Sequel driver:
 
 ```ruby
-Sandthorn.configure do |conf|
-  conf.serializer = Proc.new { |data| Oj::dump(data) }
-  conf.deserializer = Proc.new { |data| Oj::load(data) }
-  conf.snapshot_serializer = Proc.new { |data| Oj::dump(data) }
-  conf.snapshot_deserializer = Proc.new { |data| Oj::load(data) }
-end
+oj_driver = SandthornDriverSequel.driver_from_connection(connection: Sequel.sqlite) { |conf|
+  conf.event_serializer = Proc.new { |data| Oj::dump(data) }
+  conf.event_deserializer = Proc.new { |data| Oj::load(data) }
+}
 ```
-
 
 # Usage
 
@@ -208,6 +213,40 @@ end
 
 All objects that include `Sandthorn::AggregateRoot` is provided with an `aggregate_id` which is a [UUID](http://en.wikipedia.org/wiki/Universally_unique_identifier).
 
+### `Sandthorn::AggregateRoot::events`
+
+An abstraction over `commit` that creates events methods that can be used from within a command method.
+
+In this exampel the `events` method will generate a method called `marked`, this method take *args as input that will result in the method argument on the event. It also take a block that will be executed before the event is commited and is used to groups the state changes to the event (but is only optional right now).
+
+```ruby
+class Board
+  include Sandthorn::AggregateRoot
+  
+  events :marked
+  
+  def mark player, pos_x, pos_y
+    # change some state
+    marked(player) do
+      @pos_x = pos_x
+      @pos_y = pos_y
+    end
+  end
+end
+```
+
+### `Sandthorn::AggregateRoot::default_attributes`
+
+Its possible to add a default_attributes method on an aggregate and set default values to new and already created aggregates.
+
+The `default_attributes` method will be run before initialize on Class.new and before the events when an aggregate is rebuilt. This will make is possible to add default attributes to an aggregate during its hole life cycle.
+
+```ruby
+def default_attributes
+  @new_array = []
+end
+```
+
 ### `Sandthorn::AggregateRoot.commit`
 
 It is required that an event is commited to the aggregate to be stored as an event. `commit` extracts the object's delta and locally caches the state changes that has been applied to the aggregate. Commonly, commit is called when an event is applied. In [CQRS](http://martinfowler.com/bliki/CQRS.html), events are named using past tense.
@@ -224,6 +263,8 @@ end
 ```
 
 `commit` determines the state changes by monitoring the object's readable fields.
+
+Since version 0.10.0 of Sandthorn the concept `events` have been introduced to abstract away the usage of `commit`. Commit still works as before but we think that the `events` abstraction makes the aggregate more readable. 
 
 ### `Sandthorn::AggregateRoot.save`
 

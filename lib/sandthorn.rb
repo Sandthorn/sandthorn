@@ -10,7 +10,7 @@ module Sandthorn
   class << self
     extend Forwardable
 
-    def_delegators :configuration, :event_stores, :serialize, :deserialize, :serialize_snapshot, :deserialize_snapshot
+    def_delegators :configuration, :event_stores
 
     def default_event_store
       event_stores.default_store
@@ -28,8 +28,6 @@ module Sandthorn
       @configuration ||= Configuration.new
     end
 
-    
-
     def generate_aggregate_id
       SecureRandom.uuid
     end
@@ -46,24 +44,26 @@ module Sandthorn
       event_store_for(aggregate_type).get_aggregate_events_from_snapshot aggregate_id
     end
 
-    def save_snapshot(
-        aggregate_type: missing_key(:aggregate_type),
-        aggregate_snapshot: missing_key(:aggregate_snapshot),
-        aggregate_id: missing_key(:aggregate_id)
-    )
-      event_store_for(aggregate_type).save_snapshot(aggregate_snapshot, aggregate_id)
+    def save_snapshot(aggregate)
+      event_store_for(aggregate.class).save_snapshot(aggregate)
     end
 
     def get_aggregate_list_by_type aggregate_type
       event_store_for(aggregate_type).get_aggregate_ids(aggregate_type: aggregate_type)
     end
 
+    def all aggregate_type
+      event_store_for(aggregate_type).all(aggregate_type)
+    end
+
+    def find aggregate_id, aggregate_type
+      event_store_for(aggregate_type).find(aggregate_id)
+    end
+
     def get_events event_store: :default, aggregate_types: [], take: 0, after_sequence_number: 0
       event_store = find_event_store(event_store)
       events = event_store.get_events aggregate_types: aggregate_types, take: take, after_sequence_number: after_sequence_number
       events.map do |event|
-        event[:event_args] = deserialize event[:event_data]
-        event.delete(:event_data)
         Event.new(event)
       end
     end
@@ -111,67 +111,10 @@ module Sandthorn
         @event_stores = EventStores.new(store)
       end
 
-      def serializer=(block)
-        @serializer = block if block.is_a? Proc
-      end
-
-      def deserializer=(block)
-        @deserializer = block if block.is_a? Proc
-      end
-
-      def serializer
-        @serializer || default_serializer
-      end
-
-      def deserializer
-        @deserializer || default_deserializer
-      end
-
-      def default_serializer
-        -> (data) { YAML.dump(data) }
-      end
-
-      def default_deserializer
-        -> (data) { YAML.load(data) }
-      end
-
-      def serialize(data)
-        serializer.call(data)
-      end
-
-      def deserialize(data)
-        deserializer.call(data)
-      end
-
-      def snapshot_serializer=(block)
-        @snapshot_serializer = block if block.is_a? Proc
-      end
-
-      def snapshot_deserializer=(block)
-        @snapshot_deserializer = block if block.is_a? Proc
-      end
-
-      def snapshot_serializer
-        @snapshot_serializer || default_serializer
-      end
-
-      def snapshot_deserializer
-        @snapshot_deserializer || default_deserializer
-      end
-
-      def serialize_snapshot(data)
-        snapshot_serializer.call(data)
-      end
-
-      def deserialize_snapshot data
-        snapshot_deserializer.call(data)
-      end
-
       def map_types= data
         @event_stores.map_types data
       end
 
-      
       alias_method :event_stores=, :event_store=
     end
   end

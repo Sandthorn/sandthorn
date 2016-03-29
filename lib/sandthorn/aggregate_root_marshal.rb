@@ -1,9 +1,6 @@
-require "sandthorn/aggregate_root_base"
-
 module Sandthorn
   module AggregateRoot
     module Marshal 
-      include Sandthorn::AggregateRoot::Base
 
       def aggregate_initialize *args
         @aggregate_attribute_deltas = []

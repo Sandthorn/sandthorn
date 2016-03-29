@@ -18,7 +18,7 @@ module Sandthorn
     def self.call_one_event aggregate_id = nil, hash = {}, value = 0
       one_event(aggregate_id, hash, value)
     end
-    
+
   end
 
   describe "::class_events" do
@@ -32,7 +32,7 @@ module Sandthorn
       it "should not expose class_events methods" do
         expect(subject).not_to respond_to(:one_event)
       end
-      
+
       it "should create the events on the class" do
         expect(ClassEventsSpec.private_methods).to include(:one_event)
       end
@@ -58,16 +58,16 @@ module Sandthorn
       end
 
       it "should add one_event last on the aggregate" do
-        expect(last_event[:event_name]).to eql "one_event" 
+        expect(last_event[:event_name]).to eql "one_event"
       end
 
       it "should not have any deltas in event" do
-        expect(Sandthorn.deserialize(last_event[:event_data])[:attribute_deltas]).to eql []
+        expect(last_event[:event_args][:attribute_deltas]).to eql []
       end
 
       it "should store class_events arguments" do
-        expect(Sandthorn.deserialize(last_event[:event_data])[:method_args].first).to eql(args)
-        expect(Sandthorn.deserialize(last_event[:event_data])[:method_args].last).to eql(1)
+        expect(last_event[:event_args][:method_args].first).to eql(args)
+        expect(last_event[:event_args][:method_args].last).to eql(1)
       end
 
       it "should have same name attribute after reload" do
@@ -119,7 +119,7 @@ module Sandthorn
       end
 
       it "should have set the method_args to create_name" do
-        expect(Sandthorn.deserialize(Sandthorn.get_aggregate_events(ClassEventsSpec, aggregate_id).first[:event_data])[:method_args].first).to eql "create_name"
+        expect(Sandthorn.get_aggregate_events(ClassEventsSpec, aggregate_id).first[:event_args][:method_args].first).to eql "create_name"
       end
     end
   end

@@ -87,7 +87,7 @@ module Sandthorn
         it "should set the values" do
           expect(subject.name).to eql "Mogge"
           expect(subject.sex).to eql "hen"
-          expect{subject.writer}.to raise_error
+          expect{subject.writer}.to raise_error NoMethodError
         end
       end
 
@@ -117,12 +117,12 @@ module Sandthorn
 
       context "when changing writer (attr_writer)" do
         it "should raise error" do
-          expect{dirty_object.change_writer "new_writer"}.to raise_error
+          expect{dirty_object.change_writer "new_writer"}.to raise_error NameError
         end
       end
 
       context "save" do
-        it "should not have events on aggregete after save" do
+        it "should not have events on aggregate after save" do
           expect(dirty_object.save.aggregate_events.length).to eql 0
         end
 
@@ -147,7 +147,7 @@ module Sandthorn
         end
 
         it "should raise error if trying to find id that not exist" do
-          expect{DirtyClass.find("666")}.to raise_error
+          expect{DirtyClass.find("666")}.to raise_error Sandthorn::Errors::AggregateNotFound
         end
       end
 

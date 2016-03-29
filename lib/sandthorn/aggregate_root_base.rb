@@ -10,6 +10,7 @@ module Sandthorn
       attr_reader :aggregate_trace_information
 
       alias :id :aggregate_id
+      alias :aggregate_version :aggregate_current_event_version
 
 
       def aggregate_base_initialize
@@ -19,12 +20,7 @@ module Sandthorn
       end
 
       def save
-        aggregate_events.each do |event|
-          event[:event_data] = Sandthorn.serialize event[:event_args]
-          event[:event_args] = nil #Not send extra data over the wire
-        end
-
-        unless aggregate_events.empty?
+        if aggregate_events.any?
           Sandthorn.save_events(
             aggregate_events,
             aggregate_id,
@@ -52,6 +48,10 @@ module Sandthorn
         commit_with_event_name(event_name, args)
       end
 
+      def default_attributes
+        #NOOP
+      end
+
       alias :record_event :commit
 
       module ClassMethods
@@ -72,8 +72,9 @@ module Sandthorn
         end
 
         def all
-          aggregate_id_list = Sandthorn.get_aggregate_list_by_type(self)
-          find aggregate_id_list
+          Sandthorn.all(self).map { |events|
+            aggregate_build events
+          }
         end
 
         def find id
@@ -82,51 +83,50 @@ module Sandthorn
         end
 
         def aggregate_find aggregate_id
-          events = Sandthorn.get_aggregate(aggregate_id, self)
+          events = Sandthorn.find(aggregate_id, self)
           unless events && !events.empty?
             raise Sandthorn::Errors::AggregateNotFound
           end
-          
-          if first_event_snapshot?(events)
-            transformed_snapshot_event = events.first.merge(event_args: Sandthorn.deserialize_snapshot(events.first[:event_data]))
-            events.shift
-          end
 
-          transformed_events = events.map do |e|
-            e.merge(event_args: Sandthorn.deserialize(e[:event_data]))
-          end
-          aggregate_build ([transformed_snapshot_event] + transformed_events).compact
+          aggregate_build events
         end
 
-        def new *args
-          super.tap do |aggregate|
-            aggregate.aggregate_trace @@aggregate_trace_information do |aggr|
-              aggr.aggregate_base_initialize
-              aggr.aggregate_initialize
-              aggr.send :set_aggregate_id, Sandthorn.generate_aggregate_id
-              aggr.send :commit, *args
-              return aggr
-            end
+        def new *args, &block
+          aggregate = create_new_empty_aggregate()
+          aggregate.aggregate_base_initialize
+          aggregate.aggregate_initialize
+
+          aggregate.default_attributes
+          aggregate.send :initialize, *args, &block
+          aggregate.send :set_aggregate_id, Sandthorn.generate_aggregate_id
+
+          aggregate.aggregate_trace @@aggregate_trace_information do |aggr|
+            aggr.send :commit, *args
+            return aggr
           end
+
         end
 
         def aggregate_build events
-          current_aggregate_version = 0
-
           if first_event_snapshot?(events)
-            aggregate = start_build_from_snapshot events
-            current_aggregate_version = aggregate.aggregate_originating_version
+            aggregate = events.first[:aggregate]
             events.shift
           else
             aggregate = create_new_empty_aggregate
           end
 
+          if events.any?
+            current_aggregate_version = events.last[:aggregate_version]
+            aggregate.send :set_orginating_aggregate_version!, current_aggregate_version
+            aggregate.send :set_current_aggregate_version!, current_aggregate_version
+          end
+
           attributes = build_instance_vars_from_events events
-          current_aggregate_version = events.last[:aggregate_version] unless events.empty?
           aggregate.send :clear_aggregate_events
-          aggregate.send :set_orginating_aggregate_version!, current_aggregate_version
-          aggregate.send :set_current_aggregate_version!, current_aggregate_version
+
+          aggregate.default_attributes
           aggregate.send :aggregate_initialize
+
           aggregate.send :set_instance_variables!, attributes
           aggregate
         end
@@ -134,7 +134,7 @@ module Sandthorn
         def class_events(*event_names)
           event_names.each do |name|
             define_singleton_method name do |aggregate_id = nil, *args, &block|
-              
+
               unless aggregate_id #new aggregate
                 a = create_new_empty_aggregate.tap  do |aggregate|
                   aggregate.aggregate_base_initialize
@@ -146,13 +146,13 @@ module Sandthorn
                 end
               else
                 event = build_event(name.to_s, args, [], nil)
-                event[:event_data] = Sandthorn.serialize event[:event_args]
-                event[:event_args] = nil
+                #event[:event_data] = Sandthorn.serialize event[:event_args]
+                #event[:event_args] = nil
 
                 Sandthorn.save_events([event],
                   aggregate_id,
                   self)
-                
+
                 return aggregate_id
               end
             end
@@ -161,7 +161,7 @@ module Sandthorn
         end
 
         def build_event name, args, attribute_deltas, aggregate_version, trace_information = nil
-          
+
           data = {
             method_name: name,
             method_args: args,
@@ -180,12 +180,21 @@ module Sandthorn
 
         end
 
+        def events(*event_names)
+          event_names.each do |name|
+            define_method(name) do |*args, &block|
+              block.call() if block
+              commit_with_event_name(name.to_s, args)
+            end
+            private name.to_s
+          end
+        end
+
         private
 
         def build_instance_vars_from_events events
           events.each_with_object({}) do |event, instance_vars|
             event_args = event[:event_args]
-            event_name = event[:event_name]
             attribute_deltas = event_args[:attribute_deltas]
             unless attribute_deltas.nil?
               deltas = attribute_deltas.each_with_object({}) do |delta, acc|
@@ -197,11 +206,7 @@ module Sandthorn
         end
 
         def first_event_snapshot? events
-          events.first[:event_name].to_sym == :aggregate_set_from_snapshot
-        end
-
-        def start_build_from_snapshot events
-          snapshot = events.first[:event_args][0]
+          events.first[:aggregate]
         end
 
         def create_new_empty_aggregate
@@ -250,12 +255,26 @@ module Sandthorn
         @aggregate_id = aggregate_id
       end
 
-      def commit_with_event_name event_name, args
+      def commit_with_event_name(event_name, args)
         aggregate_attribute_deltas = get_delta
-        increase_current_aggregate_version!
-        event = self.class.build_event(event_name, args, aggregate_attribute_deltas, @aggregate_current_event_version, @aggregate_trace_information)
 
-        @aggregate_events << event
+        increase_current_aggregate_version!
+        data = {
+          method_name: event_name,
+          method_args: args,
+          attribute_deltas: aggregate_attribute_deltas
+        }
+        trace_information = @aggregate_trace_information
+        unless trace_information.nil? || trace_information.empty?
+          data.merge!({ trace: trace_information })
+        end
+
+        @aggregate_events << ({
+          aggregate_version: @aggregate_current_event_version,
+          event_name: event_name,
+          event_args: data
+        })
+
         self
       end
 

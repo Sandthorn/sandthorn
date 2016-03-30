@@ -131,35 +131,6 @@ module Sandthorn
           aggregate
         end
 
-        def class_events(*event_names)
-          event_names.each do |name|
-            define_singleton_method name do |aggregate_id = nil, *args, &block|
-
-              unless aggregate_id #new aggregate
-                a = create_new_empty_aggregate.tap  do |aggregate|
-                  aggregate.aggregate_base_initialize
-                  aggregate.aggregate_initialize
-                  aggregate.send :set_aggregate_id, Sandthorn.generate_aggregate_id
-                  aggregate.instance_eval(&block) if block
-                  aggregate.send :commit_with_event_name, name.to_s, args
-                  return aggregate
-                end
-              else
-                event = build_event(name.to_s, args, [], nil)
-                #event[:event_data] = Sandthorn.serialize event[:event_args]
-                #event[:event_args] = nil
-
-                Sandthorn.save_events([event],
-                  aggregate_id,
-                  self)
-
-                return aggregate_id
-              end
-            end
-            self.singleton_class.class_eval { private name.to_s }
-          end
-        end
-
         def build_event name, args, attribute_deltas, aggregate_version, trace_information = nil
 
           data = {
@@ -178,6 +149,35 @@ module Sandthorn
             event_args: data
           }
 
+        end
+
+        def stateless_events(*event_names)
+           event_names.each do |name|
+            define_singleton_method name do |aggregate_id, *args|
+              event = build_event(name.to_s, args, [], nil)
+              Sandthorn.save_events([event], aggregate_id, self)
+              return aggregate_id
+
+            end
+          end
+        end
+
+        def constructor_events(*event_names)
+          event_names.each do |name|
+            define_singleton_method name do |*args, &block|
+
+              create_new_empty_aggregate.tap  do |aggregate|
+                aggregate.aggregate_base_initialize
+                aggregate.aggregate_initialize
+                aggregate.send :set_aggregate_id, Sandthorn.generate_aggregate_id
+                aggregate.instance_eval(&block) if block
+                aggregate.send :commit_with_event_name, name.to_s, args
+                return aggregate
+              end
+
+            end
+            self.singleton_class.class_eval { private name.to_s }
+          end
         end
 
         def events(*event_names)

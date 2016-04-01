@@ -130,25 +130,7 @@ module Sandthorn
           aggregate
         end
 
-        def build_event name, args, attribute_deltas, aggregate_version, trace_information = nil
 
-          data = {
-            method_name: name,
-            method_args: args,
-            attribute_deltas: attribute_deltas
-          }
-
-          unless trace_information.nil? || trace_information.empty?
-            data.merge!({ trace: trace_information })
-          end
-
-          return {
-            aggregate_version: aggregate_version,
-            event_name: name,
-            event_args: data
-          }
-
-        end
 
         def stateless_events(*event_names)
           event_names.each do |name|
@@ -190,6 +172,26 @@ module Sandthorn
         end
 
         private
+
+        def build_event name, args, attribute_deltas, aggregate_version, trace_information = nil
+
+          data = {
+            method_name: name,
+            method_args: args,
+            attribute_deltas: attribute_deltas
+          }
+
+          unless trace_information.nil? || trace_information.empty?
+            data.merge!({ trace: trace_information })
+          end
+
+          return {
+            aggregate_version: aggregate_version,
+            event_name: name,
+            event_args: data
+          }
+
+        end
 
         def build_instance_vars_from_events events
           events.each_with_object({}) do |event, instance_vars|

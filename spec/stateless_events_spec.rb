@@ -11,10 +11,6 @@ module Sandthorn
       @name = name
     end
 
-    # def self.call_one_event aggregate_id, hash = {}, value = 0
-    #   one_event(aggregate_id, hash, value)
-    # end
-
   end
 
   describe "::stateless_events" do
@@ -26,8 +22,6 @@ module Sandthorn
       end
 
     end
-
-
 
     context "when adding a stateless event to an existing aggregate" do
 

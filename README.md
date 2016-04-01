@@ -222,9 +222,9 @@ In this exampel the `events` method will generate a method called `marked`, this
 ```ruby
 class Board
   include Sandthorn::AggregateRoot
-  
+
   events :marked
-  
+
   def mark player, pos_x, pos_y
     # change some state
     marked(player) do
@@ -233,6 +233,43 @@ class Board
     end
   end
 end
+```
+
+### `Sandthorn::AggregateRoot::constructor_events`
+
+Before version 0.13.0 the only initial event on an aggregate were `new`. With the `constructor_events` its possible to be more specific on how an aggregate came to be.
+
+```ruby
+class Board
+  include Sandthorn::AggregateRoot
+
+  # creates a private class method `board_created`
+  contructor_events :board_created
+
+  def self.create name
+
+    board_created(name) do
+      @name = name
+    end
+  end
+end
+```
+
+### `Sandthorn::AggregateRoot::stateless_events`
+
+The `stateless_events` creates public class methods. It takes as its first argument an aggregate_id that attache the resulting event to the referenced aggregate. The rest of the arguments are optinal and are stored in the method_args of the event.
+
+A stateless_event never loads the aggregate to an object but only append itself to the aggregates stream of events.
+
+```ruby
+class Board
+  include Sandthorn::AggregateRoot
+
+  stateless_events :player_went_to_toilet
+
+end
+
+Board.player_went_to_toilet "board_aggregate_id", player_id, time
 ```
 
 ### `Sandthorn::AggregateRoot::default_attributes`
@@ -264,7 +301,7 @@ end
 
 `commit` determines the state changes by monitoring the object's readable fields.
 
-Since version 0.10.0 of Sandthorn the concept `events` have been introduced to abstract away the usage of `commit`. Commit still works as before but we think that the `events` abstraction makes the aggregate more readable. 
+Since version 0.10.0 of Sandthorn the concept `events` have been introduced to abstract away the usage of `commit`. Commit still works as before but we think that the `events` abstraction makes the aggregate more readable.
 
 ### `Sandthorn::AggregateRoot.save`
 
@@ -328,7 +365,7 @@ In this case, the resulting events from the commands `new` and `mark` will have 
 
 ## Bounded Context
 
-A bounded context is a system divider that split large systems into smaller parts. [Bounded Context by Martin Fowler](http://martinfowler.com/bliki/BoundedContext.html) 
+A bounded context is a system divider that split large systems into smaller parts. [Bounded Context by Martin Fowler](http://martinfowler.com/bliki/BoundedContext.html)
 
 A module can include `Sandthorn::BoundedContext` and all aggregates within the module can be retreived via the ::aggregate_types method on the module. A use case is to use it when Sandthorn is configured and setup all aggregates in a bounded context to a driver.
 

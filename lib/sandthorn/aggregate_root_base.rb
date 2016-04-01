@@ -6,7 +6,6 @@ module Sandthorn
       attr_reader :aggregate_events
       attr_reader :aggregate_current_event_version
       attr_reader :aggregate_originating_version
-      attr_reader :aggregate_stored_serialized_object
       attr_reader :aggregate_trace_information
 
       alias :id :aggregate_id
@@ -152,7 +151,7 @@ module Sandthorn
         end
 
         def stateless_events(*event_names)
-           event_names.each do |name|
+          event_names.each do |name|
             define_singleton_method name do |aggregate_id, *args|
               event = build_event(name.to_s, args, [], nil)
               Sandthorn.save_events([event], aggregate_id, self)

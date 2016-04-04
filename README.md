@@ -257,9 +257,9 @@ end
 
 ### `Sandthorn::AggregateRoot::stateless_events`
 
-The `stateless_events` creates public class methods. It takes as its first argument an aggregate_id that attache the resulting event to the referenced aggregate. The rest of the arguments are optinal and are stored in the method_args of the event.
+Calling `stateless_events` creates public class methods. The first argument is an `aggregate_id`. The resulting event is attached to the referenced aggregate. The rest of the arguments are optional and are stored in the method_args of the event.
 
-A stateless_event never loads the aggregate to an object but only append itself to the aggregates stream of events.
+When creating a stateless event, the corresponding aggregate is never loaded. The event is appendend to the aggregate's event stream.
 
 ```ruby
 class Board

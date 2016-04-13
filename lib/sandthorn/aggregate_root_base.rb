@@ -6,7 +6,6 @@ module Sandthorn
       attr_reader :aggregate_events
       attr_reader :aggregate_current_event_version
       attr_reader :aggregate_originating_version
-      attr_reader :aggregate_stored_serialized_object
       attr_reader :aggregate_trace_information
 
       alias :id :aggregate_id
@@ -72,8 +71,8 @@ module Sandthorn
         end
 
         def all
-          Sandthorn.all(self).map { |events| 
-            aggregate_build events 
+          Sandthorn.all(self).map { |events|
+            aggregate_build events
           }
         end
 
@@ -116,7 +115,7 @@ module Sandthorn
           end
 
           if events.any?
-            current_aggregate_version = events.last[:aggregate_version] 
+            current_aggregate_version = events.last[:aggregate_version]
             aggregate.send :set_orginating_aggregate_version!, current_aggregate_version
             aggregate.send :set_current_aggregate_version!, current_aggregate_version
           end
@@ -131,6 +130,37 @@ module Sandthorn
           aggregate
         end
 
+
+
+        def stateless_events(*event_names)
+          event_names.each do |name|
+            define_singleton_method name do |aggregate_id, *args|
+              event = build_event(name.to_s, args, [], nil)
+              Sandthorn.save_events([event], aggregate_id, self)
+              return aggregate_id
+
+            end
+          end
+        end
+
+        def constructor_events(*event_names)
+          event_names.each do |name|
+            define_singleton_method name do |*args, &block|
+
+              create_new_empty_aggregate.tap  do |aggregate|
+                aggregate.aggregate_base_initialize
+                aggregate.aggregate_initialize
+                aggregate.send :set_aggregate_id, Sandthorn.generate_aggregate_id
+                aggregate.instance_eval(&block) if block
+                aggregate.send :commit_with_event_name, name.to_s, args
+                return aggregate
+              end
+
+            end
+            self.singleton_class.class_eval { private name.to_s }
+          end
+        end
+
         def events(*event_names)
           event_names.each do |name|
             define_method(name) do |*args, &block|
@@ -142,6 +172,26 @@ module Sandthorn
         end
 
         private
+
+        def build_event name, args, attribute_deltas, aggregate_version, trace_information = nil
+
+          data = {
+            method_name: name,
+            method_args: args,
+            attribute_deltas: attribute_deltas
+          }
+
+          unless trace_information.nil? || trace_information.empty?
+            data.merge!({ trace: trace_information })
+          end
+
+          return {
+            aggregate_version: aggregate_version,
+            event_name: name,
+            event_args: data
+          }
+
+        end
 
         def build_instance_vars_from_events events
           events.each_with_object({}) do |event, instance_vars|

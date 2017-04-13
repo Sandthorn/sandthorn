@@ -89,50 +89,50 @@ class BankAccount
   def changed_interest_rate_event new_interest_rate, interest_valid_from
     @current_interest_info[:interest_rate] = new_interest_rate
     @current_interest_info[:interest_valid_from] = interest_valid_from
-    record_event new_interest_rate,interest_valid_from
+    record_event
   end
 
   def added_unpaid_interest_event interest_amount, calculated_until
     @unpaid_interest_balance += interest_amount
     @last_interest_calculation = calculated_until
-    record_event interest_amount, calculated_until
+    record_event
   end
 
   def paid_out_unpaid_interest_balance_event interest_amount
     @unpaid_interest_balance -= interest_amount
     @balance += interest_amount
-    record_event interest_amount
+    record_event
   end
 
   def withdrew_amount_from_atm_event amount, atm_id
     @balance -= amount
-    record_event amount,atm_id
+    record_event
   end
 
   def withdrew_amount_from_cashier_event amount, cashier_id
     @balance -= amount
-    record_event amount, cashier_id
+    record_event
   end
 
   def paid_with_visa_card_event amount, visa_card_transaction_id
     @balance -= amount
-    record_event amount,visa_card_transaction_id
+    record_event
   end
 
   def charged_cashier_withdrawal_fee_event amount
     @balance -= amount
-    record_event amount
+    record_event
   end
 
   def deposited_to_cashier_event amount, cashier_id
     @balance = self.balance + amount
-    record_event amount,cashier_id
+    record_event
   end
 
   def incoming_transfer_event amount, from_account_number
     current_balance = self.balance
     @balance = amount + current_balance
-    record_event amount, from_account_number
+    record_event
   end
 
 end

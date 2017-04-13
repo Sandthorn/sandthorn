@@ -42,9 +42,9 @@ module Sandthorn
         @aggregate_trace_information = nil
       end
 
-      def commit *args
+      def commit
         event_name = caller_locations(1,1)[0].label.gsub(/block ?(.*) in /, "")
-        commit_with_event_name(event_name, args)
+        commit_with_event_name(event_name)
       end
 
       def default_attributes
@@ -100,7 +100,7 @@ module Sandthorn
           aggregate.send :set_aggregate_id, Sandthorn.generate_aggregate_id
 
           aggregate.aggregate_trace @@aggregate_trace_information do |aggr|
-            aggr.send :commit, *args
+            aggr.send :commit
             return aggr
           end
 
@@ -119,7 +119,6 @@ module Sandthorn
             aggregate.send :set_orginating_aggregate_version!, current_aggregate_version
             aggregate.send :set_current_aggregate_version!, current_aggregate_version
           end
-
           attributes = build_instance_vars_from_events events
           aggregate.send :clear_aggregate_events
 
@@ -135,7 +134,7 @@ module Sandthorn
         def stateless_events(*event_names)
           event_names.each do |name|
             define_singleton_method name do |aggregate_id, *args|
-              event = build_event(name.to_s, args, [], nil)
+              event = build_stateless_event(name.to_s, args)
               Sandthorn.save_events([event], aggregate_id, self)
               return aggregate_id
 
@@ -152,7 +151,7 @@ module Sandthorn
                 aggregate.aggregate_initialize
                 aggregate.send :set_aggregate_id, Sandthorn.generate_aggregate_id
                 aggregate.instance_eval(&block) if block
-                aggregate.send :commit_with_event_name, name.to_s, args
+                aggregate.send :commit_with_event_name, name.to_s
                 return aggregate
               end
 
@@ -165,7 +164,7 @@ module Sandthorn
           event_names.each do |name|
             define_method(name) do |*args, &block|
               block.call() if block
-              commit_with_event_name(name.to_s, args)
+              commit_with_event_name(name.to_s)
             end
             private name.to_s
           end
@@ -173,30 +172,33 @@ module Sandthorn
 
         private
 
-        def build_event name, args, attribute_deltas, aggregate_version, trace_information = nil
+        def build_stateless_event name, args = []
+
+          formated_attribute_deltas = args.first.map do |key, value|
+            {
+              attribute_name: key.to_s,
+              old_value: nil,
+              new_value: value
+            }
+          end unless args.empty?
 
           data = {
-            method_name: name,
-            method_args: args,
-            attribute_deltas: attribute_deltas
+            attribute_deltas: formated_attribute_deltas
           }
 
-          unless trace_information.nil? || trace_information.empty?
-            data.merge!({ trace: trace_information })
-          end
-
           return {
-            aggregate_version: aggregate_version,
+            aggregate_version: nil,
             event_name: name,
-            event_args: data
+            event_data: data,
+            event_meta_data: nil
           }
 
         end
 
         def build_instance_vars_from_events events
           events.each_with_object({}) do |event, instance_vars|
-            event_args = event[:event_args]
-            attribute_deltas = event_args[:attribute_deltas]
+            event_data = event[:event_data]
+            attribute_deltas = event_data[:attribute_deltas]
             unless attribute_deltas.nil?
               deltas = attribute_deltas.each_with_object({}) do |delta, acc|
                 acc[delta[:attribute_name]] = delta[:new_value]
@@ -256,24 +258,19 @@ module Sandthorn
         @aggregate_id = aggregate_id
       end
 
-      def commit_with_event_name(event_name, args)
+      def commit_with_event_name(event_name)
         aggregate_attribute_deltas = get_delta
 
         increase_current_aggregate_version!
         data = {
-          method_name: event_name,
-          method_args: args,
           attribute_deltas: aggregate_attribute_deltas
         }
-        trace_information = @aggregate_trace_information
-        unless trace_information.nil? || trace_information.empty?
-          data.merge!({ trace: trace_information })
-        end
 
         @aggregate_events << ({
           aggregate_version: @aggregate_current_event_version,
           event_name: event_name,
-          event_args: data
+          event_data: data,
+          event_meta_data: @aggregate_trace_information
         })
 
         self

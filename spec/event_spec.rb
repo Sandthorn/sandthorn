@@ -10,7 +10,7 @@ module Sandthorn
           "sequence_number":114,
           "event_name":"new",
           "timestamp":"2014-08-16 20:02:05 UTC",
-          "event_args":{"method_name":"new",
+          "event_data":{"method_name":"new",
           "method_args":[{"name":"Hahah",
           "price":"50",
           "stock_status":"outofstock"}],
@@ -42,7 +42,7 @@ module Sandthorn
       aggregate_version
       timestamp
       event_name
-      event_args
+      event_data
       method_args
       trace
       )
@@ -75,7 +75,7 @@ module Sandthorn
 
       describe "a delta" do
         let(:wrapped_delta) { subject.attribute_deltas.first }
-        let(:raw_delta) { subject[:event_args][:attribute_deltas].first }
+        let(:raw_delta) { subject[:event_data][:attribute_deltas].first }
         describe "#attribute_name" do
           it "has the same value as the raw hash" do
             expect(wrapped_delta.attribute_name).to eq(raw_delta[:attribute_name])

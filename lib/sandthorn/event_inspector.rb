@@ -52,21 +52,18 @@ module Sandthorn
         .concat(unsaved)
         .sort { |a, b| a[:aggregate_version] <=> b[:aggregate_version] }
 
-      extracted = all.collect do |e| 
-        if e[:event_args].nil? && !e[:event_data].nil?
+      extracted = all.collect do |e|
+        if e[:event_data].nil? && !e[:event_data].nil?
           data = Sandthorn.deserialize e[:event_data]
         else
-          data = e[:event_args]
-        end
-
-        unless data.nil? || !data.is_a?(Hash)
-          trace = data[:trace]
+          data = e[:event_data]
         end
 
         {
           aggregate_version: e[:aggregate_version],
           event_name: e[:event_name].to_sym, 
-          trace: trace 
+          event_data: data,
+          event_meta_data: e[:event_meta_data]
         }
       end
 

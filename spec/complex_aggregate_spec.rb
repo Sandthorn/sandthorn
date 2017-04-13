@@ -25,7 +25,7 @@ class IAmComplex
 
   def set_foo_bar_on_hello value
     @hello.set_foo_bar value
-    commit value
+    commit
   end
 
 
@@ -36,7 +36,7 @@ class IAmComplex
   private
   def set_hello_event hello
     @hello = hello
-    commit hello
+    commit
   end
 
 end

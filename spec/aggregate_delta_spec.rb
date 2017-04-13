@@ -20,22 +20,22 @@ class PersonTest
 
     def change_name new_name
       @name = new_name
-      record_event new_name
+      record_event
     end
 
     def change_relationship new_relationship
       @relationship_status = new_relationship
-      record_event new_relationship
+      record_event
     end
 
     def add_to_array element
       @my_array << element
-      record_event element
+      record_event
     end
 
     def add_to_hash name,value
       @my_hash[name] = value
-      record_event name,value
+      record_event
     end
 end
 

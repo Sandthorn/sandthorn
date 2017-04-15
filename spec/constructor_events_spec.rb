@@ -49,16 +49,12 @@ module Sandthorn
     end
 
     it "should have created an created_event" do
-      expect(Sandthorn.get_aggregate_events(ConstructorEventsSpec, aggregate_id).first[:event_name]).to eql "created_event"
+      expect(Sandthorn.find(aggregate_id, ConstructorEventsSpec).first[:event_name]).to eql "created_event"
     end
 
-    # it "should have set the method_args to create_name" do
-    #   expect(Sandthorn.get_aggregate_events(ConstructorEventsSpec, aggregate_id).first[:event_args][:method_args].first).to eql "create_name"
-    # end
-
     it "should have set the attribute_delta name" do
-      expect(Sandthorn.get_aggregate_events(ConstructorEventsSpec, aggregate_id).first[:event_data][:attribute_deltas].last[:attribute_name]).to eql "name"
-      expect(Sandthorn.get_aggregate_events(ConstructorEventsSpec, aggregate_id).first[:event_data][:attribute_deltas].last[:new_value]).to eql "create_name"
+      expect(Sandthorn.find(aggregate_id, ConstructorEventsSpec).first[:event_data][:attribute_deltas].last[:attribute_name]).to eql "name"
+      expect(Sandthorn.find(aggregate_id, ConstructorEventsSpec).first[:event_data][:attribute_deltas].last[:new_value]).to eql "create_name"
     end
   end
 end

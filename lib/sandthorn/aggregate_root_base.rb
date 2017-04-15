@@ -137,7 +137,6 @@ module Sandthorn
               event = build_stateless_event(name.to_s, args)
               Sandthorn.save_events([event], aggregate_id, self)
               return aggregate_id
-
             end
           end
         end

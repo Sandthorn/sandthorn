@@ -38,7 +38,7 @@ module Sandthorn
       end
 
       let(:last_event) do
-        Sandthorn.get_aggregate_events(StatelessEventsSpec, subject.aggregate_id).last
+        Sandthorn.find(subject.aggregate_id, StatelessEventsSpec).last
       end
 
       let(:reloaded_subject) do
@@ -67,7 +67,7 @@ module Sandthorn
       let(:aggregate_id) {"none_existing_aggregate_id"}
 
       let(:events) do
-        Sandthorn.get_aggregate_events(StatelessEventsSpec, aggregate_id)
+        Sandthorn.find aggregate_id, StatelessEventsSpec
       end
 
       it "should store the stateless event as the first event" do

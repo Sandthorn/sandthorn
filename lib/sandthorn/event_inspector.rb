@@ -77,7 +77,7 @@ module Sandthorn
     end
 
     def get_saved_events event_name
-      saved_events = Sandthorn.get_aggregate_events self.aggregate_id, self.class
+      saved_events = Sandthorn.find self.class, self.aggregate_id
       saved_events.select { |e| e[:event_name] == event_name.to_s  }
     end
 

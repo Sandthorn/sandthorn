@@ -36,10 +36,6 @@ module Sandthorn
       event_store_for(aggregate_type).save_events aggregate_events, aggregate_id, *aggregate_type
     end
 
-    def get_aggregate aggregate_id, aggregate_type
-      event_store_for(aggregate_type).get_aggregate_events_from_snapshot aggregate_id
-    end
-
     def save_snapshot(aggregate)
       event_store_for(aggregate.class).save_snapshot(aggregate)
     end

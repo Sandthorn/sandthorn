@@ -44,10 +44,6 @@ module Sandthorn
       event_store_for(aggregate.class).save_snapshot(aggregate)
     end
 
-    def get_aggregate_list_by_type aggregate_type
-      event_store_for(aggregate_type).get_aggregate_ids(aggregate_type: aggregate_type)
-    end
-
     def all aggregate_type
       event_store_for(aggregate_type).all(aggregate_type)
     end

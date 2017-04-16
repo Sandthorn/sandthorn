@@ -10,7 +10,7 @@ require "ap"
 require "bundler"
 require "sandthorn_driver_sequel"
 require "support/custom_matchers"
-
+require "sandthorn_driver_event_store"
 Bundler.require
 
 module Helpers
@@ -45,10 +45,9 @@ def sqlite_store_setup
   driver = SandthornDriverSequel.driver_from_url(url: url) do |conf|
     conf.event_serializer       = Proc.new { |data| YAML::dump(data) }
     conf.event_deserializer     = Proc.new { |data| YAML::load(data) }
-    conf.snapshot_serializer    = Proc.new { |data| YAML::dump(data) }
-    conf.snapshot_deserializer  = Proc.new { |data| YAML::load(data) }
   end
-
+  
+  #driver = SandthornDriverEventStore.driver host: "localhost", port: 2113, page_size: 20
   Sandthorn.configure do |c|
     c.event_store = driver
   end

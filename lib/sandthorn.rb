@@ -45,7 +45,7 @@ module Sandthorn
     end
 
     def save_snapshot(aggregate)
-      event_store_for(aggregate.class).save_snapshot(aggregate)
+      raise "Not Implemented"
     end
 
     def find_event_store(name)

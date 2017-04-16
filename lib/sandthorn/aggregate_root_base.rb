@@ -107,12 +107,7 @@ module Sandthorn
         end
 
         def aggregate_build events
-          if first_event_snapshot?(events)
-            aggregate = events.first[:aggregate]
-            events.shift
-          else
-            aggregate = create_new_empty_aggregate
-          end
+          aggregate = create_new_empty_aggregate
 
           if events.any?
             current_aggregate_version = events.last[:aggregate_version]
@@ -128,8 +123,6 @@ module Sandthorn
           aggregate.send :set_instance_variables!, attributes
           aggregate
         end
-
-
 
         def stateless_events(*event_names)
           event_names.each do |name|
@@ -205,10 +198,6 @@ module Sandthorn
               instance_vars.merge! deltas
             end
           end
-        end
-
-        def first_event_snapshot? events
-          events.first[:aggregate]
         end
 
         def create_new_empty_aggregate

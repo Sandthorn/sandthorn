@@ -1,6 +1,5 @@
 require 'spec_helper'
 require 'sandthorn/event_inspector'
-require 'sandthorn/aggregate_root_snapshot'
 
 class UsualSuspect
   include Sandthorn::AggregateRoot
@@ -36,7 +35,6 @@ describe "using a traced change" do
     it "should record tracing if specified" do
       simple = Simple.new
       simple.extend Sandthorn::EventInspector
-      simple.extend Sandthorn::AggregateRootSnapshot
       
       simple.extend Go
       simple.aggregate_trace "123" do |traced|

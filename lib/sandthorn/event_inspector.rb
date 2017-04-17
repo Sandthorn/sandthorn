@@ -46,7 +46,12 @@ module Sandthorn
     end
 
     def events_with_trace_info
-      saved = Sandthorn.find aggregate_id, self.class
+      begin
+        saved = Sandthorn.find aggregate_id, self.class  
+      rescue Exception
+        saved = []
+      end
+      
       unsaved = self.aggregate_events
       all = saved
         .concat(unsaved)

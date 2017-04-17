@@ -82,12 +82,17 @@ module Sandthorn
         end
 
         def aggregate_find aggregate_id
-          events = Sandthorn.find(aggregate_id, self)
-          unless events && !events.empty?
-            raise Sandthorn::Errors::AggregateNotFound
-          end
+          begin
+            events = Sandthorn.find(aggregate_id, self)
+            unless events && !events.empty?
+              raise Errors::AggregateNotFound
+            end
 
-          aggregate_build events
+            return aggregate_build events
+          rescue Exception
+            raise Errors::AggregateNotFound
+          end
+            
         end
 
         def new *args, &block

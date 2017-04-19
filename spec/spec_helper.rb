@@ -10,7 +10,7 @@ require "ap"
 require "bundler"
 require "sandthorn_driver_sequel"
 require "support/custom_matchers"
-require "sandthorn_driver_event_store"
+#require "sandthorn_driver_event_store"
 Bundler.require
 
 module Helpers

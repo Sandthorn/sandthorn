@@ -144,7 +144,7 @@ end
 
 Calling `stateless_events` creates public class methods. The first argument is an `aggregate_id` and the second argument is optional but has to be a hash and are stored in the attribute_deltas of the event.
 
-When creating a stateless event, the corresponding aggregate is never loaded. The event is appendend to the aggregate's event stream.
+When creating a stateless event, the corresponding aggregate is never loaded and the event is saved without calling the save method.
 
 ```ruby
 class Board

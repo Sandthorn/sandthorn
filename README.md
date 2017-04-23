@@ -25,10 +25,6 @@ Check out examples of Sandthorn:
 * [Examples](https://github.com/Sandthorn/sandthorn_examples) including a product shop and TicTacToe game.
 * Live [demo](http://infinite-mesa-8629.herokuapp.com/) comparing Active Record and Sandthorn.
 
-## How do I use Sandthorn?
-
-
-
 # Installation
 
 Add this line to your application's Gemfile:

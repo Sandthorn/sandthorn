@@ -13,8 +13,7 @@ A ruby library for saving an object's state as a series of events.
 
 ## When do I need event sourcing?
 
-If the history of how an object came to be is important a well known technique is to generate a separate history log. The log is generated in parallel with the object and all actions to the object needs to be stored to the log by a separate method call. With event sourcing the history log is now integrated with the object and generated based on the actions that are made on the object, the log is now the fact that the object is built upon.
-
+When state changes made to an object is important a common technique is to store the changes in a separate history log and the log is generated in parallel with the object own state. With event sourcing the history log is now integrated within the object and generated based on the actions made to the object. The entries in log is the facts the object is built upon.
 
 ## Why Sandthorn?
 

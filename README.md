@@ -57,26 +57,23 @@ end
 
 ## Map aggregate types to event stores
 
-Its possible to map aggregate_types to events stores from the configuration setup. This makes it possible to work with data from different stores that are using the same context, and will override any event_store setting within an aggregate.
+Its possible to save events from different classes into different stores. Below the events from class FooAggregate are stored into the sql_foo.sqlite3 database and events from class BarAggregate are stored in sql_bar.sqlite3.
 
 ```ruby
-url_foo = "sqlite://sql_foo.sqlite3"
-driver_foo = SandthornDriverSequel.driver_from_url(url: url_foo)
+driver_foo = SandthornDriverSequel.driver_from_url(url: "sqlite://sql_foo.sqlite3")
+driver_bar = SandthornDriverSequel.driver_from_url(url: "sqlite://sql_bar.sqlite3")
 
-url_bar = "sqlite://sql_bar.sqlite3"
-driver_bar = SandthornDriverSequel.driver_from_url(url: url_bar)
-
-class AnAggregate
+class FooAggregate
   Include Sandthorn::AggregateRoot
 end
 
-class AnOtherAggregate
+class BarAggregate
   Include Sandthorn::AggregateRoot
 end
 
 Sandthorn.configure do |conf|
   conf.event_stores = { foo: driver_foo, bar: driver_bar }
-  conf.map_types = { foo: [AnAggregate], bar: [AnOtherAggregate] }
+  conf.map_types = { foo: [FooAggregate], bar: [BarAggregate] }
 end
 ```
 

@@ -41,12 +41,11 @@ Or install it yourself as:
 # Configuring Sandthorn
 
 ## Driver
+Sandthorn can be setup with one or more drivers. A driver is bound to a specific data store where events are saved and loaded from. The current implemented drivers are [sandthorn_driver_sequel](https://github.com/Sandthorn/sandthorn_driver_sequel) for SQL via [Sequel](https://github.com/jeremyevans/sequel) and [sandthorn_driver_event_store](https://github.com/Sandthorn/sandthorn_driver_event_store) that uses [Get Event Store](https://geteventstore.com).
 
-To save events Sandthorn is setup with drivers that are specific to data storage. This means Sandthorn can be used with any data storage given that a driver exists.
+This means Sandthorn can be used with any data store given that a driver exists.
 
-The current implemented drivers are [sandthorn_driver_sequel](https://github.com/Sandthorn/sandthorn_driver_sequel) for SQL via [Sequel](https://github.com/jeremyevans/sequel) and [sandthorn_driver_event_store](https://github.com/Sandthorn/sandthorn_driver_event_store) that uses [Get Event Store](https://geteventstore.com)
-
-Here's an example of using the Sequel driver with a sqlite3 database.
+Here's an example of setting up Sandthorn with the Sequel driver and a sqlite3 database.
 
 ```ruby
 url = "sqlite://sql.sqlite3"

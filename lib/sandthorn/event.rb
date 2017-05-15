@@ -9,7 +9,7 @@ module Sandthorn
       timestamp
       event_name
       event_data
-      event_meta_data
+      event_metadata
       method_args
       trace
     )

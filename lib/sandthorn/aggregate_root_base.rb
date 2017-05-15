@@ -187,7 +187,7 @@ module Sandthorn
             aggregate_version: nil,
             event_name: name,
             event_data: data,
-            event_meta_data: nil
+            event_metadata: nil
           }
 
         end
@@ -263,7 +263,7 @@ module Sandthorn
           aggregate_version: @aggregate_current_event_version,
           event_name: event_name,
           event_data: data,
-          event_meta_data: @aggregate_trace_information
+          event_metadata: @aggregate_trace_information
         })
 
         self

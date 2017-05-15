@@ -68,7 +68,7 @@ module Sandthorn
           aggregate_version: e[:aggregate_version],
           event_name: e[:event_name].to_sym, 
           event_data: data,
-          event_meta_data: e[:event_meta_data]
+          event_metadata: e[:event_metadata]
         }
       end
 

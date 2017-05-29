@@ -97,7 +97,7 @@ All objects that include `Sandthorn::AggregateRoot` is provided with an `aggrega
 
 An abstraction over `commit` that creates events methods that can be used from within a command method.
 
-In this exampel the `events` method will generate a method called `marked`, this method take *args as input that will result in the method argument on the event. It also take a block that will be executed before the event is commited and is used to groups the state changes to the event (but is only optional right now).
+In this exampel the `events` method will generate a method called `marked`, this method take an block that will be executed before the event is commited and is used to groups the state changes to the event. The block is optional and the state changes could have been made outside the `marked` method.
 
 ```ruby
 class Board
@@ -107,7 +107,7 @@ class Board
 
   def mark player, pos_x, pos_y
     # change some state
-    marked(player) do
+    marked() do
       @pos_x = pos_x
       @pos_y = pos_y
     end
@@ -117,7 +117,7 @@ end
 
 ### `Sandthorn::AggregateRoot::constructor_events`
 
-With `constructor_events` its possible to be more specific on how an aggregate came to be.
+With `constructor_events` its possible to be more specific on how an aggregate came to be. The first event will now have the name `board_created` instead of the default `new`.
 
 ```ruby
 class Board
@@ -137,7 +137,7 @@ end
 
 ### `Sandthorn::AggregateRoot::stateless_events`
 
-Calling `stateless_events` creates public class methods. The first argument is an `aggregate_id` and the second argument is optional but has to be a hash and are stored in the attribute_deltas of the event.
+Calling `stateless_events` creates public class methods. The first argument is an `aggregate_id` and the second argument is optional but has to be a hash and is stored in the attribute_deltas of the event.
 
 When creating a stateless event, the corresponding aggregate is never loaded and the event is saved without calling the save method.
 
@@ -185,7 +185,7 @@ The concept `events` have been introduced to abstract away the usage of `commit`
 
 ### `Sandthorn::AggregateRoot.save`
 
-The save method store generated events, this means all commited events will be persisted via a specific Sandthorn driver.
+The save method store generated events, this means all commited events will be persisted via a Sandthorn driver.
 
 ```ruby
 board = Board.new
@@ -220,7 +220,7 @@ If no aggregate with the specifid uuid is found, a `Sandthorn::Errors::Aggregate
 
 ### `Sandthorn::AggregateRoot.aggregate_trace`
 
-Using `aggregate_trace` one can store meta data on events. The data is not aggregate specific and it can store who executed a specific command on the aggregate.
+Using `aggregate_trace` one can store meta data on events. The data is not aggregate specific and it can for example store who executed a specific command on the aggregate.
 
 ```ruby
 board.aggregate_trace {player: "Fred"} do |aggregate|

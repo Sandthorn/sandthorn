@@ -8,7 +8,8 @@ module Sandthorn
       aggregate_version
       timestamp
       event_name
-      event_args
+      event_data
+      event_metadata
       method_args
       trace
     )
@@ -40,7 +41,7 @@ module Sandthorn
     end
 
     def raw_deltas
-      fetch(:event_args, {}).fetch(:attribute_deltas, [])
+      fetch(:event_data, {}).fetch(:attribute_deltas, [])
     end
 
     class AttributeDelta < SimpleDelegator

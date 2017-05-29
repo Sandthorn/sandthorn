@@ -13,8 +13,7 @@ A ruby library for saving an object's state as a series of events.
 
 ## When do I need event sourcing?
 
-If the history of how an object came to be is important a well known technique is to generate a separate history log. The log is generated in parallel with the object and all actions to the object needs to be stored to the log by a separate method call. With event sourcing the history log is now integrated with the object and generated based on the actions that are made on the object, the log is now the fact that the object is built upon.
-
+When state changes made to an object is important a common technique is to store the changes in a separate history log where the log is generated in parallel with the object internal state. With event sourcing the history log is now integrated within the object and generated based on the actions made to the object. The entries in log is the facts the object is built upon.
 
 ## Why Sandthorn?
 
@@ -24,88 +23,6 @@ Check out examples of Sandthorn:
 
 * [Examples](https://github.com/Sandthorn/sandthorn_examples) including a product shop and TicTacToe game.
 * Live [demo](http://infinite-mesa-8629.herokuapp.com/) comparing Active Record and Sandthorn.
-
-## How do I use Sandthorn?
-
-
-
-Think of it as an object database where you store not only what the new value of an attribute is, but also when and why it changed.
-_Example:_
-
-```ruby
-
-# Setup the Aggregate
-
-# The one available right now
-require 'sandthorn'
-require 'sandthorn_driver_sequel'
-
-class Ship
-  include Sandthorn::AggregateRoot
-  attr_reader :name
-
-  def initialize name: nil, shipping_company: nil
-    @name = name
-  end
-
-  # State-changing command
-  def rename! new_name: ""
-    unless new_name.empty? or new_name == name
-      @name = new_name
-      ship_was_renamed
-    end
-  end
-
-  private
-
-  # Commit the event and state-change is automatically recorded.
-  def ship_was_renamed
-    commit
-  end
-end
-
-# Configure one driver
-url = "sqlite://spec/db/sequel_driver.sqlite3"
-sql_event_store = SandthornDriverSequel.driver_from_url(url: url)
-Sandthorn.configure do |c|
-  c.event_store = sql_event_store
-end
-
-# Or configure many drivers
-url = "sqlite://spec/db/sequel_driver.sqlite3"
-sql_event_store = SandthornDriverSequel.driver_from_url(url: url)
-url_two = "sqlite://spec/db/sequel_driver_two.sqlite3"
-other_store = SandthornDriverSequel.driver_from_url(url: url_two)
-
-Sandthorn.configure do |c|
-  c.event_stores = {
-    default: sql_event_store,
-    other_event_store: other_store
-  }
-end
-
-# Assign your aggregates to a named event store
-
-class Boat
-  include Sandthorn::AggregateRoot
-  event_store :other_event_store
-end
-
-# Aggregates with no explicit event store will use the default event store
-
-# Migrate db schema for the sequel driver
-migrator = SandthornDriverSequel::Migration.new url: url
-SandthornDriverSequel.migrate_db url: url
-
-# Usage
-ship = Ship.new name: "Titanic"
-ship.rename! new_name: "Vasa"
-
-ship.save
-
-new_ship = Ship.find ship.id
-puts new_ship.name
-```
 
 # Installation
 
@@ -124,77 +41,40 @@ Or install it yourself as:
 # Configuring Sandthorn
 
 ## Driver
+Sandthorn can be setup with one or more drivers. A driver is bound to a specific data store where events are saved and loaded from. The current implemented drivers are [sandthorn_driver_sequel](https://github.com/Sandthorn/sandthorn_driver_sequel) for SQL via [Sequel](https://github.com/jeremyevans/sequel) and [sandthorn_driver_event_store](https://github.com/Sandthorn/sandthorn_driver_event_store) that uses [Get Event Store](https://geteventstore.com).
 
-Sandthorn relies on a driver that is specific to the data storage that you are using. This means Sandthorn can be used with any data storage given that a driver exists.
+This means Sandthorn can be used with any data store given that a driver exists.
 
-To setup a driver you need to add it to your project's Gemfile and configure it in your application code.
-
-    gem 'sandthorn_driver_sequel'
-
-
-The driver is configured when your application launches. Here's an example of how to do it using the Sequel driver and a sqlite3 database.
+Here's an example of setting up Sandthorn with the Sequel driver and a sqlite3 database.
 
 ```ruby
-url = "sqlite://spec/db/sequel_driver.sqlite3"
+url = "sqlite://sql.sqlite3"
 driver = SandthornDriverSequel.driver_from_url(url: url)
 Sandthorn.configure do |conf|
   conf.event_stores = { default: driver }
 end
 ```
 
-First we specify the path to the sqlite3 database in the `url` variable. Secondly, the specific driver is instantiated with the `url`. Hence, the driver could be instantiated using a different configuration, for example, an address to a Postgres database. Finally, `Sandthorn.configure` accepts a keyword list with options. It´s here the driver is bound to Sandthorn via a context.
-
-The first time you use the Sequel driver it is necessary to install the database schema.
-
-```ruby
-url = "sqlite://spec/db/sequel_driver.sqlite3"
-SandthornDriverSequel::Migration.new url: url
-SandthornDriverSequel.migrate_db url: url
-```
-
-Optionally, when using Sandthorn in your tests you can configure it in a `spec_helper.rb` which is then required by your test suites [example](https://github.com/Sandthorn/sandthorn_examples/blob/master/sandthorn_tictactoe/spec/spec_helper.rb#L20-L30). Note that the Sequel driver accepts a special parameter to empty the database between each test.
-
-The Sequel driver is the only production-ready driver to date.
-
-
 ## Map aggregate types to event stores
 
-Its possible to map aggregate_types to events stores from the configuration setup. This makes it possible to work with data from different stores that are using the same context, and will override any event_store setting within an aggregate.
+Its possible to save events from different classes into different stores. Below the events from class FooAggregate are stored into the sql_foo.sqlite3 database and events from class BarAggregate are stored in sql_bar.sqlite3.
 
 ```ruby
-url_foo = "sqlite://spec/db/sequel_driver_foo.sqlite3"
-driver_foo = SandthornDriverSequel.driver_from_url(url: url_foo)
+driver_foo = SandthornDriverSequel.driver_from_url(url: "sqlite://sql_foo.sqlite3")
+driver_bar = SandthornDriverSequel.driver_from_url(url: "sqlite://sql_bar.sqlite3")
 
-url_bar = "sqlite://spec/db/sequel_driver_bar.sqlite3"
-driver_bar = SandthornDriverSequel.driver_from_url(url: url_bar)
-
-class AnAggregate
+class FooAggregate
   Include Sandthorn::AggregateRoot
 end
 
-class AnOtherAggregate
+class BarAggregate
   Include Sandthorn::AggregateRoot
 end
 
 Sandthorn.configure do |conf|
   conf.event_stores = { foo: driver_foo, bar: driver_bar }
-  conf.map_types = { foo: [AnAggregate], bar: [AnOtherAggregate] }
+  conf.map_types = { foo: [FooAggregate], bar: [BarAggregate] }
 end
-```
-
-## Data serialization
-
-Its possible to configure how events and snapshots are serialized. Since version `0.11.0` of Sandthorn the serialization of events and snapshots is the responsibility of the driver. This means drivers can have different serialization mechanism, independent of each other.
-
-The default serializer of the Sequel driver is YAML.
-
-Here's how to use the Oj gem to serialize data in the Sequel driver:
-
-```ruby
-oj_driver = SandthornDriverSequel.driver_from_connection(connection: Sequel.sqlite) { |conf|
-  conf.event_serializer = Proc.new { |data| Oj::dump(data) }
-  conf.event_deserializer = Proc.new { |data| Oj::load(data) }
-}
 ```
 
 # Usage
@@ -217,7 +97,7 @@ All objects that include `Sandthorn::AggregateRoot` is provided with an `aggrega
 
 An abstraction over `commit` that creates events methods that can be used from within a command method.
 
-In this exampel the `events` method will generate a method called `marked`, this method take *args as input that will result in the method argument on the event. It also take a block that will be executed before the event is commited and is used to groups the state changes to the event (but is only optional right now).
+In this exampel the `events` method will generate a method called `marked`, this method take an block that will be executed before the event is commited and is used to groups the state changes to the event. The block is optional and the state changes could have been made outside the `marked` method.
 
 ```ruby
 class Board
@@ -227,7 +107,7 @@ class Board
 
   def mark player, pos_x, pos_y
     # change some state
-    marked(player) do
+    marked() do
       @pos_x = pos_x
       @pos_y = pos_y
     end
@@ -237,7 +117,7 @@ end
 
 ### `Sandthorn::AggregateRoot::constructor_events`
 
-Before version 0.13.0 the only initial event on an aggregate were `new`. With the `constructor_events` its possible to be more specific on how an aggregate came to be.
+With `constructor_events` its possible to be more specific on how an aggregate came to be. The first event will now have the name `board_created` instead of the default `new`.
 
 ```ruby
 class Board
@@ -257,9 +137,9 @@ end
 
 ### `Sandthorn::AggregateRoot::stateless_events`
 
-Calling `stateless_events` creates public class methods. The first argument is an `aggregate_id`. The resulting event is attached to the referenced aggregate. The rest of the arguments are optional and are stored in the method_args of the event.
+Calling `stateless_events` creates public class methods. The first argument is an `aggregate_id` and the second argument is optional but has to be a hash and is stored in the attribute_deltas of the event.
 
-When creating a stateless event, the corresponding aggregate is never loaded. The event is appendend to the aggregate's event stream.
+When creating a stateless event, the corresponding aggregate is never loaded and the event is saved without calling the save method.
 
 ```ruby
 class Board
@@ -269,7 +149,7 @@ class Board
 
 end
 
-Board.player_went_to_toilet "board_aggregate_id", player_id, time
+Board.player_went_to_toilet "board_aggregate_id", {player_id: "1", time: "10:12"}
 ```
 
 ### `Sandthorn::AggregateRoot::default_attributes`
@@ -286,7 +166,7 @@ end
 
 ### `Sandthorn::AggregateRoot.commit`
 
-It is required that an event is commited to the aggregate to be stored as an event. `commit` extracts the object's delta and locally caches the state changes that has been applied to the aggregate. Commonly, commit is called when an event is applied. In [CQRS](http://martinfowler.com/bliki/CQRS.html), events are named using past tense.
+To generate an event the commit method has to be called within the aggregate. `commit` extracts the object's delta and locally caches the state changes that has been applied to the aggregate.
 
 ```ruby
 def mark player, pos_x, pos_y
@@ -301,11 +181,11 @@ end
 
 `commit` determines the state changes by monitoring the object's readable fields.
 
-Since version 0.10.0 of Sandthorn the concept `events` have been introduced to abstract away the usage of `commit`. Commit still works as before but we think that the `events` abstraction makes the aggregate more readable.
+The concept `events` have been introduced to abstract away the usage of `commit`. Commit still works as before but we think that the `events` abstraction makes the aggregate more readable.
 
 ### `Sandthorn::AggregateRoot.save`
 
-Once one or more commits have been applied to an aggregate it should be saved. This means all commited events will be persisted by the specific Sandthorn driver. `save` is called by the owning object.
+The save method store generated events, this means all commited events will be persisted via a Sandthorn driver.
 
 ```ruby
 board = Board.new
@@ -315,7 +195,7 @@ board.save
 
 ### `Sandthorn::AggregateRoot.all`
 
-It is possible to retrieve an array with all instances of a specific aggregate.
+Retrieve an array with all instances of a specific aggregate type.
 
 ```ruby
 Board.all
@@ -329,20 +209,18 @@ Board.all.select { |board| board.active == true }
 
 ### `Sandthorn::AggregateRoot.find`
 
-Using `find` it is possible to retrieve a specific aggregate using it's id.
+Loads a specific aggregate using it's uuid.
 
 ```ruby
 uuid = '550e8400-e29b-41d4-a716-446655440000'
 board = Board.find(uuid)
-board.aggregate_id == uuid
 ```
 
-If no aggregate with the specifid id is found, a `Sandthorn::Errors::AggregateNotFound` exception is raised.
-
+If no aggregate with the specifid uuid is found, a `Sandthorn::Errors::AggregateNotFound` exception is raised.
 
 ### `Sandthorn::AggregateRoot.aggregate_trace`
 
-Using `aggregate_trace` one can store meta data with events. The data is not aggregate specific, for example, one can store who executed a specific command on the aggregate.
+Using `aggregate_trace` one can store meta data on events. The data is not aggregate specific and it can for example store who executed a specific command on the aggregate.
 
 ```ruby
 board.aggregate_trace {player: "Fred"} do |aggregate|
@@ -353,7 +231,7 @@ end
 
 `aggregate_trace` can also be specified on a class.
 
-````ruby
+```ruby
 Board.aggregate_trace {ip: :127.0.0.1} do
   board = Board.new
   board.mark :o , 0, 1

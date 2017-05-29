@@ -1,6 +1,5 @@
 require 'spec_helper'
 require 'sandthorn/event_inspector'
-require 'sandthorn/aggregate_root_snapshot'
 
 class UsualSuspect
   include Sandthorn::AggregateRoot
@@ -17,7 +16,7 @@ class UsualSuspect
   private
   def suspect_was_charged crime_name
     @charges << crime_name
-    record_event crime_name
+    record_event
   end
 end
 
@@ -36,25 +35,24 @@ describe "using a traced change" do
     it "should record tracing if specified" do
       simple = Simple.new
       simple.extend Sandthorn::EventInspector
-      simple.extend Sandthorn::AggregateRootSnapshot
       
       simple.extend Go
       simple.aggregate_trace "123" do |traced|
         traced.go
       end
-      expect(simple.events_with_trace_info.last[:trace]).to eql("123")
+      expect(simple.events_with_trace_info.last[:event_metadata]).to eql("123")
     end
   end
   context "when not tracing" do
     it "should not have any trace event info at all on new" do
       suspect = UsualSuspect.new "Ronny"
       event = suspect.aggregate_events.first
-      expect(event[:trace]).to be_nil
+      expect(event[:event_metadata]).to be_nil
     end
     it "should not have any trace event info at all on regular event" do
       suspect = UsualSuspect.new "Ronny"
       event = suspect.aggregate_events.first
-      expect(event[:trace]).to be_nil
+      expect(event[:event_metadata]).to be_nil
     end
   end
   context "when changing aggregate in a traced context" do
@@ -64,7 +62,7 @@ describe "using a traced change" do
         s.charge_suspect_of_crime! "Theft"
       end
       event = suspect.events_with_trace_info.last
-      expect(event[:trace]).to eql "Ture Sventon"
+      expect(event[:event_metadata]).to eql "Ture Sventon"
     end
 
     it "should record optional other tracing information" do
@@ -73,7 +71,7 @@ describe "using a traced change" do
         s.charge_suspect_of_crime! "Murder"       
       end
       event = suspect.events_with_trace_info.last
-      expect(event[:trace]).to eql trace_info 
+      expect(event[:event_metadata]).to eql trace_info 
     end
   end
   context "when initializing a new aggregate in a traced context" do
@@ -81,7 +79,7 @@ describe "using a traced change" do
       UsualSuspect.aggregate_trace "Ture Sventon" do
         suspect = UsualSuspect.new("Sonny").extend Sandthorn::EventInspector
         event = suspect.events_with_trace_info.first
-        expect(event[:trace]).to eql "Ture Sventon"
+        expect(event[:event_metadata]).to eql "Ture Sventon"
       end
     end
     it "should record tracing for all events in the trace block" do
@@ -90,7 +88,7 @@ describe "using a traced change" do
         suspect = UsualSuspect.new("Sonny").extend Sandthorn::EventInspector
         suspect.charge_suspect_of_crime! "Hit and run"
         event = suspect.events_with_trace_info.last
-        expect(event[:trace]).to eql trace_info
+        expect(event[:event_metadata]).to eql trace_info
       end
     end
     it "should record tracing for all events in the trace block" do
@@ -99,7 +97,7 @@ describe "using a traced change" do
         suspect = UsualSuspect.new("Conny").extend Sandthorn::EventInspector
         suspect.charge_suspect_of_crime! "Desception"
         event = suspect.events_with_trace_info.last
-        expect(event[:trace]).to eql trace_info
+        expect(event[:event_metadata]).to eql trace_info
       end
     end
   end 

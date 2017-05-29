@@ -10,7 +10,6 @@ require "ap"
 require "bundler"
 require "sandthorn_driver_sequel"
 require "support/custom_matchers"
-
 Bundler.require
 
 module Helpers
@@ -29,30 +28,34 @@ RSpec.configure do |config|
   # the seed, which is printed after each run.
   #     --seed 1234
   config.order = 'random'
-  config.before(:each) { sqlite_store_setup }
+  config.before(:all) {
+    sqlite_store_setup
+  }
 
-  config.after(:each) do
+  config.before(:each) {
+    migrator = SandthornDriverSequel::Migration.new url: url  
+    migrator.send(:clear_for_test)
+  }
+
+  config.after(:all) do
     Sandthorn.event_stores.default_store.driver.instance_variable_get(:@db).disconnect
   end
 end
 
-def spec_db
+def url
   "sqlite://spec/db/sequel_driver.sqlite3"
 end
 def sqlite_store_setup
-  url = spec_db
+
+  SandthornDriverSequel.migrate_db url: url
 
   driver = SandthornDriverSequel.driver_from_url(url: url) do |conf|
     conf.event_serializer       = Proc.new { |data| YAML::dump(data) }
     conf.event_deserializer     = Proc.new { |data| YAML::load(data) }
-    conf.snapshot_serializer    = Proc.new { |data| YAML::dump(data) }
-    conf.snapshot_deserializer  = Proc.new { |data| YAML::load(data) }
   end
-
+  
   Sandthorn.configure do |c|
     c.event_store = driver
   end
-  migrator = SandthornDriverSequel::Migration.new url: url
-  SandthornDriverSequel.migrate_db url: url
-  migrator.send(:clear_for_test)
+ 
 end

@@ -46,27 +46,29 @@ module Sandthorn
     end
 
     def events_with_trace_info
-      saved = Sandthorn.get_aggregate_events(self.class, aggregate_id)
+      begin
+        saved = Sandthorn.find aggregate_id, self.class  
+      rescue Exception
+        saved = []
+      end
+      
       unsaved = self.aggregate_events
       all = saved
         .concat(unsaved)
         .sort { |a, b| a[:aggregate_version] <=> b[:aggregate_version] }
 
-      extracted = all.collect do |e| 
-        if e[:event_args].nil? && !e[:event_data].nil?
+      extracted = all.collect do |e|
+        if e[:event_data].nil? && !e[:event_data].nil?
           data = Sandthorn.deserialize e[:event_data]
         else
-          data = e[:event_args]
-        end
-
-        unless data.nil? || !data.is_a?(Hash)
-          trace = data[:trace]
+          data = e[:event_data]
         end
 
         {
           aggregate_version: e[:aggregate_version],
           event_name: e[:event_name].to_sym, 
-          trace: trace 
+          event_data: data,
+          event_metadata: e[:event_metadata]
         }
       end
 
@@ -80,7 +82,7 @@ module Sandthorn
     end
 
     def get_saved_events event_name
-      saved_events = Sandthorn.get_aggregate_events self.aggregate_id, self.class
+      saved_events = Sandthorn.find self.class, self.aggregate_id
       saved_events.select { |e| e[:event_name] == event_name.to_s  }
     end
 

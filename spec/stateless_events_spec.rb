@@ -14,6 +14,10 @@ module Sandthorn
   end
 
   describe "::stateless_events" do
+    
+    let(:args) do
+      {first: "first", other: [1,2,3]}
+    end
 
     context "interface" do
 
@@ -30,15 +34,11 @@ module Sandthorn
       end
 
       before do
-        StatelessEventsSpec.one_event(subject.aggregate_id, args, 1)
-      end
-
-      let(:args) do
-        {first: "first", other: [1,2,3]}
+        StatelessEventsSpec.one_event(subject.aggregate_id, args)
       end
 
       let(:last_event) do
-        Sandthorn.get_aggregate_events(StatelessEventsSpec, subject.aggregate_id).last
+        Sandthorn.find(subject.aggregate_id, StatelessEventsSpec).last
       end
 
       let(:reloaded_subject) do
@@ -49,13 +49,8 @@ module Sandthorn
         expect(last_event[:event_name]).to eql "one_event"
       end
 
-      it "should not have any deltas in event" do
-        expect(last_event[:event_args][:attribute_deltas]).to eql []
-      end
-
-      it "should store event arguments" do
-        expect(last_event[:event_args][:method_args].first).to eql(args)
-        expect(last_event[:event_args][:method_args].last).to eql(1)
+      it "should have staeless data in deltas in event" do
+        expect(last_event[:event_data][:attribute_deltas]).to eql ([{:attribute_name=>"first", :old_value => nil, :new_value => "first"}, { :attribute_name => "other", :old_value => nil, :new_value => [1, 2, 3]}])
       end
 
       it "should have same name attribute after reload" do
@@ -66,13 +61,13 @@ module Sandthorn
     context "when adding stateless_events to none existing aggregate" do
 
       before do
-        StatelessEventsSpec.one_event(aggregate_id, "argument_data")
+        StatelessEventsSpec.one_event(aggregate_id, args)
       end
 
       let(:aggregate_id) {"none_existing_aggregate_id"}
 
       let(:events) do
-        Sandthorn.get_aggregate_events(StatelessEventsSpec, aggregate_id)
+        Sandthorn.find aggregate_id, StatelessEventsSpec
       end
 
       it "should store the stateless event as the first event" do
@@ -88,5 +83,26 @@ module Sandthorn
       end
     end
 
+    context "overriding properties with stateless data" do
+      let(:subject) do
+        StatelessEventsSpec.new("name").save
+      end
+
+      let(:reloaded_subject) do
+        StatelessEventsSpec.find subject.aggregate_id
+      end
+
+      let(:args) do
+        {name: "ghost"}
+      end
+
+      before do
+        StatelessEventsSpec.one_event(subject.aggregate_id, args)
+      end
+
+      it "should override the name via the stateless event" do
+        expect(subject.name).not_to eql(reloaded_subject.name)
+      end
+    end
   end
 end

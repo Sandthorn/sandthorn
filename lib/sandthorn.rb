@@ -32,24 +32,8 @@ module Sandthorn
       SecureRandom.uuid
     end
 
-    def get_aggregate_events aggregate_type, aggregate_id
-      event_store_for(aggregate_type).get_aggregate_events aggregate_id
-    end
-
     def save_events aggregate_events, aggregate_id, aggregate_type
       event_store_for(aggregate_type).save_events aggregate_events, aggregate_id, *aggregate_type
-    end
-
-    def get_aggregate aggregate_id, aggregate_type
-      event_store_for(aggregate_type).get_aggregate_events_from_snapshot aggregate_id
-    end
-
-    def save_snapshot(aggregate)
-      event_store_for(aggregate.class).save_snapshot(aggregate)
-    end
-
-    def get_aggregate_list_by_type aggregate_type
-      event_store_for(aggregate_type).get_aggregate_ids(aggregate_type: aggregate_type)
     end
 
     def all aggregate_type
@@ -57,25 +41,11 @@ module Sandthorn
     end
 
     def find aggregate_id, aggregate_type
-      event_store_for(aggregate_type).find(aggregate_id)
+      event_store_for(aggregate_type).find(aggregate_id, aggregate_type)
     end
 
-    def get_events event_store: :default, aggregate_types: [], take: 0, after_sequence_number: 0
-      event_store = find_event_store(event_store)
-      events = event_store.get_events aggregate_types: aggregate_types, take: take, after_sequence_number: after_sequence_number
-      events.map do |event|
-        Event.new(event)
-      end
-    end
-
-    def obsolete_snapshots type_names: [], min_event_distance: 0
-      obsolete = event_stores.flat_map { |event_store| event_store.obsolete_snapshots(aggregate_types: type_names, max_event_distance: min_event_distance) }
-      obsolete.map do |single_obsolete|
-        type = Kernel.const_get single_obsolete[:aggregate_type]
-        aggregate = type.aggregate_find(single_obsolete[:aggregate_id]).tap do |agg|
-          yield agg if block_given?
-        end
-      end
+    def save_snapshot(aggregate)
+      raise "Not Implemented"
     end
 
     def find_event_store(name)

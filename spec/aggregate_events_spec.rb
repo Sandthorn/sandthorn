@@ -19,7 +19,7 @@ module Sandthorn
     end
 
     def old_way_event event_params
-      commit event_params
+      commit
     end
   end
 
@@ -52,7 +52,7 @@ module Sandthorn
       end
 
       it "should store the args to the event" do
-        expect(subject.aggregate_events[1][:event_args][:method_args][0]).to eql("new name")
+        expect(subject.aggregate_events[1][:event_data][:attribute_deltas][0][:new_value]).to eql("new name")
       end
 
       it "should store the event_name" do
@@ -70,9 +70,6 @@ module Sandthorn
         expect(subject.has_event?(:some_other_event)).to be_truthy
       end
 
-      it "should store the args to the event" do
-        expect(subject.aggregate_events[1][:event_args][:method_args]).to eql([1,2])
-      end
     end
 
     describe ".old_way_event" do
@@ -85,9 +82,6 @@ module Sandthorn
         expect(subject.has_event?(:old_way_event)).to be_truthy
       end
 
-      it "should store the args to the event" do
-        expect(subject.aggregate_events[1][:event_args][:method_args][0]).to eql("hej")
-      end
     end
   end
 end

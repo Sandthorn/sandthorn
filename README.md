@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/Sandthorn/sandthorn.svg?branch=master)](https://travis-ci.org/Sandthorn/sandthorn)
-[![Coverage Status](https://coveralls.io/repos/Sandthorn/sandthorn/badge.png?branch=master)](https://coveralls.io/r/Sandthorn/sandthorn?branch=master)
-[![Code Climate](https://codeclimate.com/github/Sandthorn/sandthorn.png)](https://codeclimate.com/github/Sandthorn/sandthorn)
-[![Gem Version](https://badge.fury.io/rb/sandthorn.png)](http://badge.fury.io/rb/sandthorn)
+[![Coverage Status](https://coveralls.io/repos/Sandthorn/sandthorn/badge.svg?branch=master)](https://coveralls.io/r/Sandthorn/sandthorn?branch=master)
+[![Code Climate](https://codeclimate.com/github/Sandthorn/sandthorn.svg)](https://codeclimate.com/github/Sandthorn/sandthorn)
+[![Gem Version](https://badge.fury.io/rb/sandthorn.svg)](http://badge.fury.io/rb/sandthorn)
 
 # Sandthorn Event Sourcing
 A ruby library for saving an object's state as a series of events.

@@ -124,7 +124,7 @@ class Board
   include Sandthorn::AggregateRoot
 
   # creates a private class method `board_created`
-  contructor_events :board_created
+  constructor_events :board_created
 
   def self.create name
 

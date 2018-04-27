@@ -10,28 +10,11 @@ module Sandthorn
           "sequence_number":114,
           "event_name":"new",
           "timestamp":"2014-08-16 20:02:05 UTC",
-          "event_data":{"method_name":"new",
-          "method_args":[{"name":"Hahah",
-          "price":"50",
-          "stock_status":"outofstock"}],
-          "attribute_deltas":[{"attribute_name":"name",
-          "old_value":null,
-      "new_value":"Hahah"},
-          {"attribute_name":"price",
-          "old_value":null,
-      "new_value":50},
-          {"attribute_name":"stock_status",
-          "old_value":null,
-      "new_value":"outofstock"},
-          {"attribute_name":"active",
-          "old_value":null,
-      "new_value":true},
-          {"attribute_name":"on_sale",
-          "old_value":null,
-      "new_value":false},
-          {"attribute_name":"aggregate_id",
-          "old_value":null,
-      "new_value":"62d88e96-c551-4157-a837-1674e3f2698d"}]}}', symbolize_names: true)
+          "event_data":{
+            "name":{"old_value":null,"new_value":"Hahah"},
+            "aggregate_id":{"old_value":null,"new_value":"62d88e96-c551-4157-a837-1674e3f2698d"}
+          }
+        }', symbolize_names: true)
     end
 
     let(:subject) { Event.new(event_data) }
@@ -68,23 +51,23 @@ module Sandthorn
       end
     end
 
-    describe "#attributes_deltas" do
+    describe "#attribute_deltas" do
       it "returns something enumerable" do
         expect(subject.attribute_deltas).to respond_to(:each)
       end
 
       describe "a delta" do
         let(:wrapped_delta) { subject.attribute_deltas.first }
-        let(:raw_delta) { subject[:event_data][:attribute_deltas].first }
+        let(:raw_delta) { subject[:event_data] }
         describe "#attribute_name" do
           it "has the same value as the raw hash" do
-            expect(wrapped_delta.attribute_name).to eq(raw_delta[:attribute_name])
+            expect(raw_delta[wrapped_delta.attribute_name.to_sym]).not_to be_nil
           end
         end
 
         describe "#new_value" do
           it "has the same value as the raw hash" do
-            expect(wrapped_delta.new_value).to eq(raw_delta[:new_value])
+            expect(wrapped_delta.new_value).to eq(raw_delta[wrapped_delta.attribute_name][:new_value])
           end
         end
 

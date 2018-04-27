@@ -53,8 +53,8 @@ module Sandthorn
     end
 
     it "should have set the attribute_delta name" do
-      expect(Sandthorn.find(aggregate_id, ConstructorEventsSpec).first[:event_data][:attribute_deltas].last[:attribute_name]).to eql "name"
-      expect(Sandthorn.find(aggregate_id, ConstructorEventsSpec).first[:event_data][:attribute_deltas].last[:new_value]).to eql "create_name"
+      expect(Sandthorn.find(aggregate_id, ConstructorEventsSpec).first[:event_data]["name"].nil?).to be_falsy
+      expect(Sandthorn.find(aggregate_id, ConstructorEventsSpec).first[:event_data]["name"][:new_value]).to eql "create_name"
     end
   end
 end

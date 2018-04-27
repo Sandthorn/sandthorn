@@ -31,17 +31,25 @@ module Sandthorn
     private
 
     def build_deltas
-      raw_deltas.map { |delta| AttributeDelta.new(delta) }
+      raw_deltas.map { |key, value|
+        d = {}
+        d[:attribute_name] = key
+        d[:old_value] = value[:old_value]
+        d[:new_value] = value[:new_value]
+        AttributeDelta.new(d) 
+      }
     end
 
     def build_new_values
-      attribute_deltas.each_with_object({}) do |delta, changed|
-        changed[delta.attribute_name.to_sym] = delta.new_value
+      deltas = {}
+      attribute_deltas.each do |delta|
+        deltas[delta[:attribute_name]] = delta[:new_value]
       end
+      return deltas
     end
 
     def raw_deltas
-      fetch(:event_data, {}).fetch(:attribute_deltas, [])
+      fetch(:event_data, {})
     end
 
     class AttributeDelta < SimpleDelegator

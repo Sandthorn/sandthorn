@@ -3,7 +3,7 @@ module Sandthorn
     module Marshal 
 
       def aggregate_initialize *args
-        @aggregate_attribute_deltas = []
+        @aggregate_attribute_deltas = {}
         @aggregate_stored_instance_variables = {}
       end
 
@@ -42,8 +42,7 @@ module Sandthorn
         new_value_to_store = ::Marshal.load(new_dump)
         old_value_to_store = old_dump ? ::Marshal.load(old_dump) : nil
 
-        @aggregate_attribute_deltas << {
-          attribute_name: attribute_name.to_s.delete("@"),
+        @aggregate_attribute_deltas[attribute_name.to_s.delete("@")] = {
           old_value: old_value_to_store,
           new_value: new_value_to_store
         }
@@ -54,7 +53,7 @@ module Sandthorn
       end
 
       def clear_aggregate_deltas
-        @aggregate_attribute_deltas = []
+        @aggregate_attribute_deltas = {}
       end
     end
   end

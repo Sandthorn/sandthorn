@@ -118,6 +118,7 @@ module Sandthorn
             current_aggregate_version = events.last[:aggregate_version]
             aggregate.send :set_orginating_aggregate_version!, current_aggregate_version
             aggregate.send :set_current_aggregate_version!, current_aggregate_version
+            aggregate.send :set_aggregate_id, events.first[:aggregate_id]
           end
           attributes = build_instance_vars_from_events events
           aggregate.send :clear_aggregate_events
@@ -213,10 +214,7 @@ module Sandthorn
 
       def extract_relevant_aggregate_instance_variables
         instance_variables.select do |variable|
-          equals_aggregate_id = variable.to_s == "@aggregate_id"
-          does_not_contain_aggregate = !variable.to_s.start_with?("@aggregate_")
-
-          equals_aggregate_id || does_not_contain_aggregate
+           !variable.to_s.start_with?("@aggregate_")
         end
       end
 
@@ -249,6 +247,7 @@ module Sandthorn
 
         @aggregate_events << ({
           aggregate_version: @aggregate_current_event_version,
+          aggregate_id: @aggregate_id,
           event_name: event_name,
           event_data: get_delta(),
           event_metadata: @aggregate_trace_information

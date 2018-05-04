@@ -49,6 +49,10 @@ module Sandthorn
         expect(last_event[:event_name]).to eql "one_event"
       end
 
+      it "should add aggregate_id to events" do
+        expect(last_event[:aggregate_id]).to eql subject.aggregate_id
+      end
+
       it "should have stateless data in deltas in event" do
         expect(last_event[:event_data]).to eql ({"first" => {:old_value => nil, :new_value => "first"}, "other" => {:old_value => nil, :new_value => [1, 2, 3]}})
       end

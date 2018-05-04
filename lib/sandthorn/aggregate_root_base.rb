@@ -133,7 +133,7 @@ module Sandthorn
         def stateless_events(*event_names)
           event_names.each do |name|
             define_singleton_method name do |aggregate_id, *args|
-              event = build_stateless_event(name.to_s, args)
+              event = build_stateless_event(aggregate_id, name.to_s, args)
               Sandthorn.save_events([event], aggregate_id, self)
               return aggregate_id
             end
@@ -170,7 +170,7 @@ module Sandthorn
 
         private
 
-        def build_stateless_event name, args = []
+        def build_stateless_event aggregate_id, name, args = []
 
           deltas = {}
           args.first.each do |key, value|
@@ -179,6 +179,7 @@ module Sandthorn
 
           return {
             aggregate_version: nil,
+            aggregate_id: aggregate_id,
             event_name: name,
             event_data: deltas,
             event_metadata: nil

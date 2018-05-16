@@ -44,14 +44,14 @@ describe "when the initialize-method changes" do
     it "should have an set the array attribute to [] on new" do
       add_default_attributes
       aggregate = DefaultAttributes.new
-      expect(aggregate.array).to eql []
+      expect(aggregate.array).to eq([])
     end
 
     it "should have set the array attribute to [] on rebuilt when attribute is intruduced after `new`" do
       aggregate = DefaultAttributes.new
       add_default_attributes
       rebuilt_aggregate = DefaultAttributes.aggregate_build(aggregate.aggregate_events)
-      expect(rebuilt_aggregate.array).to eql []
+      expect(rebuilt_aggregate.array).to eq([])
     end
 
     it "should set the array attribute to ['banana'] on rebuilt" do
@@ -59,7 +59,7 @@ describe "when the initialize-method changes" do
       aggregate = DefaultAttributes.new
       aggregate.add_item 'banana'
       rebuilt_aggregate = DefaultAttributes.aggregate_build(aggregate.aggregate_events)
-      expect(rebuilt_aggregate.array).to eql ['banana']
+      expect(rebuilt_aggregate.array).to eq(['banana'])
     end
 
   end

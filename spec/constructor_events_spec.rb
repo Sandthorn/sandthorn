@@ -45,16 +45,16 @@ module Sandthorn
     end
 
     it "should set instance variable in aggregate" do
-      expect(ConstructorEventsSpec.find(aggregate_id).name).to eql "create_name"
+      expect(ConstructorEventsSpec.find(aggregate_id).name).to eq("create_name")
     end
 
     it "should have created an created_event" do
-      expect(Sandthorn.find(aggregate_id, ConstructorEventsSpec).first[:event_name]).to eql "created_event"
+      expect(Sandthorn.find(aggregate_id, ConstructorEventsSpec).first[:event_name]).to eq("created_event")
     end
 
     it "should have set the attribute_delta name" do
-      expect(Sandthorn.find(aggregate_id, ConstructorEventsSpec).first[:event_data]["name"].nil?).to be_falsy
-      expect(Sandthorn.find(aggregate_id, ConstructorEventsSpec).first[:event_data]["name"][:new_value]).to eql "create_name"
+      expect(Sandthorn.find(aggregate_id, ConstructorEventsSpec).first[:event_data]).to have_key("name")
+      expect(Sandthorn.find(aggregate_id, ConstructorEventsSpec).first[:event_data]["name"][:new_value]).to eq("create_name")
     end
   end
 end

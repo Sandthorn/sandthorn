@@ -118,7 +118,7 @@ module Sandthorn
             current_aggregate_version = events.last[:aggregate_version]
             aggregate.send :set_orginating_aggregate_version!, current_aggregate_version
             aggregate.send :set_current_aggregate_version!, current_aggregate_version
-            aggregate.send :set_aggregate_id, events.first[:aggregate_id]
+            aggregate.send :set_aggregate_id, events.first.fetch(:aggregate_id)
           end
           attributes = build_instance_vars_from_events events
           aggregate.send :clear_aggregate_events

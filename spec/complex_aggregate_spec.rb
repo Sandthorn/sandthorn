@@ -70,6 +70,6 @@ describe 'when using complex types in events' do
     aggr = IAmComplex.aggregate_build @events
     aggr.set_foo_bar_on_hello "morgan"
     builded = IAmComplex.aggregate_build aggr.aggregate_events
-    expect(builded.hello.foo_bar).to eql "morgan"
+    expect(builded.hello.foo_bar).to eq("morgan")
   end
 end

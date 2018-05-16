@@ -44,7 +44,7 @@ module Sandthorn
       end
 
       it "should set the name instance variable" do
-        expect(subject.name).to eql "new name"
+        expect(subject.name).to eq("new name")
       end
     
       it "should store the event params as methods args" do
@@ -52,11 +52,11 @@ module Sandthorn
       end
 
       it "should store the args to the event" do
-        expect(subject.aggregate_events[1][:event_data]["name"][:new_value]).to eql("new name")
+        expect(subject.aggregate_events[1][:event_data]["name"][:new_value]).to eq("new name")
       end
 
       it "should store the event_name" do
-        expect(subject.aggregate_events[1][:event_name]).to eql("name_changed")
+        expect(subject.aggregate_events[1][:event_name]).to eq("name_changed")
       end
     end
 

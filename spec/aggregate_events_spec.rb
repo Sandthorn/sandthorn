@@ -52,7 +52,7 @@ module Sandthorn
       end
 
       it "should store the args to the event" do
-        expect(subject.aggregate_events[1][:event_data]["name"][:new_value]).to eq("new name")
+        expect(subject.aggregate_events[1][:event_data][:name][:new_value]).to eq("new name")
       end
 
       it "should store the event_name" do

@@ -167,7 +167,7 @@ module Sandthorn
 
         it "should set the old_value on the event" do
           dirty_object_after_find.change_name "new_name"
-          expect(dirty_object_after_find.aggregate_events.last[:event_data]["name"][:old_value]).to eq("old_value")
+          expect(dirty_object_after_find.aggregate_events.last[:event_data][:name][:old_value]).to eq("old_value")
         end
 
       end
@@ -176,7 +176,7 @@ module Sandthorn
       
         it "should set the old_value on the event" do
           dirty_object.change_name "new_name"
-          expect(dirty_object.aggregate_events.last[:event_data]["name"][:old_value]).to eq("old_value")
+          expect(dirty_object.aggregate_events.last[:event_data][:name][:old_value]).to eq("old_value")
         end
 
         it "should not change aggregate_id" do
@@ -200,8 +200,8 @@ module Sandthorn
 
         it "should set old_value and new_value on age change" do
           dirty_object.change_age 36
-          expect(dirty_object.aggregate_events.last[:event_data]["age"][:old_value]).to eq(35)
-          expect(dirty_object.aggregate_events.last[:event_data]["age"][:new_value]).to eq(36)
+          expect(dirty_object.aggregate_events.last[:event_data][:age][:old_value]).to eq(35)
+          expect(dirty_object.aggregate_events.last[:event_data][:age][:new_value]).to eq(36)
         end
       end
     end

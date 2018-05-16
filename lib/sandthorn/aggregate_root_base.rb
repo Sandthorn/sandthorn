@@ -174,7 +174,7 @@ module Sandthorn
 
           deltas = {}
           args.first.each do |key, value|
-            deltas[key.to_s] = { old_value: nil, new_value: value }
+            deltas[key.to_sym] = { old_value: nil, new_value: value }
           end unless args.empty?
 
           return {

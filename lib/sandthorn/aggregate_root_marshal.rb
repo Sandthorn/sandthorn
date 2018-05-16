@@ -20,7 +20,7 @@ module Sandthorn
       def get_delta
         deltas = extract_relevant_aggregate_instance_variables
         deltas.each { |d| delta_attribute(d) }
-
+        
         result = @aggregate_attribute_deltas
         clear_aggregate_deltas
         result
@@ -42,7 +42,7 @@ module Sandthorn
         new_value_to_store = ::Marshal.load(new_dump)
         old_value_to_store = old_dump ? ::Marshal.load(old_dump) : nil
 
-        @aggregate_attribute_deltas[attribute_name.to_s.delete("@")] = {
+        @aggregate_attribute_deltas[attribute_name.to_s.delete("@").to_sym] = {
           old_value: old_value_to_store,
           new_value: new_value_to_store
         }

@@ -5,12 +5,12 @@ module Sandthorn
     class DirtyClass
       include Sandthorn::AggregateRoot
       attr_reader :name, :age
-      attr :sex
+      attr :age
       attr_writer :writer
       
       def initialize args = {}
         @name = args.fetch(:name, nil)
-        @sex = args.fetch(:sex, nil)
+        @age = args.fetch(:age, nil)
         @writer = args.fetch(:writer, nil)
       end
 
@@ -21,9 +21,9 @@ module Sandthorn
         end
       end
 
-      def change_sex value
-        unless sex == value
-          @sex = value
+      def change_age value
+        unless age == value
+          @age = value
           commit
         end
       end
@@ -64,7 +64,7 @@ module Sandthorn
 
       context "all" do
         it "should all the aggregates" do
-          expect(subject.length).to eql 3
+          expect(subject.length).to eq(3)
         end
 
         it "should include correct aggregates" do
@@ -83,10 +83,10 @@ module Sandthorn
 
       context "new with args" do
 
-        let(:subject) { DirtyClass.new(name: "Mogge", sex: "hen", writer: true) }
+        let(:subject) { DirtyClass.new(name: "Mogge", age: 35, writer: true) }
         it "should set the values" do
-          expect(subject.name).to eql "Mogge"
-          expect(subject.sex).to eql "hen"
+          expect(subject.name).to eq("Mogge")
+          expect(subject.age).to eq(35)
           expect{subject.writer}.to raise_error NoMethodError
         end
       end
@@ -95,23 +95,23 @@ module Sandthorn
         
         it "should get new_name" do
           dirty_object.change_name "new_name"
-          expect(dirty_object.name).to eql "new_name"
+          expect(dirty_object.name).to eq("new_name")
         end
 
         it "should generate one event on new" do
-          expect(dirty_object.aggregate_events.length).to eql 1
+          expect(dirty_object.aggregate_events.length).to eq(1)
         end
 
         it "should generate 2 events new and change_name" do
           dirty_object.change_name "new_name"
-          expect(dirty_object.aggregate_events.length).to eql 2
+          expect(dirty_object.aggregate_events.length).to eq(2)
         end
       end
 
-      context "when changing sex (attr)" do
-        it "should get new_sex" do
-          dirty_object.change_sex "new_sex"
-          expect(dirty_object.sex).to eql "new_sex"
+      context "when changing age (attr)" do
+        it "should get new_age" do
+          dirty_object.change_age "new_age"
+          expect(dirty_object.age).to eq("new_age")
         end
       end
 
@@ -123,27 +123,27 @@ module Sandthorn
 
       context "save" do
         it "should not have events on aggregate after save" do
-          expect(dirty_object.save.aggregate_events.length).to eql 0
+          expect(dirty_object.save.aggregate_events.length).to eq(0)
         end
 
         it "should have aggregate_originating_version == 0 pre save" do
-          expect(dirty_object.aggregate_originating_version).to eql 0
+          expect(dirty_object.aggregate_originating_version).to eq(0)
         end
 
         it "should have aggregate_originating_version == 1 post save" do
-          expect(dirty_object.save.aggregate_originating_version).to eql 1
+          expect(dirty_object.save.aggregate_originating_version).to eq(1)
         end
       end
 
       context "find" do
         before(:each) { dirty_object.save }
         it "should find by id" do
-          expect(DirtyClass.find(dirty_object.id).id).to eql dirty_object.id
+          expect(DirtyClass.find(dirty_object.id).id).to eq(dirty_object.id)
         end
 
         it "should hold changed name" do
           dirty_object.change_name("morgan").save
-          expect(DirtyClass.find(dirty_object.id).name).to eql "morgan"
+          expect(DirtyClass.find(dirty_object.id).name).to eq("morgan")
         end
 
         it "should raise error if trying to find id that not exist" do
@@ -157,7 +157,7 @@ module Sandthorn
     describe "event data" do
 
       let(:dirty_object) { 
-        o = DirtyClass.new :name => "old_value", :sex => "hen"
+        o = DirtyClass.new :name => "old_value", :age => 35
         o.save
       }
 
@@ -167,7 +167,7 @@ module Sandthorn
 
         it "should set the old_value on the event" do
           dirty_object_after_find.change_name "new_name"
-          expect(dirty_object_after_find.aggregate_events.last[:event_data][:attribute_deltas].first[:old_value]).to eql "old_value"
+          expect(dirty_object_after_find.aggregate_events.last[:event_data][:name][:old_value]).to eq("old_value")
         end
 
       end
@@ -176,36 +176,32 @@ module Sandthorn
       
         it "should set the old_value on the event" do
           dirty_object.change_name "new_name"
-          expect(dirty_object.aggregate_events.last[:event_data][:attribute_deltas].first[:old_value]).to eql "old_value"
+          expect(dirty_object.aggregate_events.last[:event_data][:name][:old_value]).to eq("old_value")
         end
 
         it "should not change aggregate_id" do
           dirty_object.change_name "new_name"
-          expect(dirty_object.aggregate_events.last[:event_data][:attribute_deltas].last[:attribute_name]).not_to eql "aggregate_id"
+          expect(dirty_object.aggregate_events.last[:event_data]["attribute_name"]).not_to eq("aggregate_id")
         end
 
-        it "should not change sex attribute if sex method is not runned" do
+        it "should not change age attribute if age method is not runned" do
           dirty_object.change_name "new_name"
           dirty_object.aggregate_events.each do |event|
-            event[:event_data][:attribute_deltas].each do |attribute_delta|
-              expect(attribute_delta[:attribute_name]).not_to eql "sex"
-            end
+            expect(event[:event_data]["age"].nil?).to be_truthy
           end
         end
 
-        it "should not change sex attribute if sex attribute is the same" do
-          dirty_object.change_sex "hen"
+        it "should not change age attribute if age attribute is the same" do
+          dirty_object.change_age 35
           dirty_object.aggregate_events.each do |event|
-            event[:event_data][:attribute_deltas].each do |attribute_delta|
-              expect(attribute_delta[:attribute_name]).not_to eql "sex"
-            end
+            expect(event[:event_data]["age"].nil?).to be_truthy
           end
         end
 
-        it "should set old_value and new_value on sex change" do
-          dirty_object.change_sex "shemale"
-          expect(dirty_object.aggregate_events.last[:event_data][:attribute_deltas].first[:old_value]).to eql "hen"
-          expect(dirty_object.aggregate_events.last[:event_data][:attribute_deltas].first[:new_value]).to eql "shemale"
+        it "should set old_value and new_value on age change" do
+          dirty_object.change_age 36
+          expect(dirty_object.aggregate_events.last[:event_data][:age][:old_value]).to eq(35)
+          expect(dirty_object.aggregate_events.last[:event_data][:age][:new_value]).to eq(36)
         end
       end
     end
@@ -218,11 +214,11 @@ module Sandthorn
       end
 
       it "should have the event no_state_change_only_empty_event" do
-        expect(dirty_object.aggregate_events.first[:event_name]).to eql("no_state_change_only_empty_event")
+        expect(dirty_object.aggregate_events.first[:event_name]).to eq("no_state_change_only_empty_event")
       end
 
-      it "should have attribute_deltas set to empty array" do
-        expect(dirty_object.aggregate_events.first[:event_data][:attribute_deltas]).to eql([])
+      it "should have event_data set to empty hash" do
+        expect(dirty_object.aggregate_events.first[:event_data]).to eq({})
       end
 
     end

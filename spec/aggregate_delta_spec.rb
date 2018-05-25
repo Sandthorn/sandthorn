@@ -1,7 +1,5 @@
 require 'spec_helper'
 
-
-
 class PersonTest
     include Sandthorn::AggregateRoot
     attr_reader :name
@@ -44,15 +42,14 @@ describe 'Property Delta Event Sourcing' do
 
   it 'should be able to set name' do
     person.change_name  "Klabbarparen"
-    expect(person.name).to eql("Klabbarparen")
-    #puts person.aggregate_events
+    expect(person.name).to eq("Klabbarparen")
   end
 
   it 'should be able to build from events' do
     person.change_name  "Klabbarparen"
     builded = PersonTest.aggregate_build person.aggregate_events
-    expect(builded.name).to eql(person.name)
-    expect(builded.aggregate_id).to eql(person.aggregate_id)
+    expect(builded.name).to eq(person.name)
+    expect(builded.aggregate_id).to eq(person.aggregate_id)
   end
 
   it 'should not have any events when built up' do
@@ -75,16 +72,12 @@ describe 'Property Delta Event Sourcing' do
     person.add_to_hash :bar, "foo"
 
     builded = PersonTest.aggregate_build person.aggregate_events
-    expect(builded.my_hash[:foo]).to eql("bar")
-    expect(builded.my_hash[:bar]).to eql("foo")
+    expect(builded.my_hash[:foo]).to eq("bar")
+    expect(builded.my_hash[:bar]).to eq("foo")
 
     person.add_to_hash :foo, "BAR"
 
-    #events = person.aggregate_events
-    #events << builded.aggregate_events
-    #puts events
-
     builded2 = PersonTest.aggregate_build person.aggregate_events
-    expect(builded2.my_hash[:foo]).to eql("BAR")
+    expect(builded2.my_hash[:foo]).to eq("BAR")
   end
 end

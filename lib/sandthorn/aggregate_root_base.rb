@@ -118,6 +118,7 @@ module Sandthorn
             current_aggregate_version = events.last[:aggregate_version]
             aggregate.send :set_orginating_aggregate_version!, current_aggregate_version
             aggregate.send :set_current_aggregate_version!, current_aggregate_version
+            aggregate.send :set_aggregate_id, events.first.fetch(:aggregate_id)
           end
           attributes = build_instance_vars_from_events events
           aggregate.send :clear_aggregate_events
@@ -132,7 +133,7 @@ module Sandthorn
         def stateless_events(*event_names)
           event_names.each do |name|
             define_singleton_method name do |aggregate_id, *args|
-              event = build_stateless_event(name.to_s, args)
+              event = build_stateless_event(aggregate_id, name.to_s, args)
               Sandthorn.save_events([event], aggregate_id, self)
               return aggregate_id
             end
@@ -169,24 +170,18 @@ module Sandthorn
 
         private
 
-        def build_stateless_event name, args = []
+        def build_stateless_event aggregate_id, name, args = []
 
-          formated_attribute_deltas = args.first.map do |key, value|
-            {
-              attribute_name: key.to_s,
-              old_value: nil,
-              new_value: value
-            }
+          deltas = {}
+          args.first.each do |key, value|
+            deltas[key.to_sym] = { old_value: nil, new_value: value }
           end unless args.empty?
-
-          data = {
-            attribute_deltas: formated_attribute_deltas
-          }
 
           return {
             aggregate_version: nil,
+            aggregate_id: aggregate_id,
             event_name: name,
-            event_data: data,
+            event_data: deltas,
             event_metadata: nil
           }
 
@@ -194,11 +189,11 @@ module Sandthorn
 
         def build_instance_vars_from_events events
           events.each_with_object({}) do |event, instance_vars|
-            event_data = event[:event_data]
-            attribute_deltas = event_data[:attribute_deltas]
+            attribute_deltas = event[:event_data]
             unless attribute_deltas.nil?
-              deltas = attribute_deltas.each_with_object({}) do |delta, acc|
-                acc[delta[:attribute_name]] = delta[:new_value]
+              deltas = {}
+              attribute_deltas.each do |key, value|
+                deltas[key] = value[:new_value]
               end
               instance_vars.merge! deltas
             end
@@ -220,10 +215,7 @@ module Sandthorn
 
       def extract_relevant_aggregate_instance_variables
         instance_variables.select do |variable|
-          equals_aggregate_id = variable.to_s == "@aggregate_id"
-          does_not_contain_aggregate = !variable.to_s.start_with?("@aggregate_")
-
-          equals_aggregate_id || does_not_contain_aggregate
+           !variable.to_s.start_with?("@aggregate_")
         end
       end
 
@@ -252,17 +244,13 @@ module Sandthorn
       end
 
       def commit_with_event_name(event_name)
-        aggregate_attribute_deltas = get_delta
-
         increase_current_aggregate_version!
-        data = {
-          attribute_deltas: aggregate_attribute_deltas
-        }
 
         @aggregate_events << ({
           aggregate_version: @aggregate_current_event_version,
+          aggregate_id: @aggregate_id,
           event_name: event_name,
-          event_data: data,
+          event_data: get_delta(),
           event_metadata: @aggregate_trace_information
         })
 

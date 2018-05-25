@@ -18,8 +18,8 @@ describe "when the initialize-method changes" do
     events = aggregate.aggregate_events
     change_init
     with_change = InitChange.new
-    expect(with_change.foo).to eql :foo
+    expect(with_change.foo).to eq(:foo)
     replayed = InitChange.aggregate_build(events)
-    expect(replayed.foo).to eql :bar
+    expect(replayed.foo).to eq(:bar)
   end
 end

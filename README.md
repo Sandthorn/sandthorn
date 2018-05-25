@@ -137,7 +137,7 @@ end
 
 ### `Sandthorn::AggregateRoot::stateless_events`
 
-Calling `stateless_events` creates public class methods. The first argument is an `aggregate_id` and the second argument is optional but has to be a hash and is stored in the attribute_deltas of the event.
+Calling `stateless_events` creates public class methods. The first argument is an `aggregate_id` and the second argument is optional but has to be a hash and is stored in the event_data of the event.
 
 When creating a stateless event, the corresponding aggregate is never loaded and the event is saved without calling the save method.
 

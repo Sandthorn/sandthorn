@@ -40,7 +40,7 @@ describe "using a traced change" do
       simple.aggregate_trace "123" do |traced|
         traced.go
       end
-      expect(simple.events_with_trace_info.last[:event_metadata]).to eql("123")
+      expect(simple.events_with_trace_info.last[:event_metadata]).to eq("123")
     end
   end
   context "when not tracing" do
@@ -62,7 +62,7 @@ describe "using a traced change" do
         s.charge_suspect_of_crime! "Theft"
       end
       event = suspect.events_with_trace_info.last
-      expect(event[:event_metadata]).to eql "Ture Sventon"
+      expect(event[:event_metadata]).to eq("Ture Sventon")
     end
 
     it "should record optional other tracing information" do
@@ -71,7 +71,7 @@ describe "using a traced change" do
         s.charge_suspect_of_crime! "Murder"       
       end
       event = suspect.events_with_trace_info.last
-      expect(event[:event_metadata]).to eql trace_info 
+      expect(event[:event_metadata]).to eq(trace_info) 
     end
   end
   context "when initializing a new aggregate in a traced context" do
@@ -79,7 +79,7 @@ describe "using a traced change" do
       UsualSuspect.aggregate_trace "Ture Sventon" do
         suspect = UsualSuspect.new("Sonny").extend Sandthorn::EventInspector
         event = suspect.events_with_trace_info.first
-        expect(event[:event_metadata]).to eql "Ture Sventon"
+        expect(event[:event_metadata]).to eq("Ture Sventon")
       end
     end
     it "should record tracing for all events in the trace block" do
@@ -88,7 +88,7 @@ describe "using a traced change" do
         suspect = UsualSuspect.new("Sonny").extend Sandthorn::EventInspector
         suspect.charge_suspect_of_crime! "Hit and run"
         event = suspect.events_with_trace_info.last
-        expect(event[:event_metadata]).to eql trace_info
+        expect(event[:event_metadata]).to eq(trace_info)
       end
     end
     it "should record tracing for all events in the trace block" do
@@ -97,7 +97,7 @@ describe "using a traced change" do
         suspect = UsualSuspect.new("Conny").extend Sandthorn::EventInspector
         suspect.charge_suspect_of_crime! "Desception"
         event = suspect.events_with_trace_info.last
-        expect(event[:event_metadata]).to eql trace_info
+        expect(event[:event_metadata]).to eq(trace_info)
       end
     end
   end 

@@ -10,6 +10,7 @@ module Sandthorn
     extend Forwardable
 
     def_delegators :configuration, :event_stores
+    def_delegators :configuration, :snapshot
 
     def default_event_store
       event_stores.default_store
@@ -82,6 +83,14 @@ module Sandthorn
 
       def map_types= data
         @event_stores.map_types data
+      end
+
+      def snapshot
+        @snapshot ||= false
+      end
+
+      def snapshot=(value)
+        @snapshot = value
       end
 
       alias_method :event_stores=, :event_store=

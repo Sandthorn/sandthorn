@@ -56,6 +56,7 @@ def sqlite_store_setup
   
   Sandthorn.configure do |c|
     c.event_store = driver
+    c.snapshot = true
   end
  
 end

@@ -51,6 +51,17 @@ module Sandthorn
       end
     end
 
+    describe "::snapshot" do
+      let(:klass) { Class.new { include Sandthorn::AggregateRoot } }
+      it "is available as a class method" do
+        expect(klass).to respond_to(:snapshot)
+      end
+      it "sets the snapshot to true and returns it" do
+        klass.snapshot(true)
+        expect(klass.snapshot).to eq(true)
+      end
+    end
+
     describe "when get all aggregates from DirtyClass" do
       
       before(:each) do

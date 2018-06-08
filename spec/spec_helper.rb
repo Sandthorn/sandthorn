@@ -45,17 +45,13 @@ end
 def url
   "sqlite://spec/db/sequel_driver.sqlite3"
 end
+
 def sqlite_store_setup
 
   SandthornDriverSequel.migrate_db url: url
-
-  driver = SandthornDriverSequel.driver_from_url(url: url) do |conf|
-    conf.event_serializer       = Proc.new { |data| YAML::dump(data) }
-    conf.event_deserializer     = Proc.new { |data| YAML::load(data) }
-  end
   
   Sandthorn.configure do |c|
-    c.event_store = driver
+    c.event_store = SandthornDriverSequel.driver_from_url(url: url)
     c.snapshot = true
   end
  

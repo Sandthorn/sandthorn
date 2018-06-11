@@ -11,7 +11,6 @@ module Sandthorn
     extend Forwardable
 
     def_delegators :configuration, :event_stores
-    def_delegators :configuration, :snapshot?
     def_delegators :configuration, :snapshot_store
 
     def default_event_store

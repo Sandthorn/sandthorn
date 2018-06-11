@@ -28,6 +28,14 @@ module Sandthorn
       end
     end
 
+    describe "save and find snapshot enabled Class" do
+      let(:klass) { KlassOne.new.save }
+    
+      it "should find the klass" do
+        copy = KlassOne.find klass.aggregate_id
+        expect(copy.aggregate_version).to eql(klass.aggregate_version)
+      end
+    end
   end
 end
 

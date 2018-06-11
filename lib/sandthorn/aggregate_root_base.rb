@@ -29,7 +29,7 @@ module Sandthorn
           @aggregate_originating_version = @aggregate_current_event_version
         end
 
-        Sandthorn.save_snapshot self if Sandthorn.snapshot?
+        Sandthorn.save_snapshot self if self.class.snapshot
 
         self
       end
@@ -93,7 +93,7 @@ module Sandthorn
 
         def aggregate_find aggregate_id
           begin
-            aggregate_from_snapshot = Sandthorn.find_snapshot(aggregate_id) if Sandthorn.snapshot?
+            aggregate_from_snapshot = Sandthorn.find_snapshot(aggregate_id) if self.snapshot
             current_aggregate_version = aggregate_from_snapshot.nil? ? 0 : aggregate_from_snapshot.aggregate_current_event_version
             events = Sandthorn.find(aggregate_id, self, current_aggregate_version)
             if aggregate_from_snapshot.nil? && events.empty?

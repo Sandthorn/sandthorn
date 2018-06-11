@@ -91,16 +91,14 @@ module Sandthorn
         @event_stores.map_types data
       end
 
-      def snapshot?
-        @snapshot ||= false
-      end
-
-      def snapshot=(value)
-        @snapshot = value
-      end
-
       def snapshot_store
         @snapshot_store ||= SnapshotStore.new
+      end
+
+      def snapshot_types= aggregate_types
+        aggregate_types.each do |aggregate_type|
+          aggregate_type.snapshot(true)
+        end
       end
 
       alias_method :event_stores=, :event_store=

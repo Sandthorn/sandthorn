@@ -52,7 +52,6 @@ def sqlite_store_setup
   
   Sandthorn.configure do |c|
     c.event_store = SandthornDriverSequel.driver_from_url(url: url)
-    c.snapshot = true
   end
  
 end

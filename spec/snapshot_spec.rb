@@ -55,6 +55,10 @@ module Sandthorn
         Sandthorn.save_snapshot klass
         snapshot = Sandthorn.find_snapshot klass.aggregate_id
         expect(snapshot).not_to be_nil
+
+        #Check by key on the snapshot_store hash
+        expect(Sandthorn.snapshot_store.store.has_key?(klass.aggregate_id)).to be_truthy
+        
       end
 
     end

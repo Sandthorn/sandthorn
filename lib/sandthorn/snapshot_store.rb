@@ -4,6 +4,8 @@ module Sandthorn
       @store = Hash.new
     end
 
+    attr_reader :store
+
     def save key, value
       @store[key] = value
     end

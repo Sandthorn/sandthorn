@@ -105,7 +105,7 @@ module Sandthorn
             end
 
             return aggregate_build events, aggregate_from_snapshot
-          rescue Exception => error
+          rescue Exception
             raise Errors::AggregateNotFound
           end
             

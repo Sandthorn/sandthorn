@@ -241,6 +241,17 @@ end
 
 In this case, the resulting events from the commands `new` and `mark` will have the trace `{ip: :127.0.0.1}` attached to them.
 
+### `Sandthorn::AggregateRoot.unsaved_events?`
+
+Check if there are unsaved events attached to the aggregate.
+
+```ruby
+board = Board.new
+board.mark :o, 0, 1
+board.unsaved_events?
+=> true
+```
+
 ## Bounded Context
 
 A bounded context is a system divider that split large systems into smaller parts. [Bounded Context by Martin Fowler](http://martinfowler.com/bliki/BoundedContext.html)

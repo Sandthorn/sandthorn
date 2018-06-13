@@ -46,10 +46,7 @@ module Sandthorn
     end
 
     def save_snapshot aggregate
-      if aggregate.aggregate_events.count > 0
-        raise Errors::SnapshotError,
-          "Can't take snapshot on object with unsaved events"
-      end
+      raise Errors::SnapshotError, "Can't take snapshot on object with unsaved events" if aggregate.unsaved_events?
       snapshot_store.save aggregate.aggregate_id, aggregate
     end
 

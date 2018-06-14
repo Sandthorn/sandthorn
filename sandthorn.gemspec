@@ -8,9 +8,9 @@ Gem::Specification.new do |spec|
   spec.version       = Sandthorn::VERSION
   spec.authors       = ["Lars Krantz", "Morgan Hallgren", "Jesper Josefsson"]
   spec.email         = ["lars.krantz@alaz.se", "morgan.hallgren@gmail.com", "jesper.josefsson@gmail.com"]
-  spec.description   = %q{Event sourcing gem}
+  spec.description   = %q{Event sourcing}
   spec.summary       = %q{Event sourcing gem}
-  spec.homepage      = ""
+  spec.homepage      = "https://github.com/Sandthorn/sandthorn"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)

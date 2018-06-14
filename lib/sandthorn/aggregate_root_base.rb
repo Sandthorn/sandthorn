@@ -29,11 +29,17 @@ module Sandthorn
           @aggregate_originating_version = @aggregate_current_event_version
         end
 
+        Sandthorn.save_snapshot self if self.class.snapshot
+
         self
       end
 
       def ==(other)
         other.respond_to?(:aggregate_id) && aggregate_id == other.aggregate_id
+      end
+
+      def unsaved_events?
+        aggregate_events.any?
       end
 
       def aggregate_trace args
@@ -70,9 +76,17 @@ module Sandthorn
           end
         end
 
+        def snapshot(value = nil)
+          if value
+            @snapshot = value
+          else
+            @snapshot
+          end
+        end
+
         def all
           Sandthorn.all(self).map { |events|
-            aggregate_build events
+            aggregate_build events, nil
           }
         end
 
@@ -83,12 +97,14 @@ module Sandthorn
 
         def aggregate_find aggregate_id
           begin
-            events = Sandthorn.find(aggregate_id, self)
-            unless events && !events.empty?
+            aggregate_from_snapshot = Sandthorn.find_snapshot(aggregate_id) if self.snapshot
+            current_aggregate_version = aggregate_from_snapshot.nil? ? 0 : aggregate_from_snapshot.aggregate_current_event_version
+            events = Sandthorn.find(aggregate_id, self, current_aggregate_version)
+            if aggregate_from_snapshot.nil? && events.empty?
               raise Errors::AggregateNotFound
             end
 
-            return aggregate_build events
+            return aggregate_build events, aggregate_from_snapshot
           rescue Exception
             raise Errors::AggregateNotFound
           end
@@ -111,8 +127,8 @@ module Sandthorn
 
         end
 
-        def aggregate_build events
-          aggregate = create_new_empty_aggregate
+        def aggregate_build events, aggregate_from_snapshot = nil
+          aggregate = aggregate_from_snapshot || create_new_empty_aggregate
 
           if events.any?
             current_aggregate_version = events.last[:aggregate_version]

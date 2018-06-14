@@ -2,6 +2,7 @@ require "sandthorn/version"
 require "sandthorn/errors"
 require "sandthorn/aggregate_root"
 require "sandthorn/event_stores"
+require "sandthorn/snapshot_store"
 require 'yaml'
 require 'securerandom'
 
@@ -10,6 +11,7 @@ module Sandthorn
     extend Forwardable
 
     def_delegators :configuration, :event_stores
+    def_delegators :configuration, :snapshot_store
 
     def default_event_store
       event_stores.default_store
@@ -39,12 +41,17 @@ module Sandthorn
       event_store_for(aggregate_type).all(aggregate_type)
     end
 
-    def find aggregate_id, aggregate_type
-      event_store_for(aggregate_type).find(aggregate_id, aggregate_type)
+    def find aggregate_id, aggregate_type, after_aggregate_version = 0
+      event_store_for(aggregate_type).find(aggregate_id, aggregate_type, after_aggregate_version)
     end
 
-    def save_snapshot(aggregate)
-      raise "Not Implemented"
+    def save_snapshot aggregate
+      raise Errors::SnapshotError, "Can't take snapshot on object with unsaved events" if aggregate.unsaved_events?
+      snapshot_store.save aggregate.aggregate_id, aggregate
+    end
+
+    def find_snapshot aggregate_id
+      return snapshot_store.find aggregate_id
     end
 
     def find_event_store(name)
@@ -82,6 +89,16 @@ module Sandthorn
 
       def map_types= data
         @event_stores.map_types data
+      end
+
+      def snapshot_store
+        @snapshot_store ||= SnapshotStore.new
+      end
+
+      def snapshot_types= aggregate_types
+        aggregate_types.each do |aggregate_type|
+          aggregate_type.snapshot(true)
+        end
       end
 
       alias_method :event_stores=, :event_store=

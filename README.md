@@ -241,6 +241,50 @@ end
 
 In this case, the resulting events from the commands `new` and `mark` will have the trace `{ip: :127.0.0.1}` attached to them.
 
+### `Sandthorn::AggregateRoot.unsaved_events?`
+
+Check if there are unsaved events attached to the aggregate.
+
+```ruby
+board = Board.new
+board.mark :o, 0, 1
+board.unsaved_events?
+=> true
+```
+
+## Snapshot
+
+If there is a lot of events saved to an aggregate it can take some time to reload the current state of the aggregate via the `.find` method. This is because all events belonging to the aggregate has to be fetched and iterated one by one to build its current state. The snapshot functionality makes it possible to store the current aggregate state and re-use it when loading the aggregate. The snapshot is used as a cache where only the events that has occurred after the snapshot has to be fetched and used to build the current state of the aggregate.
+
+There is one global snapshot store where all snapshots are stored independent on aggregate_type. To enable snapshot on a aggregate_type the Class has to be added to the `snapshot_types` Array when configuring Sandthorn. The aggregate will now be stored to the snapshot_store on every `.save` and when using `.find` it will look for a snapshot of the requested aggregate.
+
+Currently its only possible to store the snapshots in memory, so be careful not draining your applications memory space.
+
+
+```ruby
+
+class Board
+  include Sandthorn::AggregateRoot
+end
+
+Sandthorn.configure do |c|
+  c.snapshot_types = [Board]
+end
+```
+
+Its also possible to take manual snapshots without enabling snapshots on the aggregate_type.
+
+```ruby
+board = Board.new
+board.save
+
+# Save snapshot of the board aggregate
+Sandthorn.save_snapshot board
+
+# Get snapshot
+snapshot = Sandthorn.find_snapshot board.aggregate_id
+```
+
 ## Bounded Context
 
 A bounded context is a system divider that split large systems into smaller parts. [Bounded Context by Martin Fowler](http://martinfowler.com/bliki/BoundedContext.html)

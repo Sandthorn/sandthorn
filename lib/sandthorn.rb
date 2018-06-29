@@ -83,8 +83,8 @@ module Sandthorn
         @event_stores ||= EventStores.new
       end
 
-      def event_store=(store)
-        @event_stores = EventStores.new(store)
+      def event_store=(event_store)
+        @event_stores = EventStores.new(event_store)
       end
 
       def map_types= data
@@ -93,6 +93,10 @@ module Sandthorn
 
       def snapshot_store
         @snapshot_store ||= ApplicationSnapshotStore.new
+      end
+
+      def snapshot_store=(snapshot_store)
+        @snapshot_store = snapshot_store
       end
 
       def snapshot_types= aggregate_types

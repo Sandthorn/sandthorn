@@ -6,12 +6,12 @@ module Sandthorn
 
     attr_reader :store
 
-    def save key, value
-      @store[key] = value
+    def save aggregate_id, aggregate
+      @store[aggregate_id] = aggregate
     end
 
-    def find key
-      @store[key]
+    def find aggregate_id
+      @store[aggregate_id]
     end
   end
 end

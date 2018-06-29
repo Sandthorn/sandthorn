@@ -2,7 +2,7 @@ require "sandthorn/version"
 require "sandthorn/errors"
 require "sandthorn/aggregate_root"
 require "sandthorn/event_stores"
-require "sandthorn/snapshot_store"
+require "sandthorn/application_snapshot_store"
 require 'yaml'
 require 'securerandom'
 
@@ -92,7 +92,7 @@ module Sandthorn
       end
 
       def snapshot_store
-        @snapshot_store ||= SnapshotStore.new
+        @snapshot_store ||= ApplicationSnapshotStore.new
       end
 
       def snapshot_types= aggregate_types

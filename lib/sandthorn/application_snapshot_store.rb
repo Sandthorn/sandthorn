@@ -1,5 +1,5 @@
 module Sandthorn
-  class SnapshotStore
+  class ApplicationSnapshotStore
   	def initialize
       @store = Hash.new
     end

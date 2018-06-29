@@ -258,9 +258,6 @@ If there is a lot of events saved to an aggregate it can take some time to reloa
 
 There is one global snapshot store where all snapshots are stored independent on aggregate_type. To enable snapshot on a aggregate_type the Class has to be added to the `snapshot_types` Array when configuring Sandthorn. The aggregate will now be stored to the snapshot_store on every `.save` and when using `.find` it will look for a snapshot of the requested aggregate.
 
-Currently its only possible to store the snapshots in memory, so be careful not draining your applications memory space.
-
-
 ```ruby
 
 class Board
@@ -272,7 +269,7 @@ Sandthorn.configure do |c|
 end
 ```
 
-Its also possible to take manual snapshots without enabling snapshots on the aggregate_type.
+Its possible to take manual snapshots without enabling snapshots on the aggregate_type.
 
 ```ruby
 board = Board.new
@@ -284,6 +281,18 @@ Sandthorn.save_snapshot board
 # Get snapshot
 snapshot = Sandthorn.find_snapshot board.aggregate_id
 ```
+
+### External snapshot store
+
+Currently there is no external snapshot stores available but this is how `Sandthorn` should be configured with one when there is.
+
+```ruby
+Sandthorn.configure do |conf|
+  conf.snapshot_store = <snapshot_store_driver>
+end
+```
+
+**Currently its only possible to store the snapshots in the application memory (be careful not draining your application memory space).**
 
 ## Bounded Context
 

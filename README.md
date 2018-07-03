@@ -284,7 +284,7 @@ snapshot = Sandthorn.find_snapshot board.aggregate_id
 
 ### External snapshot store
 
-There is one external snapshot store available [sandthorn_snapshot_memcached](https://github.com/Sandthorn/sandthorn_snapshot_memcached) and it can be configured into `Sandthorn.configure`
+There is one external snapshot store available [sandthorn_snapshot_memcached](https://github.com/Sandthorn/sandthorn_snapshot_memcached) and it can be configured via `Sandthorn.configure`
 
 ```ruby
 require 'sandthorn_snapshot_memcached'

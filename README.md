@@ -284,15 +284,19 @@ snapshot = Sandthorn.find_snapshot board.aggregate_id
 
 ### External snapshot store
 
-Currently there is no external snapshot stores available but this is how `Sandthorn` should be configured with one when there is.
+There is one external snapshot store available [sandthorn_snapshot_memcached](https://github.com/Sandthorn/sandthorn_snapshot_memcached) and it can be configured into `Sandthorn.configure`
 
 ```ruby
+require 'sandthorn_snapshot_memcached'
+
+snapshot_store = SandthornSnapshotMemcached.from_url "memcached_url"
+
 Sandthorn.configure do |conf|
-  conf.snapshot_store = <snapshot_store_driver>
+  conf.snapshot_store = snapshot_store
 end
 ```
 
-**Currently its only possible to store the snapshots in the application memory (be careful not draining your application memory space).**
+**If no external snapshot store is configured snapshots will be stored in the application memory (be careful not draining your application memory space).**
 
 ## Bounded Context
 

@@ -2,7 +2,7 @@ require "sandthorn/version"
 require "sandthorn/errors"
 require "sandthorn/aggregate_root"
 require "sandthorn/event_stores"
-require "sandthorn/snapshot_store"
+require "sandthorn/application_snapshot_store"
 require 'yaml'
 require 'securerandom'
 
@@ -83,8 +83,8 @@ module Sandthorn
         @event_stores ||= EventStores.new
       end
 
-      def event_store=(store)
-        @event_stores = EventStores.new(store)
+      def event_store=(event_store)
+        @event_stores = EventStores.new(event_store)
       end
 
       def map_types= data
@@ -92,7 +92,11 @@ module Sandthorn
       end
 
       def snapshot_store
-        @snapshot_store ||= SnapshotStore.new
+        @snapshot_store ||= ApplicationSnapshotStore.new
+      end
+
+      def snapshot_store=(snapshot_store)
+        @snapshot_store = snapshot_store
       end
 
       def snapshot_types= aggregate_types
